@@ -1,0 +1,33 @@
+ # Project
+Assets/3rd Party/Rewired
+Assets/3rd Party/ProCore
+Assets/PostProcessing
+Assets/StreamingAssets/
+SwitchIL2CPPCache/
+SwitchIL2CPPStats/
+Assets/Textures
+Assets/Video
+Assets/Audio
+Library/
+Temp/
+obj/
+.vs/
+
+# Files generated externally
+*(Conflicted)*
+*.booproj
+*.csproj
+*.pidb
+*.sln
+*.suo
+*.user
+*.userprefs
+*.unityproj
+*.dll
+*.vs
+*.manifest
+*.meta
+*.lock
+*.ide
+*.ide-wal
+*.ide-shm
