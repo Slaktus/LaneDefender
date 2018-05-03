@@ -98,17 +98,63 @@ public class Session
             if ( hoveredLane != null && Input.GetMouseButtonDown( 1 ) )
                 hoveredLane.AddEntityToLane( "Entity" , 10 , 5 , 1 );
 
+            //Reset lane colors
+            level.SetLaneColor( Color.black );
+
             //Proceed if a lane is hovered and an item is held
             if ( heldItem != null && hoveredLane != null )
             {
+                int laneIndex = level.IndexOf( hoveredLane );
+                int lane1Up = laneIndex - 1 >= 0 ? laneIndex - 1 : -1;
+                int lane1Down = level.lanes > laneIndex + 1 ? laneIndex + 1 : -1;
+
                 hoveredLane.color = Color.yellow;
 
+                switch ( heldItem.conveyorItem.level )
+                {
+                    case 0:
+                        break;
+
+                    case 1:
+                        if ( lane1Up >= 0 )
+                            level.LaneBy( lane1Up ).color = Color.yellow;
+
+                        if ( lane1Down >= 0 )
+                            level.LaneBy( lane1Down ).color = Color.yellow;
+                        break;
+                }
+                
                 //Proceed if the left mouse button is not held
                 //This will only happen if the left mouse button is released
                 if ( !Input.GetMouseButton( 0 ) )
                 {
                     //Add the item to the lane and clean up
-                    hoveredLane.AddItemToLane( heldItem );
+                    switch ( heldItem.conveyorItem.level )
+                    {
+                        case 0:
+                            hoveredLane.AddItemToLane( heldItem );
+                            break;
+
+                        case 1:
+
+                            if ( lane1Up >= 0 )
+                                level.LaneBy( lane1Up ).AddItemToLane( heldItem );
+
+                            if ( lane1Down >= 0 )
+                                level.LaneBy( lane1Down ).AddItemToLane( heldItem );
+
+                            hoveredLane.AddItemToLane( heldItem );
+                            break;
+
+                        case 2:
+                            hoveredLane.AddItemToLane( heldItem );
+                            break;
+
+                        case 3:
+                            hoveredLane.AddItemToLane( heldItem );
+                            break;
+                    }
+
                     heldItem.conveyorItem.Destroy();
                     heldItem.Destroy();
                     heldItem = null;
@@ -131,9 +177,6 @@ public class Session
                 }
             }
         }
-
-        //Reset the color of any lane not currently hovered
-        level.SetLaneColor( Color.black , hoveredLane );
 
         //Reset the color of any item not currently hovered
         conveyor.SetItemColor( Color.white , heldItem != null ? heldItem.conveyorItem : hoveredItem );
@@ -236,11 +279,10 @@ public class Level
     /// </summary>
     /// <param name="color">Color to apply</param>
     /// <param name="except">Lane to except</param>
-    public void SetLaneColor( Color color , Lane except = null )
+    public void SetLaneColor( Color color  )
     {
         for ( int i = 0 ; _lanes.Count > i ; i++ )
-            if ( _lanes[ i ] != except )
-                _lanes[ i ].color = color;
+            _lanes[ i ].color = color;
     }
 
     /// <summary>
@@ -601,7 +643,7 @@ public class ConveyorItem
     /// <summary>
     /// Upgrade the item and update the label
     /// </summary>
-    public void Upgrade() => _textMesh.text = type.ToString() + "\n" + level++;
+    public void Upgrade() => _textMesh.text = type.ToString() + "\n" + ++level;
 
     /// <summary>
     /// Update the item's position
@@ -628,7 +670,7 @@ public class ConveyorItem
     /// <summary>
     /// Checks the two items above (if they exist) and returns whether they qualify for a match-three
     /// </summary>
-    public bool matchThree => canUpgrade && _conveyor.itemCount > index + 2 && _conveyor.ItemAt( index + 1 ).canUpgrade && !_conveyor.ItemAt( index + 2 ).canUpgrade && type == _conveyor.ItemAt( index + 1 ).type && _conveyor.ItemAt( index + 1 ).type == _conveyor.ItemAt( index + 2 ).type && level == _conveyor.ItemAt( index + 1 ).level && _conveyor.ItemAt( index + 1 ).level == _conveyor.ItemAt( index + 2 ).level;
+    public bool matchThree => canUpgrade && _conveyor.itemCount > index + 2 && _conveyor.ItemAt( index + 1 ).canUpgrade && _conveyor.ItemAt( index + 2 ).canUpgrade && type == _conveyor.ItemAt( index + 1 ).type && _conveyor.ItemAt( index + 1 ).type == _conveyor.ItemAt( index + 2 ).type && level == _conveyor.ItemAt( index + 1 ).level && _conveyor.ItemAt( index + 1 ).level == _conveyor.ItemAt( index + 2 ).level;
 
     /// <summary>
     /// Returns whether the item has settled and is below max level
@@ -682,7 +724,8 @@ public class ConveyorItem
         _textMesh.transform.SetParent( _container.transform );
         _textMesh.transform.localRotation = Quaternion.identity;
 
-        _textMesh.text = name + "\n" + level++;
+
+        _textMesh.text = name + "\n" + level;
         _textMesh.fontSize = 35;
         _textMesh.color = Color.black;
         _textMesh.characterSize = 0.15f;
@@ -702,8 +745,9 @@ public class ConveyorItem
         LaneDown = 1,
         Damage = 2,
         Split = 3,
-        Count = 4,
-        Part = 5,
+        Leap = 4,
+        Count = 5,
+        Part = 6,
     }
 }
 
@@ -786,10 +830,13 @@ public class LaneItem
             if ( changeLane != null )
                 move = !changeLane.MoveNext();
 
-            float x = position.x - ( speed * Time.deltaTime );
+            float x = position.x - ( ( speed * Time.deltaTime ) * ( move ? 1 : 0 ) );
             bool destroy = _lane.start.x + ( _cube.transform.localScale.x * 0.5f ) > x;
             position = new Vector3( Mathf.Clamp( x , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
             Debug.DrawLine( new Vector3( rect.xMin , 0 , rect.yMin ) , new Vector3( rect.xMax , 0 , rect.yMax ) , Color.yellow );
+
+            if ( leap != null )
+                leap.MoveNext();
 
             if ( overlap )
                 overlapping.Interaction( this );
@@ -808,6 +855,37 @@ public class LaneItem
     {
         _lane.RemoveItemFromLane( this );
         GameObject.Destroy( _container );
+    }
+
+    public void Split()
+    {
+        HeldItem upHeldItem = new HeldItem( new ConveyorItem( _lane.level.conveyor , ConveyorItem.Type.Part ) );
+        LaneItem upItem = new LaneItem( upHeldItem , _lane );
+        upHeldItem.conveyorItem.Destroy();
+        upHeldItem.Destroy();
+        _lane.AddItemToLane( upItem );
+        upItem.SetPosition( new Vector3( position.x , upItem.position.y , upItem.position.z ) );
+        upItem.changeLane = upItem.ChangeLane( -1 );
+
+        HeldItem downHeldItem = new HeldItem( new ConveyorItem( _lane.level.conveyor , ConveyorItem.Type.Part ) );
+        LaneItem downItem = new LaneItem( downHeldItem , _lane );
+        downHeldItem.conveyorItem.Destroy();
+        downHeldItem.Destroy();
+        _lane.AddItemToLane( downItem );
+        downItem.SetPosition( new Vector3( position.x , downItem.position.y , downItem.position.z ) );
+        downItem.changeLane = downItem.ChangeLane( 1 );
+    }
+
+    public void LeapEntity( LaneEntity laneEntity ) => leap = Leap( laneEntity );
+
+    private IEnumerator Leap( LaneEntity laneEntity )
+    {
+        _cube.transform.localPosition = Vector3.up;
+
+        while ( laneEntity.valid && back.x > laneEntity.back )
+            yield return null;
+
+        _cube.transform.localPosition = Vector3.zero;
     }
 
     public IEnumerator ChangeLane( int change )
@@ -847,7 +925,8 @@ public class LaneItem
 
     public void SetPosition( Vector3 position ) => this.position = position;
 
-    public bool overlap => overlapping != null;
+    public bool overlap => Mathf.Approximately( _cube.transform.localPosition.y , 0 ) && overlapping != null;
+
     public LaneEntity overlapping
     {
         get
@@ -862,10 +941,10 @@ public class LaneItem
         }
     }
 
-    public IEnumerator changeLane { get; set; }
     public IEnumerator updater { get; private set; }
     public ConveyorItem.Type type => _heldItem.conveyorItem.type;
     public Vector3 front => new Vector3( rect.xMin , 0 , rect.center.y );
+    public Vector3 back => new Vector3( rect.xMax , 0 , rect.center.y );
     public Rect rect => new Rect( position.x - ( scale.x * 0.5f ) , position.z - ( scale.z * 0.5f ) , scale.x , scale.z );
     public Vector3 position { get { return _container.transform.position; } private set { _container.transform.position = value; } }
     public Vector3 scale { get { return _cube.transform.localScale; } private set { _cube.transform.localScale = value; } }
@@ -880,6 +959,8 @@ public class LaneItem
     private TextMesh _textMesh { get; set; }
     private GameObject _container { get; set; }
     private MeshRenderer _meshRenderer { get; set; }
+    private IEnumerator leap { get; set; }
+    private IEnumerator changeLane { get; set; }
 
     public LaneItem ( HeldItem heldItem , Lane lane )
     {
@@ -947,7 +1028,7 @@ public class LaneEntity
     private IEnumerator PushBack()
     {
         float current = position.x;
-        float target = current - 5;
+        float target = current - 3;
         float targetTime = Time.time + 1;
 
         while ( targetTime > Time.time )
@@ -1003,45 +1084,14 @@ public class LaneEntity
             case ConveyorItem.Type.Split:
                 _healthBar.Decrease();
                 _pushBack = PushBack();
+                laneItem.Split();
                 laneItem.Destroy();
+                break;
 
-                HeldItem upHeldItem = new HeldItem( new ConveyorItem( _lane.level.conveyor , ConveyorItem.Type.Part ) );
-                LaneItem upItem = new LaneItem( upHeldItem , _lane );
-                upHeldItem.conveyorItem.Destroy();
-                upHeldItem.Destroy();
-                _lane.AddItemToLane( upItem );
-                upItem.SetPosition( new Vector3( laneItem.position.x , upItem.position.y , upItem.position.z ) );
-                upItem.changeLane = upItem.ChangeLane( -1 );
-
-                HeldItem downHeldItem = new HeldItem( new ConveyorItem( _lane.level.conveyor , ConveyorItem.Type.Part ) );
-                LaneItem downItem = new LaneItem( downHeldItem , _lane );
-                downHeldItem.conveyorItem.Destroy();
-                downHeldItem.Destroy();
-                _lane.AddItemToLane( downItem );
-                downItem.SetPosition( new Vector3( laneItem.position.x , downItem.position.y , downItem.position.z ) );
-                downItem.changeLane = downItem.ChangeLane( 1 );
-                /*
-                Level level = _lane.level;
-                int laneIndex = level.IndexOf( _lane );
-                Lane upLane = level.LaneBy( Mathf.Clamp( laneIndex - 1 , 0 , level.lanes - 1 ) );
-                Lane downlane = level.LaneBy( Mathf.Clamp( laneIndex + 1 , 0 , level.lanes - 1 ) );
-                bool upOut= upLane == _lane;
-                bool downOut= downlane == _lane;
-
-                HeldItem upHeldItem = new HeldItem( new ConveyorItem( _lane.level.conveyor , ConveyorItem.Type.Part ) );
-                LaneItem upItem = new LaneItem( upHeldItem , upLane );
-                upHeldItem.conveyorItem.Destroy();
-                upHeldItem.Destroy();
-                upLane.AddItemToLane( upItem );
-                upItem.SetPosition( new Vector3( laneItem.position.x , upItem.position.y , upItem.position.z ) );
-
-                HeldItem downHeldItem = new HeldItem( new ConveyorItem( _lane.level.conveyor , ConveyorItem.Type.Part ) );
-                LaneItem downItem = new LaneItem( downHeldItem , downlane );
-                downHeldItem.conveyorItem.Destroy();
-                downHeldItem.Destroy();
-                downlane.AddItemToLane( downItem );
-                downItem.SetPosition( new Vector3( laneItem.position.x , downItem.position.y , downItem.position.z ) );
-                */
+            case ConveyorItem.Type.Leap:
+                _healthBar.Decrease();
+                _pushBack = PushBack();
+                laneItem.LeapEntity( this );
                 break;
 
             case ConveyorItem.Type.LaneDown:
@@ -1058,11 +1108,14 @@ public class LaneEntity
 
     public void Interaction( LaneEntity laneEntity )
     {
-        if ( ( scale.z * 0.5f > Mathf.Abs( laneEntity.position.z - position.z ) ) && ( laneEntity.Contains( frontPoint ) || laneEntity.Contains( frontPoint + ( Vector3.forward * scale.z * 0.5f ) ) || laneEntity.Contains( frontPoint + ( Vector3.back * scale.z * 0.5f ) ) ) )
+        LaneEntity front = position.x > laneEntity.position.x ? this : laneEntity;
+        LaneEntity back = front == this ? laneEntity : this;
+
+        if ( ( back.scale.z * 0.5f > Mathf.Abs( front.position.z - back.position.z ) ) && ( front.Contains( back.frontPoint ) || front.Contains( back.frontPoint + ( Vector3.forward * back.scale.z * 0.5f ) ) || front.Contains( back.frontPoint + ( Vector3.back * back.scale.z * 0.5f ) ) ) )
         {
-            position = new Vector3( laneEntity.back - ( scale.x * 0.6f ) , position.y , position.z );
-            _pushBack = PushBack();
-            _healthBar.Decrease();
+            back.position = new Vector3( front.back - ( front.scale.x * 0.6f ) , back.position.y , back.position.z );
+            back._pushBack = back.PushBack();
+            back._healthBar.Decrease();
         }
         else
         {
@@ -1084,6 +1137,7 @@ public class LaneEntity
 
     public bool Contains( Vector3 position ) => rect.Contains( new Vector2( position.x , position.z ) );
 
+    public bool valid => _container != null;
     public Vector3 backPoint => new Vector3( rect.xMin , 0 , rect.center.y );
     public Vector3 frontPoint => new Vector3( rect.xMax , 0 , rect.center.y );
     public Vector3 topPoint => new Vector3( rect.center.x , 0 , rect.yMax );
