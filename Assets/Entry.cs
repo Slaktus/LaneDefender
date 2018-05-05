@@ -852,34 +852,15 @@ public class LaneItem : LaneObject
     private HeldItem _heldItem { get; set; }
     private IEnumerator leap { get; set; }
 
-    public LaneItem ( HeldItem heldItem , Lane lane ) : base()
+    public LaneItem ( HeldItem heldItem , Lane lane ) : base( "Lane" + heldItem.conveyorItem.type.ToString() , lane)
     {
-        string name = heldItem.conveyorItem.type.ToString();
-        container = new GameObject( "Lane" + name );
-
-        cube = GameObject.CreatePrimitive( PrimitiveType.Cube );
-        cube.transform.SetParent( container.transform );
-        cube.transform.localRotation = Quaternion.identity;
         cube.transform.localScale = new Vector3( heldItem.conveyorItem.width , 1 , heldItem.conveyorItem.height );
 
-        meshRenderer = cube.GetComponent<MeshRenderer>();
-        meshRenderer.material = Entry.instance.unlitColor;
         meshRenderer.material.color = Color.white;
-
-        textMesh = new GameObject( name ).AddComponent<TextMesh>();
-        textMesh.transform.SetParent( container.transform );
-        textMesh.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
-
-        textMesh.fontSize = 35;
-        textMesh.color = Color.black;
-        textMesh.characterSize = 0.15f;
-        textMesh.anchor = TextAnchor.MiddleCenter;
-        textMesh.alignment = TextAlignment.Center;
         textMesh.text = heldItem.conveyorItem.text;
 
         position = lane.end + ( Vector3.up * 0.5f ) + ( Vector3.left * cube.transform.localScale.x * 0.5f );
         _heldItem = heldItem;
-        base.lane = lane;
     }
 }
 
@@ -1009,33 +990,13 @@ public class LaneEntity : LaneObject
     private int _health => _healthBar.value;
     private HealthBar _healthBar { get; set; }
 
-    public LaneEntity( string name , float speed , float width , float laneHeightPadding , Lane lane ) : base()
+    public LaneEntity( string name , float speed , float width , float laneHeightPadding , Lane lane ) : base( "Lane" + name , lane , speed )
     {
-        container = new GameObject( "Lane" + name );
-
-        cube = GameObject.CreatePrimitive( PrimitiveType.Cube );
-        cube.transform.SetParent( container.transform );
-        cube.transform.localRotation = Quaternion.identity;
         cube.transform.localScale = new Vector3( width , 1 , lane.height - laneHeightPadding );
 
-        meshRenderer = cube.GetComponent<MeshRenderer>();
-        meshRenderer.material = Entry.instance.unlitColor;
-        meshRenderer.material.color = Color.white;
-
-        textMesh = new GameObject( name ).AddComponent<TextMesh>();
-        textMesh.transform.SetParent( container.transform );
-        textMesh.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
-
-        textMesh.fontSize = 35;
-        textMesh.color = Color.black;
-        textMesh.characterSize = 0.15f;
-        textMesh.anchor = TextAnchor.MiddleCenter;
-        textMesh.alignment = TextAlignment.Center;
-        textMesh.text = name;
-
         position = lane.start + ( Vector3.up * 0.5f ) + ( Vector3.right * cube.transform.localScale.x * 0.5f );
-        base.speed = speed;
-        base.lane = lane;
+        meshRenderer.material.color = Color.white;
+        textMesh.text = name;
 
         _healthBar = new HealthBar( scale.x , base.lane.level.laneSpacing , 0.1f , 0.1f , 1 , 3 );
         _healthBar.SetParent( container.transform , Vector3.forward * ( ( scale.z + base.lane.level.laneSpacing + laneHeightPadding ) * 0.5f ) );
@@ -1094,6 +1055,8 @@ public abstract class LaneObject
 
     public IEnumerator update { get; private set; }
 
+    public float top => rect.yMax;
+    public float bottom => rect.yMin;
     public bool valid => container != null;
     public Vector3 topPoint => new Vector3( rect.center.x , 0 , top );
     public Vector3 backPoint => new Vector3( back , 0 , rect.center.y );
@@ -1107,11 +1070,6 @@ public abstract class LaneObject
     public abstract LaneEntity overlapping { get; }
     public abstract float front { get; }
     public abstract float back { get; }
-    public float bottom => rect.yMin;
-    public float top => rect.yMax;
-
-    protected abstract float start { get; }
-    protected abstract float end { get; }
 
     protected Lane lane { get; set; }
     protected GameObject cube { get; set; }
@@ -1120,11 +1078,35 @@ public abstract class LaneObject
     protected MeshRenderer meshRenderer { get; set; }
     protected IEnumerator changeLane { get; set; }
     protected IEnumerator pushBack { get; set; }
-    protected virtual float speed { get; set; }
 
-    public LaneObject()
+    protected virtual float speed { get; private set; }
+
+    protected abstract float start { get; }
+    protected abstract float end { get; }
+
+    public LaneObject( string containerName , Lane lane , float speed = 0 )
     {
         update = Update();
+        this.lane = lane;
+        this.speed = speed;
+        container = new GameObject( containerName );
+
+        cube = GameObject.CreatePrimitive( PrimitiveType.Cube );
+        cube.transform.SetParent( container.transform );
+        cube.transform.localRotation = Quaternion.identity;
+
+        meshRenderer = cube.GetComponent<MeshRenderer>();
+        meshRenderer.material = Entry.instance.unlitColor;
+
+        textMesh = new GameObject( containerName + "Label" ).AddComponent<TextMesh>();
+        textMesh.transform.SetParent( container.transform );
+        textMesh.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
+
+        textMesh.fontSize = 35;
+        textMesh.color = Color.black;
+        textMesh.characterSize = 0.15f;
+        textMesh.anchor = TextAnchor.MiddleCenter;
+        textMesh.alignment = TextAlignment.Center;
     }
 }
 
