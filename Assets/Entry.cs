@@ -33,7 +33,7 @@ public class Entry : MonoBehaviour
     void Update() => session.Update();
 
     /// <summary>
-    /// Singleton-ish instance reference. Useful for running co-routines and accessing assets
+    /// Singleton-ish instance reference. Useful for accessing assets
     /// </summary>
     public static Entry instance { get; private set; }
 
@@ -96,7 +96,7 @@ public class Session
             }
 
             if ( hoveredLane != null && Input.GetMouseButtonDown( 1 ) )
-                hoveredLane.AddEntityToLane( "Entity" , 10 , 5 , 1 );
+                hoveredLane.AddToLane( new LaneEntity( "Entity" , 10 , 5 , 1 , hoveredLane ) );
 
             //Reset lane colors
             level.SetLaneColor( Color.black );
@@ -132,26 +132,32 @@ public class Session
                     switch ( heldItem.conveyorItem.level )
                     {
                         case 0:
-                            hoveredLane.AddItemToLane( heldItem );
+                            hoveredLane.AddToLane( new LaneItem( heldItem , hoveredLane ) );
                             break;
 
                         case 1:
 
                             if ( lane1Up >= 0 )
-                                level.LaneBy( lane1Up ).AddItemToLane( heldItem );
+                            {
+                                Lane lane = level.LaneBy( lane1Up );
+                                lane.AddToLane( new LaneItem( heldItem , lane ) );
+                            }
 
                             if ( lane1Down >= 0 )
-                                level.LaneBy( lane1Down ).AddItemToLane( heldItem );
+                            {
+                                Lane lane = level.LaneBy( lane1Down );
+                                lane.AddToLane( new LaneItem( heldItem , lane ) );
+                            }
 
-                            hoveredLane.AddItemToLane( heldItem );
+                            hoveredLane.AddToLane( new LaneItem( heldItem , hoveredLane ) );
                             break;
 
                         case 2:
-                            hoveredLane.AddItemToLane( heldItem );
+                            hoveredLane.AddToLane( new LaneItem( heldItem , hoveredLane ) );
                             break;
 
                         case 3:
-                            hoveredLane.AddItemToLane( heldItem );
+                            hoveredLane.AddToLane( new LaneItem( heldItem , hoveredLane ) );
                             break;
                     }
 
@@ -344,76 +350,20 @@ public class Lane
     /// </summary>
     public void Update()
     {
-        LaneItemUpdater();
-        LaneEntityUpdater();
+        Updater();
     }
 
-    /// <summary>
-    /// Add a held item to the lane
-    /// </summary>
-    /// <param name="heldItem">Currently held item</param>
-    /// <returns>Lane item corresponding to held item</returns>
-    public LaneItem AddItemToLane( HeldItem heldItem )
+    public T AddToLane<T> ( T laneObject ) where T : LaneObject
     {
-        LaneItem laneItem = new LaneItem( heldItem , this );
-        LaneItemUpdater += laneItem.updater.MoveNext;
-        laneItems.Add( laneItem );
-        return laneItem;
+        Updater += laneObject.update.MoveNext;
+        objects.Add( laneObject );
+        return laneObject;
     }
 
-    /// <summary>
-    /// Add a held item to the lane
-    /// </summary>
-    /// <param name="laneItem">Currently held item</param>
-    /// <returns>Lane item corresponding to held item</returns>
-    public LaneItem AddItemToLane( LaneItem laneItem )
+    public void RemoveFromLane<T> ( T laneObject ) where T : LaneObject
     {
-        LaneItemUpdater += laneItem.updater.MoveNext;
-        laneItems.Add( laneItem );
-        return laneItem;
-    }
-
-    /// <summary>
-    /// Add an entity to the lane
-    /// </summary>
-    /// <param name="name">Name of the entity</param>
-    /// <param name="speed">Speed of the entity</param>
-    /// <param name="width">Width of the entity</param>
-    /// <param name="laneHeightPadding">Amount to subtract from lane height to give height</param>
-    /// <returns>The added lane entity</returns>
-    public LaneEntity AddEntityToLane( string name , float speed , float width , float laneHeightPadding )
-    {
-        LaneEntity laneEntity = new LaneEntity( name , speed , width , laneHeightPadding , this );
-        LaneEntityUpdater += laneEntity.updater.MoveNext;
-        laneEntities.Add( laneEntity );
-        return laneEntity;
-    }
-
-    public LaneEntity AddEntityToLane( LaneEntity laneEntity )
-    {
-        LaneEntityUpdater += laneEntity.updater.MoveNext;
-        laneEntities.Add( laneEntity );
-        return laneEntity;
-    }
-
-    /// <summary>
-    /// Remove an item from the lane
-    /// </summary>
-    /// <param name="laneItem">The item to remove from the lane</param>
-    public void RemoveItemFromLane( LaneItem laneItem )
-    {
-        LaneItemUpdater -= laneItem.updater.MoveNext;
-        laneItems.Remove( laneItem );
-    } 
-
-    /// <summary>
-    /// Remove an entity from the lane
-    /// </summary>
-    /// <param name="laneEntity">The entity to remove from the lane</param>
-    public void RemoveEntityFromLane( LaneEntity laneEntity )
-    {
-        LaneEntityUpdater -= laneEntity.updater.MoveNext;
-        laneEntities.Remove( laneEntity );
+        Updater -= laneObject.update.MoveNext;
+        objects.Remove( laneObject );
     }
 
     /// <summary>
@@ -432,8 +382,7 @@ public class Lane
     public float speed => level.speed;
 
     public Level level { get; private set; }
-    public List<LaneItem> laneItems { get; private set; }
-    public List<LaneEntity> laneEntities { get; private set; }
+    public List<LaneObject> objects { get; private set; }
 
     /// <summary>
     /// Why a rect? Why not a collider like the ground plane?
@@ -444,15 +393,14 @@ public class Lane
     private Rect _rect { get; set; }
     private GameObject _quad { get; set; }
     private MeshRenderer _meshRenderer { get; set; }
-    private event Func<bool> LaneEntityUpdater;
-    private event Func<bool> LaneItemUpdater;
+    private event Func<bool> Updater;
 
     public Lane( Level level , float depth , float width , float height , string name )
     {
-        LaneEntityUpdater += () => false;
-        LaneItemUpdater += () => false;
+        Updater += () => false;
 
         this.level = level;
+        objects = new List<LaneObject>();
         _rect = new Rect( 0 , -depth , width , height );
 
         _quad = GameObject.CreatePrimitive( PrimitiveType.Quad );
@@ -465,8 +413,6 @@ public class Lane
         _meshRenderer = _quad.GetComponent<MeshRenderer>();
         _meshRenderer.material = Entry.instance.unlitColor;
 
-        laneItems = new List<LaneItem>();
-        laneEntities = new List<LaneEntity>();
     }
 }
 
@@ -816,12 +762,12 @@ public class HeldItem
 /// <summary>
 /// Items travelling down lanes. Will eventually interact with many, many other items
 /// </summary>
-public class LaneItem
+public class LaneItem : LaneObject
 {
     /// <summary>
     /// Updates the item's position, cleaning it up if it reaches the end of the lane
     /// </summary>
-    public IEnumerator Updater()
+    public override IEnumerator Update()
     {
         bool move = true;
 
@@ -831,8 +777,8 @@ public class LaneItem
                 move = !changeLane.MoveNext();
 
             float x = position.x - ( ( speed * Time.deltaTime ) * ( move ? 1 : 0 ) );
-            bool destroy = _lane.start.x + ( _cube.transform.localScale.x * 0.5f ) > x;
-            position = new Vector3( Mathf.Clamp( x , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
+            bool destroy = end + ( cube.transform.localScale.x * 0.5f ) > x;
+            position = new Vector3( Mathf.Clamp( x , end + ( scale.x * 0.5f ) , start - ( scale.x * 0.5f )  ) , position.y , position.z );
             Debug.DrawLine( new Vector3( rect.xMin , 0 , rect.yMin ) , new Vector3( rect.xMax , 0 , rect.yMax ) , Color.yellow );
 
             if ( leap != null )
@@ -848,180 +794,184 @@ public class LaneItem
         }
     }
 
-    /// <summary>
-    /// Remove the item from the lane then destroy the scene graph representation
-    /// </summary>
-    public void Destroy()
-    {
-        _lane.RemoveItemFromLane( this );
-        GameObject.Destroy( _container );
-    }
-
     public void Split()
     {
-        HeldItem upHeldItem = new HeldItem( new ConveyorItem( _lane.level.conveyor , ConveyorItem.Type.Part ) );
-        LaneItem upItem = new LaneItem( upHeldItem , _lane );
+        HeldItem upHeldItem = new HeldItem( new ConveyorItem( lane.level.conveyor , ConveyorItem.Type.Part ) );
+        LaneItem upItem = new LaneItem( upHeldItem , lane );
         upHeldItem.conveyorItem.Destroy();
         upHeldItem.Destroy();
-        _lane.AddItemToLane( upItem );
+        lane.AddToLane( upItem );
         upItem.SetPosition( new Vector3( position.x , upItem.position.y , upItem.position.z ) );
         upItem.changeLane = upItem.ChangeLane( -1 );
 
-        HeldItem downHeldItem = new HeldItem( new ConveyorItem( _lane.level.conveyor , ConveyorItem.Type.Part ) );
-        LaneItem downItem = new LaneItem( downHeldItem , _lane );
+        HeldItem downHeldItem = new HeldItem( new ConveyorItem( lane.level.conveyor , ConveyorItem.Type.Part ) );
+        LaneItem downItem = new LaneItem( downHeldItem , lane );
         downHeldItem.conveyorItem.Destroy();
         downHeldItem.Destroy();
-        _lane.AddItemToLane( downItem );
+        lane.AddToLane( downItem );
         downItem.SetPosition( new Vector3( position.x , downItem.position.y , downItem.position.z ) );
         downItem.changeLane = downItem.ChangeLane( 1 );
     }
 
     public void LeapEntity( LaneEntity laneEntity ) => leap = Leap( laneEntity );
 
-    private IEnumerator Leap( LaneEntity laneEntity )
-    {
-        _cube.transform.localPosition = Vector3.up;
-
-        while ( laneEntity.valid && back.x > laneEntity.back )
-            yield return null;
-
-        _cube.transform.localPosition = Vector3.zero;
-    }
-
-    public IEnumerator ChangeLane( int change )
-    {
-        Level level = _lane.level;
-        int laneIndex = level.IndexOf( _lane );
-        Lane newLane = level.LaneBy( Mathf.Clamp( laneIndex + change , 0 , level.lanes - 1 ) );
-        bool outOfBounds = newLane == _lane;
-
-        if ( !outOfBounds )
-        {
-            _lane.RemoveItemFromLane( this );
-            _lane = newLane;
-            _lane.AddItemToLane( this );
-        }
-
-        return ChangeLane( position.z , outOfBounds ? ( _lane.start.z - _lane.height - _lane.level.laneSpacing ) * Mathf.Sign( change ) : _lane.start.z , outOfBounds );
-    }
-
-    private IEnumerator ChangeLane( float current , float target , bool outOfBounds )
-    {
-        float targetTime = Time.time + 1;
-
-        while ( targetTime > Time.time )
-            yield return position = new Vector3( position.x , position.y , Mathf.Lerp( current , target , 1f - ( targetTime - Time.time ) ) );
-
-        position = new Vector3( position.x , position.y , target );
-
-        if ( outOfBounds )
-        {
-            IEnumerator changeLane = ChangeLane( target , current , false );
-
-            while ( changeLane.MoveNext() )
-                yield return changeLane.Current;
-        }
-    }
-
     public void SetPosition( Vector3 position ) => this.position = position;
 
-    public bool overlap => Mathf.Approximately( _cube.transform.localPosition.y , 0 ) && overlapping != null;
+    private IEnumerator Leap( LaneEntity laneEntity )
+    {
+        cube.transform.localPosition = Vector3.up;
 
-    public LaneEntity overlapping
+        while ( laneEntity.valid && back > laneEntity.back )
+            yield return null;
+
+        cube.transform.localPosition = Vector3.zero;
+    }
+
+    public override LaneEntity overlapping
     {
         get
         {
             bool collide = false;
 
-            for ( int i = 0 ; _lane.laneEntities.Count > i && !collide ; i++ )
-                if ( _lane.laneEntities[ i ].Contains( front ) || _lane.laneEntities[ i ].Contains( front + ( Vector3.forward * scale.z * 0.5f ) ) || _lane.laneEntities[ i ].Contains( front + ( Vector3.back * scale.z * 0.5f ) ) )
-                    return _lane.laneEntities[ i ];
+            for ( int i = 0 ; lane.objects.Count > i && !collide ; i++ )
+                if ( lane.objects[ i ] is LaneEntity && ( lane.objects[ i ].Contains( frontPoint ) || lane.objects[ i ].Contains( frontPoint + ( Vector3.forward * scale.z * 0.5f ) ) || lane.objects[ i ].Contains( frontPoint + ( Vector3.back * scale.z * 0.5f ) ) ) )
+                    return lane.objects[ i ] as LaneEntity;
 
             return null;
         }
     }
 
-    public IEnumerator updater { get; private set; }
     public ConveyorItem.Type type => _heldItem.conveyorItem.type;
-    public Vector3 front => new Vector3( rect.xMin , 0 , rect.center.y );
-    public Vector3 back => new Vector3( rect.xMax , 0 , rect.center.y );
-    public Rect rect => new Rect( position.x - ( scale.x * 0.5f ) , position.z - ( scale.z * 0.5f ) , scale.x , scale.z );
-    public Vector3 position { get { return _container.transform.position; } private set { _container.transform.position = value; } }
-    public Vector3 scale { get { return _cube.transform.localScale; } private set { _cube.transform.localScale = value; } }
+    public override float front => rect.xMin;
+    public override float back => rect.xMax;
 
-    private float start => _lane.start.x;
-    private float end => _lane.end.x;
-    private float speed => _lane.speed;
+    protected override float start => lane.end.x;
+    protected override float end => lane.start.x;
+    protected override float speed => lane.speed;
 
-    private Lane _lane { get; set; }
-    private GameObject _cube { get; set; }
     private HeldItem _heldItem { get; set; }
-    private TextMesh _textMesh { get; set; }
-    private GameObject _container { get; set; }
-    private MeshRenderer _meshRenderer { get; set; }
     private IEnumerator leap { get; set; }
-    private IEnumerator changeLane { get; set; }
 
-    public LaneItem ( HeldItem heldItem , Lane lane )
+    public LaneItem ( HeldItem heldItem , Lane lane ) : base()
     {
-        updater = Updater();
         string name = heldItem.conveyorItem.type.ToString();
-        _container = new GameObject( "Lane" + name );
+        container = new GameObject( "Lane" + name );
 
-        _cube = GameObject.CreatePrimitive( PrimitiveType.Cube );
-        _cube.transform.SetParent( _container.transform );
-        _cube.transform.localRotation = Quaternion.identity;
-        _cube.transform.localScale = new Vector3( heldItem.conveyorItem.width , 1 , heldItem.conveyorItem.height );
+        cube = GameObject.CreatePrimitive( PrimitiveType.Cube );
+        cube.transform.SetParent( container.transform );
+        cube.transform.localRotation = Quaternion.identity;
+        cube.transform.localScale = new Vector3( heldItem.conveyorItem.width , 1 , heldItem.conveyorItem.height );
 
-        _meshRenderer = _cube.GetComponent<MeshRenderer>();
-        _meshRenderer.material = Entry.instance.unlitColor;
-        _meshRenderer.material.color = Color.white;
+        meshRenderer = cube.GetComponent<MeshRenderer>();
+        meshRenderer.material = Entry.instance.unlitColor;
+        meshRenderer.material.color = Color.white;
 
-        _textMesh = new GameObject( name ).AddComponent<TextMesh>();
-        _textMesh.transform.SetParent( _container.transform );
-        _textMesh.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
+        textMesh = new GameObject( name ).AddComponent<TextMesh>();
+        textMesh.transform.SetParent( container.transform );
+        textMesh.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
 
-        _textMesh.fontSize = 35;
-        _textMesh.color = Color.black;
-        _textMesh.characterSize = 0.15f;
-        _textMesh.anchor = TextAnchor.MiddleCenter;
-        _textMesh.alignment = TextAlignment.Center;
-        _textMesh.text = heldItem.conveyorItem.text;
+        textMesh.fontSize = 35;
+        textMesh.color = Color.black;
+        textMesh.characterSize = 0.15f;
+        textMesh.anchor = TextAnchor.MiddleCenter;
+        textMesh.alignment = TextAlignment.Center;
+        textMesh.text = heldItem.conveyorItem.text;
 
-        position = lane.end + ( Vector3.up * 0.5f ) + ( Vector3.left * _cube.transform.localScale.x * 0.5f );
+        position = lane.end + ( Vector3.up * 0.5f ) + ( Vector3.left * cube.transform.localScale.x * 0.5f );
         _heldItem = heldItem;
-        _lane = lane;
+        base.lane = lane;
     }
 }
 
-public class LaneEntity
+public class LaneEntity : LaneObject
 {
     /// <summary>
     /// Updates the item's position, cleaning it up if it reaches the end of the lane
     /// </summary>
-    public IEnumerator Updater()
+    public override IEnumerator Update()
     {
         bool move = true;
 
-        while ( _container != null )
+        while ( container != null )
         {
             if ( overlap )
                 Interaction( overlapping );
 
-            if ( _pushBack != null )
-                move = !_pushBack.MoveNext();
+            if ( pushBack != null )
+                move = !pushBack.MoveNext();
 
-            if ( _changeLane != null )
-                move = !_changeLane.MoveNext();
+            if ( changeLane != null )
+                move = !changeLane.MoveNext();
 
             float x = position.x + ( ( speed * Time.deltaTime ) * ( move ? 1 : 0 ) );
-            bool destroy = x > _lane.end.x - ( _cube.transform.localScale.x * 0.5f ) || 0 >= _health;
+            bool destroy = x > lane.end.x - ( cube.transform.localScale.x * 0.5f ) || 0 >= _health;
             position = new Vector3( Mathf.Clamp( x , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
 
             if ( destroy )
                 Destroy();
 
             yield return null;
+        }
+    }
+
+    public void Interaction<T> ( T laneObject ) where T : LaneObject
+    {
+        if ( laneObject is LaneItem )
+        {
+            LaneItem laneItem = laneObject as LaneItem;
+
+            switch ( laneItem.type )
+            {
+                case ConveyorItem.Type.Part:
+                case ConveyorItem.Type.Damage:
+                    _healthBar.Decrease();
+                    pushBack = PushBack();
+                    laneItem.Destroy();
+                    break;
+
+                case ConveyorItem.Type.Split:
+                    _healthBar.Decrease();
+                    pushBack = PushBack();
+                    laneItem.Split();
+                    laneItem.Destroy();
+                    break;
+
+                case ConveyorItem.Type.Leap:
+                    _healthBar.Decrease();
+                    pushBack = PushBack();
+                    laneItem.LeapEntity( this );
+                    break;
+
+                case ConveyorItem.Type.LaneDown:
+                    changeLane = ChangeLane( 1 );
+                    laneItem.Destroy();
+                    break;
+
+                case ConveyorItem.Type.LaneUp:
+                    changeLane = ChangeLane( -1 );
+                    laneItem.Destroy();
+                    break;
+            }
+        }
+        else
+        {
+            LaneEntity laneEntity = laneObject as LaneEntity;
+            LaneEntity front = position.x > laneEntity.position.x ? this : laneEntity;
+            LaneEntity back = front == this ? laneEntity : this;
+
+            if ( ( back.scale.z * 0.5f > Mathf.Abs( front.position.z - back.position.z ) ) && ( front.Contains( back.frontPoint ) || front.Contains( back.frontPoint + ( Vector3.forward * back.scale.z * 0.5f ) ) || front.Contains( back.frontPoint + ( Vector3.back * back.scale.z * 0.5f ) ) ) )
+            {
+                back.position = new Vector3( front.back - ( front.scale.x * 0.6f ) , back.position.y , back.position.z );
+                back.pushBack = back.PushBack();
+                back._healthBar.Decrease();
+            }
+            else
+            {
+                bool up = position.z > laneEntity.position.z;
+                position = new Vector3( position.x , position.y , up ? laneEntity.top + ( scale.z * 0.6f ) : laneEntity.bottom - ( scale.z * 0.6f ) );
+                changeLane = ChangeLane( up ? -1 : 1 );
+                _healthBar.Decrease();
+            }
         }
     }
 
@@ -1035,21 +985,82 @@ public class LaneEntity
             yield return position = new Vector3( Mathf.Clamp( Mathf.Lerp( current , target , 1f - ( targetTime - Time.time ) ) , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
     }
 
-    private IEnumerator ChangeLane( int change )
+    public override LaneEntity overlapping
     {
-        Level level = _lane.level;
-        int laneIndex = level.IndexOf( _lane );
+        get
+        {
+            bool collide = false;
+
+            for ( int i = 0 ; lane.objects.Count > i && !collide ; i++ )
+                if ( lane.objects[ i ] is LaneEntity && lane.objects[ i ] != this && ( lane.objects[ i ].Contains( frontPoint ) || lane.objects[ i ].Contains( frontPoint + ( Vector3.forward * scale.z * 0.5f ) ) || lane.objects[ i ].Contains( frontPoint + ( Vector3.back * scale.z * 0.5f ) ) || lane.objects[ i ].Contains( topPoint ) || lane.objects[ i ].Contains( topPoint + ( Vector3.left * scale.x * 0.5f ) ) || lane.objects[ i ].Contains( topPoint + ( Vector3.right * scale.x * 0.5f ) ) || lane.objects[ i ].Contains( bottomPoint ) || lane.objects[ i ].Contains( bottomPoint + ( Vector3.left * scale.x * 0.5f ) ) || lane.objects[ i ].Contains( bottomPoint + ( Vector3.right * scale.x * 0.5f ) ) ) )
+                    return lane.objects[ i ] as LaneEntity;
+
+            return null;
+        }
+    }
+
+    public override float front => rect.xMax;
+    public override float back => rect.xMin;
+    protected override float start => lane.start.x;
+    protected override float end => lane.end.x;
+
+    protected override float speed => base.speed - lane.speed;
+
+    private int _health => _healthBar.value;
+    private HealthBar _healthBar { get; set; }
+
+    public LaneEntity( string name , float speed , float width , float laneHeightPadding , Lane lane ) : base()
+    {
+        container = new GameObject( "Lane" + name );
+
+        cube = GameObject.CreatePrimitive( PrimitiveType.Cube );
+        cube.transform.SetParent( container.transform );
+        cube.transform.localRotation = Quaternion.identity;
+        cube.transform.localScale = new Vector3( width , 1 , lane.height - laneHeightPadding );
+
+        meshRenderer = cube.GetComponent<MeshRenderer>();
+        meshRenderer.material = Entry.instance.unlitColor;
+        meshRenderer.material.color = Color.white;
+
+        textMesh = new GameObject( name ).AddComponent<TextMesh>();
+        textMesh.transform.SetParent( container.transform );
+        textMesh.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
+
+        textMesh.fontSize = 35;
+        textMesh.color = Color.black;
+        textMesh.characterSize = 0.15f;
+        textMesh.anchor = TextAnchor.MiddleCenter;
+        textMesh.alignment = TextAlignment.Center;
+        textMesh.text = name;
+
+        position = lane.start + ( Vector3.up * 0.5f ) + ( Vector3.right * cube.transform.localScale.x * 0.5f );
+        base.speed = speed;
+        base.lane = lane;
+
+        _healthBar = new HealthBar( scale.x , base.lane.level.laneSpacing , 0.1f , 0.1f , 1 , 3 );
+        _healthBar.SetParent( container.transform , Vector3.forward * ( ( scale.z + base.lane.level.laneSpacing + laneHeightPadding ) * 0.5f ) );
+    }
+}
+
+public abstract class LaneObject
+{
+    public abstract IEnumerator Update();
+
+    public IEnumerator ChangeLane( int change )
+    {
+        Level level = lane.level;
+        int laneIndex = level.IndexOf( lane );
         Lane newLane = level.LaneBy( Mathf.Clamp( laneIndex + change , 0 , level.lanes - 1 ) );
-        bool outOfBounds = newLane == _lane;
+        bool outOfBounds = newLane == lane;
 
         if ( !outOfBounds )
         {
-            _lane.RemoveEntityFromLane( this );
-            _lane = newLane;
-            _lane.AddEntityToLane( this );
+            lane.RemoveFromLane( this );
+            lane = newLane;
+            lane.AddToLane( this );
         }
 
-        return ChangeLane( position.z , outOfBounds ? ( _lane.start.z - _lane.height - _lane.level.laneSpacing ) * Mathf.Sign( change ) : _lane.start.z , outOfBounds );
+        return ChangeLane( position.z , outOfBounds ? ( lane.start.z - lane.height - lane.level.laneSpacing ) * Mathf.Sign( change ) : lane.start.z , outOfBounds );
     }
 
     private IEnumerator ChangeLane( float current , float target , bool outOfBounds )
@@ -1070,151 +1081,50 @@ public class LaneEntity
         }
     }
 
-    public void Interaction ( LaneItem laneItem )
-    {
-        switch ( laneItem.type )
-        {
-            case ConveyorItem.Type.Part:
-            case ConveyorItem.Type.Damage:
-                _healthBar.Decrease();
-                _pushBack = PushBack();
-                laneItem.Destroy();
-                break;
-
-            case ConveyorItem.Type.Split:
-                _healthBar.Decrease();
-                _pushBack = PushBack();
-                laneItem.Split();
-                laneItem.Destroy();
-                break;
-
-            case ConveyorItem.Type.Leap:
-                _healthBar.Decrease();
-                _pushBack = PushBack();
-                laneItem.LeapEntity( this );
-                break;
-
-            case ConveyorItem.Type.LaneDown:
-                _changeLane = ChangeLane( 1 );
-                laneItem.Destroy();
-                break;
-
-            case ConveyorItem.Type.LaneUp:
-                _changeLane = ChangeLane( -1 );
-                laneItem.Destroy();
-                break;
-        }
-    }
-
-    public void Interaction( LaneEntity laneEntity )
-    {
-        LaneEntity front = position.x > laneEntity.position.x ? this : laneEntity;
-        LaneEntity back = front == this ? laneEntity : this;
-
-        if ( ( back.scale.z * 0.5f > Mathf.Abs( front.position.z - back.position.z ) ) && ( front.Contains( back.frontPoint ) || front.Contains( back.frontPoint + ( Vector3.forward * back.scale.z * 0.5f ) ) || front.Contains( back.frontPoint + ( Vector3.back * back.scale.z * 0.5f ) ) ) )
-        {
-            back.position = new Vector3( front.back - ( front.scale.x * 0.6f ) , back.position.y , back.position.z );
-            back._pushBack = back.PushBack();
-            back._healthBar.Decrease();
-        }
-        else
-        {
-            bool up = position.z > laneEntity.position.z;
-            position = new Vector3( position.x , position.y , up ? laneEntity.top + ( scale.z * 0.6f ) : laneEntity.bottom - ( scale.z * 0.6f ) );
-            _changeLane = ChangeLane( up ? -1 : 1 );
-            _healthBar.Decrease();
-        }
-    }
-
     /// <summary>
     /// Remove the item from the lane then destroy the scene graph representation
     /// </summary>
-    public void Destroy()
+    public virtual void Destroy()
     {
-        _lane.RemoveEntityFromLane( this );
-        GameObject.Destroy( _container );
+        lane.RemoveFromLane( this );
+        GameObject.Destroy( container );
     }
 
     public bool Contains( Vector3 position ) => rect.Contains( new Vector2( position.x , position.z ) );
 
-    public bool valid => _container != null;
-    public Vector3 backPoint => new Vector3( rect.xMin , 0 , rect.center.y );
-    public Vector3 frontPoint => new Vector3( rect.xMax , 0 , rect.center.y );
-    public Vector3 topPoint => new Vector3( rect.center.x , 0 , rect.yMax );
-    public Vector3 bottomPoint => new Vector3( rect.center.x , 0 , rect.yMin );
+    public IEnumerator update { get; private set; }
 
-    public float front => rect.xMax;
-    public float back => rect.xMin;
-    public float top => rect.yMax;
-    public float bottom => rect.yMin;
-    public bool overlap => overlapping != null;
-
-    public LaneEntity overlapping
-    {
-        get
-        {
-            bool collide = false;
-
-            for ( int i = 0 ; _lane.laneEntities.Count > i && !collide ; i++ )
-                if ( _lane.laneEntities[ i ] != this && ( _lane.laneEntities[ i ].Contains( frontPoint ) || _lane.laneEntities[ i ].Contains( frontPoint + ( Vector3.forward * scale.z * 0.5f ) ) || _lane.laneEntities[ i ].Contains( frontPoint + ( Vector3.back * scale.z * 0.5f ) ) || _lane.laneEntities[ i ].Contains( topPoint ) || _lane.laneEntities[ i ].Contains( topPoint + ( Vector3.left * scale.x * 0.5f ) ) || _lane.laneEntities[ i ].Contains( topPoint + ( Vector3.right * scale.x * 0.5f ) ) || _lane.laneEntities[ i ].Contains( bottomPoint ) || _lane.laneEntities[ i ].Contains( bottomPoint + ( Vector3.left * scale.x * 0.5f ) ) || _lane.laneEntities[ i ].Contains( bottomPoint + ( Vector3.right * scale.x * 0.5f ) ) ) )
-                    return _lane.laneEntities[ i ];
-
-            return null;
-        }
-    }
-
+    public bool valid => container != null;
+    public Vector3 topPoint => new Vector3( rect.center.x , 0 , top );
+    public Vector3 backPoint => new Vector3( back , 0 , rect.center.y );
+    public Vector3 frontPoint => new Vector3( front , 0 , rect.center.y );
+    public Vector3 bottomPoint => new Vector3( rect.center.x , 0 , bottom );
+    public bool overlap => overlapping != null && Mathf.Approximately( cube.transform.localPosition.y , 0 );
     public Rect rect => new Rect( position.x - ( scale.x * 0.5f ) , position.z - ( scale.z * 0.5f ) , scale.x , scale.z );
-    public Vector3 position { get { return _container.transform.position; } private set { _container.transform.position = value; } }
-    public Vector3 scale { get { return _cube.transform.localScale; } private set { _cube.transform.localScale = value; } }
+    public Vector3 scale { get { return cube.transform.localScale; } protected set { cube.transform.localScale = value; } }
+    public Vector3 position { get { return container.transform.position; } protected set { container.transform.position = value; } }
 
-    public IEnumerator updater { get; private set; }
+    public abstract LaneEntity overlapping { get; }
+    public abstract float front { get; }
+    public abstract float back { get; }
+    public float bottom => rect.yMin;
+    public float top => rect.yMax;
 
-    private float speed => _speed - _lane.speed;
-    private float start => _lane.start.x;
-    private float end => _lane.end.x;
+    protected abstract float start { get; }
+    protected abstract float end { get; }
 
-    private int _health => _healthBar.value;
-    private float _speed { get; set; }
-    private Lane _lane { get; set; }
-    private GameObject _cube { get; set; }
-    private TextMesh _textMesh { get; set; }
-    private GameObject _container { get; set; }
-    private MeshRenderer _meshRenderer { get; set; }
-    private IEnumerator _pushBack { get; set; }
-    private IEnumerator _changeLane { get; set; }
-    private HealthBar _healthBar { get; set; }
+    protected Lane lane { get; set; }
+    protected GameObject cube { get; set; }
+    protected TextMesh textMesh { get; set; }
+    protected GameObject container { get; set; }
+    protected MeshRenderer meshRenderer { get; set; }
+    protected IEnumerator changeLane { get; set; }
+    protected IEnumerator pushBack { get; set; }
+    protected virtual float speed { get; set; }
 
-    public LaneEntity( string name , float speed , float width , float laneHeightPadding , Lane lane )
+    public LaneObject()
     {
-        updater = Updater();
-        _container = new GameObject( "Lane" + name );
-
-        _cube = GameObject.CreatePrimitive( PrimitiveType.Cube );
-        _cube.transform.SetParent( _container.transform );
-        _cube.transform.localRotation = Quaternion.identity;
-        _cube.transform.localScale = new Vector3( width , 1 , lane.height - laneHeightPadding );
-
-        _meshRenderer = _cube.GetComponent<MeshRenderer>();
-        _meshRenderer.material = Entry.instance.unlitColor;
-        _meshRenderer.material.color = Color.white;
-
-        _textMesh = new GameObject( name ).AddComponent<TextMesh>();
-        _textMesh.transform.SetParent( _container.transform );
-        _textMesh.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
-
-        _textMesh.fontSize = 35;
-        _textMesh.color = Color.black;
-        _textMesh.characterSize = 0.15f;
-        _textMesh.anchor = TextAnchor.MiddleCenter;
-        _textMesh.alignment = TextAlignment.Center;
-        _textMesh.text = name;
-
-        position = lane.start + ( Vector3.up * 0.5f ) + ( Vector3.right * _cube.transform.localScale.x * 0.5f );
-        _speed = speed;
-        _lane = lane;
-
-        _healthBar = new HealthBar( scale.x , _lane.level.laneSpacing , 0.1f , 0.1f , 1 , 3 );
-        _healthBar.SetParent( _container.transform , Vector3.forward * ( ( scale.z + _lane.level.laneSpacing + laneHeightPadding ) * 0.5f ) );
+        update = Update();
     }
 }
 
