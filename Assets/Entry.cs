@@ -109,7 +109,7 @@ public class Session
                 int lane1Down = level.lanes > laneIndex + 1 ? laneIndex + 1 : -1;
 
                 hoveredLane.color = Color.yellow;
-
+                /*
                 switch ( heldItem.conveyorItem.level )
                 {
                     case 0:
@@ -123,11 +123,13 @@ public class Session
                             level.LaneBy( lane1Down ).color = Color.yellow;
                         break;
                 }
-                
+                */
+
                 //Proceed if the left mouse button is not held
                 //This will only happen if the left mouse button is released
                 if ( !Input.GetMouseButton( 0 ) )
                 {
+                    /*
                     //Add the item to the lane and clean up
                     switch ( heldItem.conveyorItem.level )
                     {
@@ -160,7 +162,8 @@ public class Session
                             hoveredLane.AddToLane( new LaneItem( heldItem , hoveredLane ) );
                             break;
                     }
-
+                    */
+                    hoveredLane.AddToLane( new LaneItem( heldItem , hoveredLane ) );
                     heldItem.conveyorItem.Destroy();
                     heldItem.Destroy();
                     heldItem = null;
@@ -569,15 +572,15 @@ public class Conveyor
 /// <summary>
 /// Items travelling down the conveyor belt. Upgrade by matching three
 /// </summary>
-public class ConveyorItem
+public class ConveyorItem : MouseObject
 {
     /// <summary>
     /// Remove the item from the conveyor then destroy the scene graph representation
     /// </summary>
-    public void Destroy()
+    public override void Destroy()
     {
         _conveyor.RemoveItemFromConveyor( this );
-        GameObject.Destroy( _container );
+        GameObject.Destroy( container );
     }
 
     /// <summary>
@@ -589,7 +592,7 @@ public class ConveyorItem
     /// <summary>
     /// Upgrade the item and update the label
     /// </summary>
-    public void Upgrade() => _textMesh.text = type.ToString() + "\n" + ++level;
+    public void Upgrade() => textMesh.text = type.ToString() + "\n" + ++level;
 
     /// <summary>
     /// Update the item's position
@@ -632,9 +635,6 @@ public class ConveyorItem
     public bool held { get; private set; }
     public int level { get; private set; }
     public Type type { get; private set; }
-    public Vector3 position { get { return _container.transform.position; } private set { _container.transform.position = value; } }
-    public Color color { get { return _meshRenderer.material.color; } set { _meshRenderer.material.color = value; } }
-    public string text => _textMesh.text;
 
     private float speed => _conveyor.speed;
     private float limit => bottom + ( height * 0.5f ) + ( ( height + itemSpacing ) * index );
@@ -642,41 +642,21 @@ public class ConveyorItem
     private float bottom => _conveyor.bottom.z;
     private float top => _conveyor.top.z;
 
-    private GameObject _quad { get; set; }
-    private TextMesh _textMesh { get; set; }
     private Conveyor _conveyor { get; set; }
-    private GameObject _container { get; set; }
-    private MeshRenderer _meshRenderer { get; set; }
     private int _maxLevel { get; } = 3;
 
-    public ConveyorItem ( Conveyor conveyor , Type type )
+    public ConveyorItem ( Conveyor conveyor , Type type ) : base( "Conveyor" + type.ToString() )
     {
-        string name = type.ToString();
-
         _conveyor = conveyor;
-        _container = new GameObject( "Conveyor" + name );
-        _container.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
+        container.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
 
-        _quad = GameObject.CreatePrimitive( PrimitiveType.Quad );
-        _quad.transform.SetParent( _container.transform );
-        _quad.transform.localRotation = Quaternion.identity;
-        _quad.transform.localScale = new Vector3( width , height , 1 );
+        quad.transform.localRotation = Quaternion.identity;
+        quad.transform.localScale = new Vector3( width , height , 1 );
 
-        _meshRenderer = _quad.GetComponent<MeshRenderer>();
-        _meshRenderer.material = Entry.instance.unlitColor;
-        _meshRenderer.material.color = Color.white;
+        meshRenderer.material.color = Color.white;
 
-        _textMesh = new GameObject( name ).AddComponent<TextMesh>();
-        _textMesh.transform.SetParent( _container.transform );
-        _textMesh.transform.localRotation = Quaternion.identity;
-
-
-        _textMesh.text = name + "\n" + level;
-        _textMesh.fontSize = 35;
-        _textMesh.color = Color.black;
-        _textMesh.characterSize = 0.15f;
-        _textMesh.anchor = TextAnchor.MiddleCenter;
-        _textMesh.alignment = TextAlignment.Center;
+        textMesh.transform.localRotation = Quaternion.identity;
+        textMesh.text = type.ToString() + "\n" + level;
 
         position = conveyor.top - ( Vector3.forward * height * 0.5f ) + Vector3.up;
         this.type = type;
@@ -694,21 +674,22 @@ public class ConveyorItem
         Leap = 4,
         Count = 5,
         Part = 6,
+        Wreck = 7
     }
 }
 
 /// <summary>
 /// Items picked up from the conveyor belt. Can be dropped on lanes
 /// </summary>
-public class HeldItem
+public class HeldItem : MouseObject
 {
     /// <summary>
     /// Drops the currently held item then destroy the scene graph representation
     /// </summary>
-    public void Destroy()
+    public override void Destroy()
     {
         conveyorItem.SetHeld( false );
-        GameObject.Destroy( _container );
+        GameObject.Destroy( container );
     }
 
     /// <summary>
@@ -717,42 +698,22 @@ public class HeldItem
     /// <param name="position">Position to place the item at</param>
     public void SetPosition ( Vector3 position ) => this.position = new Vector3( position.x , conveyorItem.position.y + 1 , position.z );
 
-    public Vector3 position { get { return _container.transform.position; } private set { _container.transform.position = value; } }
     public ConveyorItem conveyorItem { get; private set; }
 
-    private GameObject _quad { get; set; }
-    private TextMesh _textMesh { get; set; }
-    private GameObject _container { get; set; }
-    private MeshRenderer _meshRenderer { get; set; }
-
-    public HeldItem( ConveyorItem conveyorItem )
+    public HeldItem( ConveyorItem conveyorItem ) : base ( "Held" + conveyorItem.type.ToString() )
     {
         conveyorItem.SetHeld( true );
         conveyorItem.color = Color.gray;
-        string name = conveyorItem.type.ToString();
 
-        _container = new GameObject( "Held" + name );
-        _container.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
+        container.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
 
-        _quad = GameObject.CreatePrimitive( PrimitiveType.Quad );
-        _quad.transform.SetParent( _container.transform );
-        _quad.transform.localRotation = Quaternion.identity;
-        _quad.transform.localScale = new Vector3( conveyorItem.width , conveyorItem.height , 1 );
+        quad.transform.localRotation = Quaternion.identity;
+        quad.transform.localScale = new Vector3( conveyorItem.width , conveyorItem.height , 1 );
 
-        _meshRenderer = _quad.GetComponent<MeshRenderer>();
-        _meshRenderer.material = Entry.instance.unlitColor;
-        _meshRenderer.material.color = Color.white;
+        meshRenderer.material.color = Color.white;
 
-        _textMesh = new GameObject( name ).AddComponent<TextMesh>();
-        _textMesh.transform.SetParent( _container.transform );
-        _textMesh.transform.localRotation = Quaternion.identity;
-
-        _textMesh.fontSize = 35;
-        _textMesh.color = Color.black;
-        _textMesh.characterSize = 0.15f;
-        _textMesh.anchor = TextAnchor.MiddleCenter;
-        _textMesh.alignment = TextAlignment.Center;
-        _textMesh.text = conveyorItem.text;
+        textMesh.transform.localRotation = Quaternion.identity;
+        textMesh.text = conveyorItem.text;
 
         position = conveyorItem.position + Vector3.forward;
         this.conveyorItem = conveyorItem;
@@ -841,7 +802,8 @@ public class LaneItem : LaneObject
         }
     }
 
-    public ConveyorItem.Type type => _heldItem.conveyorItem.type;
+    public ConveyorItem.Type type => heldItem != null ? heldItem.conveyorItem.type : ConveyorItem.Type.Wreck;
+    public HeldItem heldItem { get; private set; }
     public override float front => rect.xMin;
     public override float back => rect.xMax;
 
@@ -849,7 +811,6 @@ public class LaneItem : LaneObject
     protected override float end => lane.start.x;
     protected override float speed => lane.speed;
 
-    private HeldItem _heldItem { get; set; }
     private IEnumerator leap { get; set; }
 
     public LaneItem ( HeldItem heldItem , Lane lane ) : base( "Lane" + heldItem.conveyorItem.type.ToString() , lane)
@@ -860,7 +821,18 @@ public class LaneItem : LaneObject
         textMesh.text = heldItem.conveyorItem.text;
 
         position = lane.end + ( Vector3.up * 0.5f ) + ( Vector3.left * cube.transform.localScale.x * 0.5f );
-        _heldItem = heldItem;
+        this.heldItem = heldItem;
+    }
+
+    public LaneItem ( Lane lane , string name , float width , float height , Vector3 position ) : base( "Lane" + name , lane )
+    {
+        cube.transform.localScale = new Vector3( width , 1 , height );
+
+        meshRenderer.material.color = Color.white;
+        textMesh.text = name;
+
+        this.position = position;
+        heldItem = null;
     }
 }
 
@@ -895,6 +867,14 @@ public class LaneEntity : LaneObject
         }
     }
 
+    public override void Destroy()
+    {
+        if (_health == 0 )
+            lane.AddToLane( new LaneItem( lane , "Wreck" , scale.x , scale.z , position ) );
+
+        base.Destroy();
+    }
+
     public void Interaction<T> ( T laneObject ) where T : LaneObject
     {
         if ( laneObject is LaneItem )
@@ -905,31 +885,32 @@ public class LaneEntity : LaneObject
             {
                 case ConveyorItem.Type.Part:
                 case ConveyorItem.Type.Damage:
-                    _healthBar.Decrease();
+                    _healthBar.Decrease( laneItem.heldItem.conveyorItem.level + 1 );
                     pushBack = PushBack();
                     laneItem.Destroy();
                     break;
 
                 case ConveyorItem.Type.Split:
-                    _healthBar.Decrease();
+                    _healthBar.Decrease( laneItem.heldItem.conveyorItem.level + 1 );
                     pushBack = PushBack();
                     laneItem.Split();
                     laneItem.Destroy();
                     break;
 
                 case ConveyorItem.Type.Leap:
-                    _healthBar.Decrease();
+                case ConveyorItem.Type.Wreck:
+                    _healthBar.Decrease( laneItem.heldItem.conveyorItem.level + 1);
                     pushBack = PushBack();
                     laneItem.LeapEntity( this );
                     break;
 
                 case ConveyorItem.Type.LaneDown:
-                    changeLane = ChangeLane( 1 );
+                    changeLane = ChangeLane( laneItem.heldItem.conveyorItem.level + 1 );
                     laneItem.Destroy();
                     break;
 
                 case ConveyorItem.Type.LaneUp:
-                    changeLane = ChangeLane( -1 );
+                    changeLane = ChangeLane( -laneItem.heldItem.conveyorItem.level - 1 );
                     laneItem.Destroy();
                     break;
             }
@@ -1000,6 +981,82 @@ public class LaneEntity : LaneObject
 
         _healthBar = new HealthBar( scale.x , base.lane.level.laneSpacing , 0.1f , 0.1f , 1 , 3 );
         _healthBar.SetParent( container.transform , Vector3.forward * ( ( scale.z + base.lane.level.laneSpacing + laneHeightPadding ) * 0.5f ) );
+    }
+}
+
+public class HealthBar
+{
+    public void Increase( int value = 1 ) => SetValue( this.value + value );
+
+    public void Decrease( int value = 1 ) => SetValue( this.value - value );
+
+    private void SetValue( int value )
+    {
+        bool different = Mathf.Clamp( value , 0 , _initialValue ) != this.value;
+        this.value = Mathf.Clamp( value , 0 , _initialValue );
+
+        if ( different )
+            for ( int i = 0 ; _segments.Count > i ; i++ )
+                _segments[ i ].material.color = this.value > i ? Color.red : Color.black;
+    }
+
+    public void SetParent( Transform parent , Vector3 localPosition )
+    {
+        _container.transform.SetParent( parent );
+        _container.transform.localPosition = localPosition;
+    }
+
+    public int value { get; private set; }
+
+    private List<MeshRenderer> _segments { get; set; }
+    private GameObject _container { get; set; }
+    private MeshRenderer _quad { get; set; }
+    private float _width { get; set; }
+    private float _height { get; set; }
+    private int _initialValue { get; set; }
+
+    public HealthBar( float width , float height , float spacing , float padding , int rows , int value )
+    {
+        _container = new GameObject( "HealthBar" );
+
+        _quad = GameObject.CreatePrimitive( PrimitiveType.Quad ).GetComponent<MeshRenderer>();
+        _quad.transform.SetParent( _container.transform );
+        _quad.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
+        _quad.transform.localScale = new Vector3( width , height , 1 );
+        _quad.transform.name = "HealthBG";
+
+        _width = width;
+        _height = height;
+        _initialValue = this.value = value;
+
+        int perRow = Mathf.CeilToInt( value / rows );
+        int remainder = value - ( perRow * rows );
+        perRow += remainder;
+        int x = 0;
+        int y = 0;
+
+        Vector2 size = new Vector2( ( width - ( padding * 2 ) - ( spacing * ( perRow - 1 ) )  ) / perRow , ( height - ( padding * 2 ) - ( spacing * ( rows - 1 ) )  ) / rows );
+        _segments = new List<MeshRenderer>( value );
+
+        for ( int i = 0 ; value > i ; i++ )
+        {
+            if ( x > perRow - 1 )
+            {
+                x = 0;
+                y++;
+            }
+
+            MeshRenderer segment = GameObject.CreatePrimitive( PrimitiveType.Quad ).GetComponent<MeshRenderer>();
+            segment.transform.SetParent( _container.transform );
+            segment.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
+            segment.transform.localScale = new Vector3( size.x , size.y , 1 );
+            segment.transform.localPosition = new Vector3( ( -width * 0.5f ) + ( size.x * x ) + ( size.x * 0.5f ) + ( spacing * x ) + padding , 1 , ( height * 0.5f ) - ( size.y * y ) - ( size.y * 0.5f ) - ( spacing * y ) - padding );
+            segment.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            segment.material.color = Color.red;
+            segment.name = "Segment" + i;
+            _segments.Add( segment );
+            x++;
+        }
     }
 }
 
@@ -1110,78 +1167,32 @@ public abstract class LaneObject
     }
 }
 
-public class HealthBar
+public abstract class MouseObject
 {
-    public void Increase( int value = 1 ) => SetValue( this.value + value );
+    public abstract void Destroy();
 
-    public void Decrease( int value = 1 ) => SetValue( this.value - value );
+    public string text => textMesh.text;
+    public Color color { get { return meshRenderer.material.color; } set { meshRenderer.material.color = value; } }
+    public Vector3 position { get { return container.transform.position; } protected set { container.transform.position = value; } }
 
-    private void SetValue( int value )
+    protected GameObject quad { get; private set; }
+    protected TextMesh textMesh { get; private set; }
+    protected GameObject container { get; private set; }
+    protected MeshRenderer meshRenderer { get; private set; }
+
+    public MouseObject( string name )
     {
-        bool different = Mathf.Clamp( value , 0 , _initialValue ) != this.value;
-        this.value = Mathf.Clamp( value , 0 , _initialValue );
-
-        if ( different )
-            for ( int i = 0 ; _segments.Count > i ; i++ )
-                _segments[ i ].material.color = this.value > i ? Color.red : Color.black;
-    }
-
-    public void SetParent( Transform parent , Vector3 localPosition )
-    {
-        _container.transform.SetParent( parent );
-        _container.transform.localPosition = localPosition;
-    }
-
-    public int value { get; private set; }
-
-    private List<MeshRenderer> _segments { get; set; }
-    private GameObject _container { get; set; }
-    private MeshRenderer _quad { get; set; }
-    private float _width { get; set; }
-    private float _height { get; set; }
-    private int _initialValue { get; set; }
-
-    public HealthBar( float width , float height , float spacing , float padding , int rows , int value )
-    {
-        _container = new GameObject( "HealthBar" );
-
-        _quad = GameObject.CreatePrimitive( PrimitiveType.Quad ).GetComponent<MeshRenderer>();
-        _quad.transform.SetParent( _container.transform );
-        _quad.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
-        _quad.transform.localScale = new Vector3( width , height , 1 );
-        _quad.transform.name = "HealthBG";
-
-        _width = width;
-        _height = height;
-        _initialValue = this.value = value;
-
-        int perRow = Mathf.CeilToInt( value / rows );
-        int remainder = value - ( perRow * rows );
-        perRow += remainder;
-        int x = 0;
-        int y = 0;
-
-        Vector2 size = new Vector2( ( width - ( padding * 2 ) - ( spacing * ( perRow - 1 ) )  ) / perRow , ( height - ( padding * 2 ) - ( spacing * ( rows - 1 ) )  ) / rows );
-        _segments = new List<MeshRenderer>( value );
-
-        for ( int i = 0 ; value > i ; i++ )
-        {
-            if ( x > perRow - 1 )
-            {
-                x = 0;
-                y++;
-            }
-
-            MeshRenderer segment = GameObject.CreatePrimitive( PrimitiveType.Quad ).GetComponent<MeshRenderer>();
-            segment.transform.SetParent( _container.transform );
-            segment.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
-            segment.transform.localScale = new Vector3( size.x , size.y , 1 );
-            segment.transform.localPosition = new Vector3( ( -width * 0.5f ) + ( size.x * x ) + ( size.x * 0.5f ) + ( spacing * x ) + padding , 1 , ( height * 0.5f ) - ( size.y * y ) - ( size.y * 0.5f ) - ( spacing * y ) - padding );
-            segment.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            segment.material.color = Color.red;
-            segment.name = "Segment" + i;
-            _segments.Add( segment );
-            x++;
-        }
+        container = new GameObject( "Held" + name );
+        quad = GameObject.CreatePrimitive( PrimitiveType.Quad );
+        quad.transform.SetParent( container.transform );
+        meshRenderer = quad.GetComponent<MeshRenderer>();
+        meshRenderer.material = Entry.instance.unlitColor;
+        textMesh = new GameObject( name ).AddComponent<TextMesh>();
+        textMesh.transform.SetParent( container.transform );
+        textMesh.alignment = TextAlignment.Center;
+        textMesh.anchor = TextAnchor.MiddleCenter;
+        textMesh.characterSize = 0.15f;
+        textMesh.color = Color.black;
+        textMesh.fontSize = 35;
     }
 }
