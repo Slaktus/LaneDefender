@@ -75,7 +75,7 @@ public class Session
             Vector3 mousePosition = hits[ 0 ].point;
 
             //See if the mouse is hovering any lanes
-            hoveredLane = level.GetHoveredLane( mousePosition );
+            hoveredLane = stage.GetHoveredLane( mousePosition );
 
             //Proceed if the mouse is hovering the conveyor
             if ( conveyor.Contains( mousePosition ) )
@@ -96,17 +96,17 @@ public class Session
             }
 
             if ( hoveredLane != null && Input.GetMouseButtonDown( 1 ) )
-                hoveredLane.AddToLane( new LaneEntity( "Entity" , 10 , 5 , 1 , hoveredLane ) );
+                hoveredLane.Add( new LaneEntity( "Entity" , 10 , 5 , 1 , hoveredLane ) );
 
             //Reset lane colors
-            level.SetLaneColor( Color.black );
+            stage.SetLaneColor( Color.black );
 
             //Proceed if a lane is hovered and an item is held
             if ( heldItem != null && hoveredLane != null )
             {
-                int laneIndex = level.IndexOf( hoveredLane );
+                int laneIndex = stage.IndexOf( hoveredLane );
                 int lane1Up = laneIndex - 1 >= 0 ? laneIndex - 1 : -1;
-                int lane1Down = level.lanes > laneIndex + 1 ? laneIndex + 1 : -1;
+                int lane1Down = stage.lanes > laneIndex + 1 ? laneIndex + 1 : -1;
 
                 hoveredLane.color = Color.yellow;
                 /*
@@ -163,7 +163,7 @@ public class Session
                             break;
                     }
                     */
-                    hoveredLane.AddToLane( new LaneItem( heldItem , hoveredLane ) );
+                    hoveredLane.Add( new LaneItem( heldItem , hoveredLane ) );
                     heldItem.conveyorItem.Destroy();
                     heldItem.Destroy();
                     heldItem = null;
@@ -193,6 +193,9 @@ public class Session
         //Update the conveyor
         conveyor.Update();
 
+        //Update the stage
+        stage.Update();
+
         //Update the level
         level.Update();
 
@@ -204,7 +207,7 @@ public class Session
     /// <summary>
     /// Level holds the lanes and methods for operating on them
     /// </summary>
-    public Level level { get; private set; }
+    public Stage stage { get; private set; }
 
     /// <summary>
     /// Conveyor handles items and methods for operating on them
@@ -231,10 +234,13 @@ public class Session
     /// </summary>
     private HeldItem heldItem { get; set; }
 
+    private Level level { get; set; }
+
     public Session ( float width , float height , float spacing , int lanes )
     {
         //Cube primitives have a mesh filter, mesh renderer and box collider already attached
         ground = GameObject.CreatePrimitive( PrimitiveType.Cube );
+
 
         conveyor = new Conveyor( 
             speed: 5 , 
@@ -245,13 +251,24 @@ public class Session
             itemWidthPadding: 2 , 
             itemSpacing: 0.1f );
 
-        level = new Level(
+        stage = new Stage(
             speed: 5 ,
             width: width ,
             height: height ,
             laneSpacing: spacing ,
             laneCount: lanes , 
             conveyor: conveyor );
+
+        level = new Level();
+        Wave wave = new Wave( 3 , stage );
+        wave.Add( new WaveEvent( 0 , 0 , WaveEvent.Type.Spawn ) );
+        wave.Add( new WaveEvent( 1 , 1 , WaveEvent.Type.Spawn ) );
+        wave.Add( new WaveEvent( 1 , 0 , WaveEvent.Type.Spawn ) );
+        wave.Add( new WaveEvent( 1 , 3 , WaveEvent.Type.Spawn ) );
+        wave.Add( new WaveEvent( 5 , 2 , WaveEvent.Type.Spawn ) );
+        wave.Add( new WaveEvent( 0 , 3 , WaveEvent.Type.Spawn ) );
+        wave.Add( new WaveEvent( 2 , 4 , WaveEvent.Type.Spawn ) );
+        level.Add( wave );
 
         //Project the corners of the screen to the ground plane to find out how large the ground plane needs to be to fill the camera's field of view
         Vector3 bottomLeft = camera.ScreenToWorldPoint( new Vector3( 0 , 0 , camera.transform.position.y ) );
@@ -271,8 +288,33 @@ public class Session
 /// <summary>
 /// Keeps and updates lanes and contains methods for operating on them
 /// </summary>
-public class Level
+public class Stage
 {
+    public bool Handle( WaveEvent waveEvent )
+    {
+        bool handled = false;
+
+        switch ( waveEvent.type )
+        {
+            case WaveEvent.Type.Spawn:
+                handled = true;
+                Lane lane = LaneBy( waveEvent.lane );
+
+                for ( int i = 0 ; lane.objects.Count > i && handled ; i++ )
+                    if ( lane.objects[ i ] is LaneEntity && 5 > lane.objects[ i ].back - lane.start.x )
+                        handled = false;
+                
+                if ( handled )
+                    lane.Add( new LaneEntity( "Entity" , 10 , 5 , 1 , lane ) );
+
+                return handled;
+
+            default:
+                return handled;
+        }
+
+    }
+
     /// <summary>
     /// Updates all lanes
     /// Should strictly speaking be an event, but right now this is safe
@@ -324,7 +366,7 @@ public class Level
 
     private List<Lane> _lanes { get; set; }
 
-    public Level ( float speed , float width , float height , float laneSpacing , int laneCount , Conveyor conveyor )
+    public Stage ( float speed , float width , float height , float laneSpacing , int laneCount , Conveyor conveyor )
     {
         this.speed = speed;
         this.conveyor = conveyor;
@@ -334,7 +376,7 @@ public class Level
 
         for ( int i = 0 ; laneCount > i ; i++ )
             _lanes.Add( new Lane( 
-                level: this , 
+                stage: this , 
                 depth: ( i * ( laneHeight + laneSpacing  ) ) + ( laneHeight * 0.5f ) , 
                 width: width , 
                 height: laneHeight , 
@@ -349,21 +391,17 @@ public class Lane
 {
     /// <summary>
     /// Updates all the items on this lane
-    /// Should strictly speaking be an event, but right now this is safe
     /// </summary>
-    public void Update()
-    {
-        Updater();
-    }
+    public void Update() => Updater();
 
-    public T AddToLane<T> ( T laneObject ) where T : LaneObject
+    public T Add<T> ( T laneObject ) where T : LaneObject
     {
         Updater += laneObject.update.MoveNext;
         objects.Add( laneObject );
         return laneObject;
     }
 
-    public void RemoveFromLane<T> ( T laneObject ) where T : LaneObject
+    public void Remove<T> ( T laneObject ) where T : LaneObject
     {
         Updater -= laneObject.update.MoveNext;
         objects.Remove( laneObject );
@@ -382,9 +420,9 @@ public class Lane
     public Vector3 end => new Vector3( _rect.xMax , 0 , _rect.yMin + ( height * 0.5f ) );
     public float width => _rect.width;
     public float height => _rect.height;
-    public float speed => level.speed;
+    public float speed => stage.speed;
 
-    public Level level { get; private set; }
+    public Stage stage { get; private set; }
     public List<LaneObject> objects { get; private set; }
 
     /// <summary>
@@ -398,11 +436,11 @@ public class Lane
     private MeshRenderer _meshRenderer { get; set; }
     private event Func<bool> Updater;
 
-    public Lane( Level level , float depth , float width , float height , string name )
+    public Lane( Stage stage , float depth , float width , float height , string name )
     {
         Updater += () => false;
 
-        this.level = level;
+        this.stage = stage;
         objects = new List<LaneObject>();
         _rect = new Rect( 0 , -depth , width , height );
 
@@ -757,19 +795,19 @@ public class LaneItem : LaneObject
 
     public void Split()
     {
-        HeldItem upHeldItem = new HeldItem( new ConveyorItem( lane.level.conveyor , ConveyorItem.Type.Part ) );
+        HeldItem upHeldItem = new HeldItem( new ConveyorItem( lane.stage.conveyor , ConveyorItem.Type.Part ) );
         LaneItem upItem = new LaneItem( upHeldItem , lane );
         upHeldItem.conveyorItem.Destroy();
         upHeldItem.Destroy();
-        lane.AddToLane( upItem );
+        lane.Add( upItem );
         upItem.SetPosition( new Vector3( position.x , upItem.position.y , upItem.position.z ) );
         upItem.changeLane = upItem.ChangeLane( -1 );
 
-        HeldItem downHeldItem = new HeldItem( new ConveyorItem( lane.level.conveyor , ConveyorItem.Type.Part ) );
+        HeldItem downHeldItem = new HeldItem( new ConveyorItem( lane.stage.conveyor , ConveyorItem.Type.Part ) );
         LaneItem downItem = new LaneItem( downHeldItem , lane );
         downHeldItem.conveyorItem.Destroy();
         downHeldItem.Destroy();
-        lane.AddToLane( downItem );
+        lane.Add( downItem );
         downItem.SetPosition( new Vector3( position.x , downItem.position.y , downItem.position.z ) );
         downItem.changeLane = downItem.ChangeLane( 1 );
     }
@@ -870,7 +908,7 @@ public class LaneEntity : LaneObject
     public override void Destroy()
     {
         if (_health == 0 )
-            lane.AddToLane( new LaneItem( lane , "Wreck" , scale.x , scale.z , position ) );
+            lane.Add( new LaneItem( lane , "Wreck" , scale.x , scale.z , position ) );
 
         base.Destroy();
     }
@@ -979,8 +1017,8 @@ public class LaneEntity : LaneObject
         meshRenderer.material.color = Color.white;
         textMesh.text = name;
 
-        _healthBar = new HealthBar( scale.x , base.lane.level.laneSpacing , 0.1f , 0.1f , 1 , 3 );
-        _healthBar.SetParent( container.transform , Vector3.forward * ( ( scale.z + base.lane.level.laneSpacing + laneHeightPadding ) * 0.5f ) );
+        _healthBar = new HealthBar( scale.x , base.lane.stage.laneSpacing , 0.1f , 0.1f , 1 , 3 );
+        _healthBar.SetParent( container.transform , Vector3.forward * ( ( scale.z + base.lane.stage.laneSpacing + laneHeightPadding ) * 0.5f ) );
     }
 }
 
@@ -1066,19 +1104,19 @@ public abstract class LaneObject
 
     public IEnumerator ChangeLane( int change )
     {
-        Level level = lane.level;
-        int laneIndex = level.IndexOf( lane );
-        Lane newLane = level.LaneBy( Mathf.Clamp( laneIndex + change , 0 , level.lanes - 1 ) );
+        Stage stage = lane.stage;
+        int laneIndex = stage.IndexOf( lane );
+        Lane newLane = stage.LaneBy( Mathf.Clamp( laneIndex + change , 0 , stage.lanes - 1 ) );
         bool outOfBounds = newLane == lane;
 
         if ( !outOfBounds )
         {
-            lane.RemoveFromLane( this );
+            lane.Remove( this );
             lane = newLane;
-            lane.AddToLane( this );
+            lane.Add( this );
         }
 
-        return ChangeLane( position.z , outOfBounds ? ( lane.start.z - lane.height - lane.level.laneSpacing ) * Mathf.Sign( change ) : lane.start.z , outOfBounds );
+        return ChangeLane( position.z , outOfBounds ? ( lane.start.z - lane.height - lane.stage.laneSpacing ) * Mathf.Sign( change ) : lane.start.z , outOfBounds );
     }
 
     private IEnumerator ChangeLane( float current , float target , bool outOfBounds )
@@ -1104,7 +1142,7 @@ public abstract class LaneObject
     /// </summary>
     public virtual void Destroy()
     {
-        lane.RemoveFromLane( this );
+        lane.Remove( this );
         GameObject.Destroy( container );
     }
 
@@ -1194,5 +1232,111 @@ public abstract class MouseObject
         textMesh.characterSize = 0.15f;
         textMesh.color = Color.black;
         textMesh.fontSize = 35;
+    }
+}
+
+public class Level
+{
+    public void Update()
+    {
+        _time += Time.deltaTime;
+
+        if ( _waves.Count > 0 && _time > _waves.Peek().time )
+        {
+            _time = 0;
+            IEnumerator handler = WaveHandler( _waves.Dequeue() );
+            _currentHandlers.Add( handler );
+            Updater += handler.MoveNext;
+        }
+
+        Updater();
+    }
+
+    public void Add( Wave wave ) => _waves.Enqueue( wave );
+
+    private IEnumerator WaveHandler( Wave wave )
+    {
+        float time = 0;
+        _currentWaves.Add( wave );
+
+        while ( wave.events > 0 )
+        {
+            wave.Update( time += Time.deltaTime );
+            yield return null;
+        }
+
+        IEnumerator handler = _currentHandlers[ _currentWaves.IndexOf( wave ) ];
+        _currentWaves.Remove( wave );
+        Updater -= handler.MoveNext;
+    }
+
+    private List<IEnumerator> _currentHandlers { get; set; }
+    private List<Wave> _currentWaves { get; set; }
+    private Queue<Wave> _waves { get; set; }
+    private float _time { get; set; }
+    private event Func<bool> Updater;
+
+    public Level()
+    {
+        _waves = new Queue<Wave>();
+        _currentWaves = new List<Wave>();
+        _currentHandlers = new List<IEnumerator>();
+
+        Updater += () => false;
+    }
+}
+
+public class Wave
+{
+    public void Update( float time )
+    {
+        for ( int i = 0 ; _events.Count > i ; i++ )
+            if ( time > _events[ i ].delay )
+                _queue.Enqueue( _events[ i ] );
+
+        while ( _queue.Count > 0 )
+        {
+            WaveEvent waveEvent = _queue.Dequeue();
+            bool handled = _stage.Handle( waveEvent );
+
+            if ( handled )
+                _events.Remove( waveEvent );
+        }
+    }
+
+    public void Add( WaveEvent waveEvent ) => _events.Add( waveEvent );
+
+    public int events => _events.Count;
+    public float time { get; private set; }
+
+    private List<WaveEvent> _events { get; set; }
+    private Queue<WaveEvent> _queue { get; set; }
+    private Stage _stage { get; set; }
+
+    public Wave( float time , Stage stage )
+    {
+        _stage = stage;
+        this.time = time;
+        _events = new List<WaveEvent>();
+        _queue = new Queue<WaveEvent>();
+    }
+}
+
+public class WaveEvent
+{
+    public float delay { get; private set; }
+    public Type type { get; private set; }
+    public int lane { get; private set; }
+
+    public WaveEvent ( float delay , int lane , Type type )
+    {
+        this.delay = delay;
+        this.lane = lane;
+        this.type = type;
+    }
+
+    public enum Type
+    {
+        Spawn
     }
 }
