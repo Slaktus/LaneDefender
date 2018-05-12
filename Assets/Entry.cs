@@ -259,7 +259,7 @@ public class Session
             laneCount: lanes , 
             conveyor: conveyor );
 
-        level = new Level();
+        level = new Level( 10 );
         Wave wave = new Wave( 3 , stage );
         wave.Add( new WaveEvent( 0 , 0 , WaveEvent.Type.Spawn ) );
         wave.Add( new WaveEvent( 1 , 1 , WaveEvent.Type.Spawn ) );
@@ -319,11 +319,7 @@ public class Stage
     /// Updates all lanes
     /// Should strictly speaking be an event, but right now this is safe
     /// </summary>
-    public void Update()
-    {
-        for ( int i = 0 ; _lanes.Count > i ; i++ )
-            _lanes[ i ].Update();
-    }
+    public void Update() => Updater();
 
     /// <summary>
     /// Set color of all lanes except optional
@@ -365,6 +361,7 @@ public class Stage
     public float speed { get; private set; }
 
     private List<Lane> _lanes { get; set; }
+    private event Action Updater;
 
     public Stage ( float speed , float width , float height , float laneSpacing , int laneCount , Conveyor conveyor )
     {
@@ -375,12 +372,17 @@ public class Stage
         _lanes = new List<Lane>( laneCount );
 
         for ( int i = 0 ; laneCount > i ; i++ )
-            _lanes.Add( new Lane( 
-                stage: this , 
-                depth: ( i * ( laneHeight + laneSpacing  ) ) + ( laneHeight * 0.5f ) , 
-                width: width , 
-                height: laneHeight , 
-                name: "Lane" + i ) );
+        {
+            Lane lane = new Lane(
+                   stage: this ,
+                   depth: ( i * ( laneHeight + laneSpacing ) ) + ( laneHeight * 0.5f ) ,
+                   width: width ,
+                   height: laneHeight ,
+                   name: "Lane" + i );
+
+            _lanes.Add( lane );
+            Updater += lane.Update;
+        }
     }
 }
 
@@ -453,7 +455,6 @@ public class Lane
         _quad.GetComponent<MeshCollider>().enabled = false;
         _meshRenderer = _quad.GetComponent<MeshRenderer>();
         _meshRenderer.material = Entry.instance.unlitColor;
-
     }
 }
 
@@ -1270,19 +1271,23 @@ public class Level
         Updater -= handler.MoveNext;
     }
 
+    public int waves => _waves.Count + _currentWaves.Count;
+    public float progress => _time / duration;
+    public float duration { get; private set; }
+
     private List<IEnumerator> _currentHandlers { get; set; }
     private List<Wave> _currentWaves { get; set; }
     private Queue<Wave> _waves { get; set; }
     private float _time { get; set; }
     private event Func<bool> Updater;
 
-    public Level()
+    public Level( float duration )
     {
+        Updater += () => false;
+        this.duration = duration;
         _waves = new Queue<Wave>();
         _currentWaves = new List<Wave>();
         _currentHandlers = new List<IEnumerator>();
-
-        Updater += () => false;
     }
 }
 
