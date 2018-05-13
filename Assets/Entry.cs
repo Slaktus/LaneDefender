@@ -95,8 +95,9 @@ public class Session
                 }
             }
 
-            if ( hoveredLane != null && Input.GetMouseButtonDown( 1 ) )
-                hoveredLane.Add( new LaneEntity( "Entity" , 10 , 5 , 1 , hoveredLane ) );
+            if ( Input.GetMouseButtonDown( 1 ) )
+                hoveredLane?.Add( new Enemy( Definitions.Enemy( Definitions.Enemies.Default ) , hoveredLane ) );
+            //hoveredLane?.Add( new LaneEntity( "Entity" , 10 , 5 , 1 , hoveredLane ) );
 
             //Reset lane colors
             stage.SetLaneColor( Color.black );
@@ -207,12 +208,12 @@ public class Session
     /// <summary>
     /// Level holds the lanes and methods for operating on them
     /// </summary>
-    public Stage stage { get; private set; }
+    public Stage stage { get; }
 
     /// <summary>
     /// Conveyor handles items and methods for operating on them
     /// </summary>
-    public Conveyor conveyor { get; private set; }
+    public Conveyor conveyor { get; }
 
     /// <summary>
     /// Getter using UnityEngine's Camera class, which features a convenience getter for the first camera in the scene with the tag "Main"
@@ -222,7 +223,7 @@ public class Session
     /// <summary>
     /// Ground plane GameObject. Has a BoxCollider attached
     /// </summary>
-    private GameObject ground { get; set; }
+    private GameObject ground { get; }
 
     /// <summary>
     /// Last time an item was added to the conveyor
@@ -240,7 +241,6 @@ public class Session
     {
         //Cube primitives have a mesh filter, mesh renderer and box collider already attached
         ground = GameObject.CreatePrimitive( PrimitiveType.Cube );
-
 
         conveyor = new Conveyor( 
             speed: 5 , 
@@ -261,13 +261,14 @@ public class Session
 
         level = new Level( 10 );
         Wave wave = new Wave( 3 , stage );
-        wave.Add( new WaveEvent( 0 , 0 , WaveEvent.Type.Spawn ) );
-        wave.Add( new WaveEvent( 1 , 1 , WaveEvent.Type.Spawn ) );
-        wave.Add( new WaveEvent( 1 , 0 , WaveEvent.Type.Spawn ) );
-        wave.Add( new WaveEvent( 1 , 3 , WaveEvent.Type.Spawn ) );
-        wave.Add( new WaveEvent( 5 , 2 , WaveEvent.Type.Spawn ) );
-        wave.Add( new WaveEvent( 0 , 3 , WaveEvent.Type.Spawn ) );
-        wave.Add( new WaveEvent( 2 , 4 , WaveEvent.Type.Spawn ) );
+        EnemyDefinition enemyDefinition = Definitions.Enemy( Definitions.Enemies.Default );
+        wave.Add( new SpawnEnemyEvent( enemyDefinition , delay: 0 , lane: 0 ) );
+        wave.Add( new SpawnEnemyEvent( enemyDefinition , delay: 1 , lane: 1 ) );
+        wave.Add( new SpawnEnemyEvent( enemyDefinition , delay: 1 , lane: 0 ) );
+        wave.Add( new SpawnEnemyEvent( enemyDefinition , delay: 1 , lane: 3 ) );
+        wave.Add( new SpawnEnemyEvent( enemyDefinition , delay: 5 , lane: 2 ) );
+        wave.Add( new SpawnEnemyEvent( enemyDefinition , delay: 0 , lane: 3 ) );
+        wave.Add( new SpawnEnemyEvent( enemyDefinition , delay: 2 , lane: 4 ) );
         level.Add( wave );
 
         //Project the corners of the screen to the ground plane to find out how large the ground plane needs to be to fill the camera's field of view
@@ -296,16 +297,16 @@ public class Stage
 
         switch ( waveEvent.type )
         {
-            case WaveEvent.Type.Spawn:
-                handled = true;
+            case WaveEvent.Type.SpawnEnemy:
                 Lane lane = LaneBy( waveEvent.lane );
+                handled = true;
 
                 for ( int i = 0 ; lane.objects.Count > i && handled ; i++ )
                     if ( lane.objects[ i ] is LaneEntity && 5 > lane.objects[ i ].back - lane.start.x )
                         handled = false;
-                
+
                 if ( handled )
-                    lane.Add( new LaneEntity( "Entity" , 10 , 5 , 1 , lane ) );
+                    lane.Add( new Enemy( ( waveEvent as SpawnEnemyEvent ).enemyDefinition , lane ) );
 
                 return handled;
 
@@ -326,7 +327,7 @@ public class Stage
     /// </summary>
     /// <param name="color">Color to apply</param>
     /// <param name="except">Lane to except</param>
-    public void SetLaneColor( Color color  )
+    public void SetLaneColor( Color color )
     {
         for ( int i = 0 ; _lanes.Count > i ; i++ )
             _lanes[ i ].color = color;
@@ -360,7 +361,7 @@ public class Stage
     public Conveyor conveyor { get; private set; }
     public float speed { get; private set; }
 
-    private List<Lane> _lanes { get; set; }
+    private List<Lane> _lanes { get; }
     private event Action Updater;
 
     public Stage ( float speed , float width , float height , float laneSpacing , int laneCount , Conveyor conveyor )
@@ -424,8 +425,8 @@ public class Lane
     public float height => _rect.height;
     public float speed => stage.speed;
 
-    public Stage stage { get; private set; }
-    public List<LaneObject> objects { get; private set; }
+    public Stage stage { get; }
+    public List<LaneObject> objects { get; }
 
     /// <summary>
     /// Why a rect? Why not a collider like the ground plane?
@@ -434,8 +435,8 @@ public class Lane
     /// Rects are fast, and best of all -- they're structs, so we can create and discard them willy-nilly!
     /// </summary>
     private Rect _rect { get; set; }
-    private GameObject _quad { get; set; }
-    private MeshRenderer _meshRenderer { get; set; }
+    private GameObject _quad { get; }
+    private MeshRenderer _meshRenderer { get; }
     private event Func<bool> Updater;
 
     public Lane( Stage stage , float depth , float width , float height , string name )
@@ -576,11 +577,11 @@ public class Conveyor
     public float itemInterval { get; private set; }
     public float itemWidthPadding { get; private set; }
 
-    private Rect _rect { get; set; }
-    private int _itemLimit { get; set; }
-    private GameObject _quad { get; set; }
-    private MeshRenderer _meshRenderer { get; set; }
-    private List<ConveyorItem> _conveyorItems { get; set; }
+    private Rect _rect { get; }
+    private int _itemLimit { get; }
+    private GameObject _quad { get; }
+    private MeshRenderer _meshRenderer { get; }
+    private List<ConveyorItem> _conveyorItems { get; }
 
     public Conveyor ( float speed , float width , float height , float itemInterval , int itemLimit , float itemWidthPadding , float itemSpacing )
     {
@@ -673,7 +674,7 @@ public class ConveyorItem : MouseObject
 
     public bool held { get; private set; }
     public int level { get; private set; }
-    public Type type { get; private set; }
+    public Type type { get; }
 
     private float speed => _conveyor.speed;
     private float limit => bottom + ( height * 0.5f ) + ( ( height + itemSpacing ) * index );
@@ -681,7 +682,7 @@ public class ConveyorItem : MouseObject
     private float bottom => _conveyor.bottom.z;
     private float top => _conveyor.top.z;
 
-    private Conveyor _conveyor { get; set; }
+    private Conveyor _conveyor { get; }
     private int _maxLevel { get; } = 3;
 
     public ConveyorItem ( Conveyor conveyor , Type type ) : base( "Conveyor" + type.ToString() )
@@ -875,6 +876,16 @@ public class LaneItem : LaneObject
     }
 }
 
+public class Enemy : LaneEntity
+{
+    public Color color { get { return meshRenderer.material.color; } set { meshRenderer.material.color = value; } }
+
+    public Enemy( EnemyDefinition enemyDefinition , Lane lane ) : base ( enemyDefinition.name , enemyDefinition.speed , enemyDefinition.width , enemyDefinition.laneHeightPadding , enemyDefinition.health , lane )
+    {
+        color = enemyDefinition.color;
+    }
+}
+
 public class LaneEntity : LaneObject
 {
     /// <summary>
@@ -908,7 +919,7 @@ public class LaneEntity : LaneObject
 
     public override void Destroy()
     {
-        if (_health == 0 )
+        if ( _health == 0 )
             lane.Add( new LaneItem( lane , "Wreck" , scale.x , scale.z , position ) );
 
         base.Destroy();
@@ -1008,9 +1019,9 @@ public class LaneEntity : LaneObject
     protected override float speed => base.speed - lane.speed;
 
     private int _health => _healthBar.value;
-    private HealthBar _healthBar { get; set; }
+    private HealthBar _healthBar { get; }
 
-    public LaneEntity( string name , float speed , float width , float laneHeightPadding , Lane lane ) : base( "Lane" + name , lane , speed )
+    public LaneEntity( string name , float speed , float width , float laneHeightPadding , int health , Lane lane ) : base( "Lane" + name , lane , speed )
     {
         cube.transform.localScale = new Vector3( width , 1 , lane.height - laneHeightPadding );
 
@@ -1018,7 +1029,7 @@ public class LaneEntity : LaneObject
         meshRenderer.material.color = Color.white;
         textMesh.text = name;
 
-        _healthBar = new HealthBar( scale.x , base.lane.stage.laneSpacing , 0.1f , 0.1f , 1 , 3 );
+        _healthBar = new HealthBar( scale.x , base.lane.stage.laneSpacing , 0.1f , 0.1f , 1 , health );
         _healthBar.SetParent( container.transform , Vector3.forward * ( ( scale.z + base.lane.stage.laneSpacing + laneHeightPadding ) * 0.5f ) );
     }
 }
@@ -1047,12 +1058,12 @@ public class HealthBar
 
     public int value { get; private set; }
 
-    private List<MeshRenderer> _segments { get; set; }
-    private GameObject _container { get; set; }
-    private MeshRenderer _quad { get; set; }
-    private float _width { get; set; }
-    private float _height { get; set; }
-    private int _initialValue { get; set; }
+    private List<MeshRenderer> _segments { get; }
+    private GameObject _container { get; }
+    private MeshRenderer _quad { get; }
+    private float _width { get; }
+    private float _height { get; }
+    private int _initialValue { get; }
 
     public HealthBar( float width , float height , float spacing , float padding , int rows , int value )
     {
@@ -1168,14 +1179,14 @@ public abstract class LaneObject
     public abstract float back { get; }
 
     protected Lane lane { get; set; }
-    protected GameObject cube { get; set; }
-    protected TextMesh textMesh { get; set; }
-    protected GameObject container { get; set; }
-    protected MeshRenderer meshRenderer { get; set; }
+    protected GameObject cube { get; }
+    protected TextMesh textMesh { get; }
+    protected GameObject container { get; }
+    protected MeshRenderer meshRenderer { get; }
     protected IEnumerator changeLane { get; set; }
     protected IEnumerator pushBack { get; set; }
 
-    protected virtual float speed { get; private set; }
+    protected virtual float speed { get; }
 
     protected abstract float start { get; }
     protected abstract float end { get; }
@@ -1214,10 +1225,10 @@ public abstract class MouseObject
     public Color color { get { return meshRenderer.material.color; } set { meshRenderer.material.color = value; } }
     public Vector3 position { get { return container.transform.position; } protected set { container.transform.position = value; } }
 
-    protected GameObject quad { get; private set; }
-    protected TextMesh textMesh { get; private set; }
-    protected GameObject container { get; private set; }
-    protected MeshRenderer meshRenderer { get; private set; }
+    protected GameObject quad { get; }
+    protected TextMesh textMesh { get; }
+    protected GameObject container { get; }
+    protected MeshRenderer meshRenderer { get; }
 
     public MouseObject( string name )
     {
@@ -1275,9 +1286,9 @@ public class Level
     public float progress => _time / duration;
     public float duration { get; private set; }
 
-    private List<IEnumerator> _currentHandlers { get; set; }
-    private List<Wave> _currentWaves { get; set; }
-    private Queue<Wave> _waves { get; set; }
+    private List<IEnumerator> _currentHandlers { get; }
+    private List<Wave> _currentWaves { get; }
+    private Queue<Wave> _waves { get; }
     private float _time { get; set; }
     private event Func<bool> Updater;
 
@@ -1314,9 +1325,9 @@ public class Wave
     public int events => _events.Count;
     public float time { get; private set; }
 
-    private List<WaveEvent> _events { get; set; }
-    private Queue<WaveEvent> _queue { get; set; }
-    private Stage _stage { get; set; }
+    private List<WaveEvent> _events { get; }
+    private Queue<WaveEvent> _queue { get; }
+    private Stage _stage { get; }
 
     public Wave( float time , Stage stage )
     {
@@ -1327,11 +1338,21 @@ public class Wave
     }
 }
 
-public class WaveEvent
+public class SpawnEnemyEvent : WaveEvent
 {
-    public float delay { get; private set; }
-    public Type type { get; private set; }
-    public int lane { get; private set; }
+    public EnemyDefinition enemyDefinition { get; }
+
+    public SpawnEnemyEvent ( EnemyDefinition enemyDefinition , float delay , int lane ) : base ( delay , lane , Type.SpawnEnemy )
+    {
+        this.enemyDefinition = enemyDefinition;
+    }
+}
+
+public abstract class WaveEvent
+{
+    public float delay { get; }
+    public Type type { get; }
+    public int lane { get; }
 
     public WaveEvent ( float delay , int lane , Type type )
     {
@@ -1342,6 +1363,55 @@ public class WaveEvent
 
     public enum Type
     {
-        Spawn
+        SpawnEnemy
+    }
+}
+
+public class EnemyDefinition : EntityDefinition
+{
+    public Color color { get; }
+    public float speed { get; }
+    public int health { get; set; }
+
+    public EnemyDefinition( string name , Color color , float width , float laneHeightPadding , float speed , int health ) : base( name , width , laneHeightPadding )
+    {
+        this.color = color;
+        this.speed = speed;
+        this.health = health;
+    }
+}
+
+public abstract class EntityDefinition
+{
+    public string name { get; }
+    public float width { get; }
+    public float laneHeightPadding { get; }
+
+    public EntityDefinition( string name , float width , float laneHeightPadding )
+    {
+        this.name = name;
+        this.width = width;
+        this.laneHeightPadding = laneHeightPadding;
+    }
+}
+
+public static class Definitions
+{
+    public static EnemyDefinition Enemy ( Enemies enemy ) => enemyDefinitions[ ( int ) enemy ];
+
+    private static List<EnemyDefinition> enemyDefinitions { get; }
+
+    static Definitions()
+    {
+        enemyDefinitions = new List<EnemyDefinition>( ( int ) Enemies.Count )
+        {
+            new EnemyDefinition( "Enemy" , Color.white , 5 , 1 , 10 , 3 )
+        };
+    }
+
+    public enum Enemies
+    {
+        Default = 0,
+        Count = 1
     }
 }
