@@ -23,7 +23,7 @@ public class Entry : MonoBehaviour
 	void Start ()
     {
         instance = this;
-        session = new Session( width: 25 , height: 15 , spacing: 1 , lanes: 5 );
+        session = new Session( new Player() , width: 25 , height: 15 , spacing: 1 , lanes: 5 );
 	}
 
     /// <summary>
@@ -54,6 +54,8 @@ public class Session
     /// </summary>
     public void Update()
     {
+        coinCounter.SetCounterValue( player.coins );
+
         //While there are strictly speaking better ways to get a world-space mouse position, this one has the absolute minimum number of moving parts
         //First we get a ray. The camera has a convenience method that returns a ray from the center of the camera in the direction of a screen point
         //The mouse position we can poll via the input system is in screen-space coordinates
@@ -97,7 +99,6 @@ public class Session
 
             if ( Input.GetMouseButtonDown( 1 ) )
                 hoveredLane?.Add( new Enemy( Definitions.Enemy( Definitions.Enemies.Default ) , hoveredLane ) );
-            //hoveredLane?.Add( new LaneEntity( "Entity" , 10 , 5 , 1 , hoveredLane ) );
 
             //Reset lane colors
             stage.SetLaneColor( Color.black );
@@ -110,60 +111,11 @@ public class Session
                 int lane1Down = stage.lanes > laneIndex + 1 ? laneIndex + 1 : -1;
 
                 hoveredLane.color = Color.yellow;
-                /*
-                switch ( heldItem.conveyorItem.level )
-                {
-                    case 0:
-                        break;
-
-                    case 1:
-                        if ( lane1Up >= 0 )
-                            level.LaneBy( lane1Up ).color = Color.yellow;
-
-                        if ( lane1Down >= 0 )
-                            level.LaneBy( lane1Down ).color = Color.yellow;
-                        break;
-                }
-                */
 
                 //Proceed if the left mouse button is not held
                 //This will only happen if the left mouse button is released
                 if ( !Input.GetMouseButton( 0 ) )
                 {
-                    /*
-                    //Add the item to the lane and clean up
-                    switch ( heldItem.conveyorItem.level )
-                    {
-                        case 0:
-                            hoveredLane.AddToLane( new LaneItem( heldItem , hoveredLane ) );
-                            break;
-
-                        case 1:
-
-                            if ( lane1Up >= 0 )
-                            {
-                                Lane lane = level.LaneBy( lane1Up );
-                                lane.AddToLane( new LaneItem( heldItem , lane ) );
-                            }
-
-                            if ( lane1Down >= 0 )
-                            {
-                                Lane lane = level.LaneBy( lane1Down );
-                                lane.AddToLane( new LaneItem( heldItem , lane ) );
-                            }
-
-                            hoveredLane.AddToLane( new LaneItem( heldItem , hoveredLane ) );
-                            break;
-
-                        case 2:
-                            hoveredLane.AddToLane( new LaneItem( heldItem , hoveredLane ) );
-                            break;
-
-                        case 3:
-                            hoveredLane.AddToLane( new LaneItem( heldItem , hoveredLane ) );
-                            break;
-                    }
-                    */
                     hoveredLane.Add( new LaneItem( heldItem , hoveredLane ) );
                     heldItem.conveyorItem.Destroy();
                     heldItem.Destroy();
@@ -237,10 +189,18 @@ public class Session
 
     private Level level { get; set; }
 
-    public Session ( float width , float height , float spacing , int lanes )
+    private Player player { get; }
+
+    private CoinCounter coinCounter { get; }
+
+    public Session ( Player player , float width , float height , float spacing , int lanes )
     {
+        this.player = player;
+
         //Cube primitives have a mesh filter, mesh renderer and box collider already attached
         ground = GameObject.CreatePrimitive( PrimitiveType.Cube );
+
+        coinCounter = new CoinCounter();
 
         conveyor = new Conveyor( 
             speed: 5 , 
@@ -257,7 +217,8 @@ public class Session
             height: height ,
             laneSpacing: spacing ,
             laneCount: lanes , 
-            conveyor: conveyor );
+            conveyor: conveyor ,
+            player: player );
 
         level = new Level( 10 );
         Wave wave = new Wave( 3 , stage );
@@ -347,6 +308,8 @@ public class Stage
         return null;
     }
 
+    public void AddCoins( int value ) => _player.AddCoins( value );
+
     public int IndexOf( Lane lane ) => _lanes.IndexOf(lane );
     public Lane LaneBy( int index ) => _lanes[ index ];
 
@@ -361,11 +324,13 @@ public class Stage
     public Conveyor conveyor { get; private set; }
     public float speed { get; private set; }
 
+    private Player _player { get; }
     private List<Lane> _lanes { get; }
     private event Action Updater;
 
-    public Stage ( float speed , float width , float height , float laneSpacing , int laneCount , Conveyor conveyor )
+    public Stage ( float speed , float width , float height , float laneSpacing , int laneCount , Conveyor conveyor , Player player )
     {
+        _player = player;
         this.speed = speed;
         this.conveyor = conveyor;
         this.laneSpacing = laneSpacing;
@@ -843,6 +808,7 @@ public class LaneItem : LaneObject
     }
 
     public ConveyorItem.Type type => heldItem != null ? heldItem.conveyorItem.type : ConveyorItem.Type.Wreck;
+    public int damage => heldItem != null ? heldItem.conveyorItem.level + 1 : 1;
     public HeldItem heldItem { get; private set; }
     public override float front => rect.xMin;
     public override float back => rect.xMax;
@@ -880,7 +846,7 @@ public class Enemy : LaneEntity
 {
     public Color color { get { return meshRenderer.material.color; } set { meshRenderer.material.color = value; } }
 
-    public Enemy( EnemyDefinition enemyDefinition , Lane lane ) : base ( enemyDefinition.name , enemyDefinition.speed , enemyDefinition.width , enemyDefinition.laneHeightPadding , enemyDefinition.health , lane )
+    public Enemy( EnemyDefinition enemyDefinition , Lane lane ) : base ( enemyDefinition.name , enemyDefinition.speed , enemyDefinition.width , enemyDefinition.laneHeightPadding , enemyDefinition.health , enemyDefinition.value , lane )
     {
         color = enemyDefinition.color;
     }
@@ -920,9 +886,20 @@ public class LaneEntity : LaneObject
     public override void Destroy()
     {
         if ( _health == 0 )
+        {
+            lane.stage.AddCoins( defeatValue );
             lane.Add( new LaneItem( lane , "Wreck" , scale.x , scale.z , position ) );
+        }
 
         base.Destroy();
+    }
+
+    private void Damage ( int damage = 1 )
+    {
+        _healthBar.Decrease( damage );
+
+        if ( _health > 0 )
+            lane.stage.AddCoins( damageValue );
     }
 
     public void Interaction<T> ( T laneObject ) where T : LaneObject
@@ -935,13 +912,13 @@ public class LaneEntity : LaneObject
             {
                 case ConveyorItem.Type.Part:
                 case ConveyorItem.Type.Damage:
-                    _healthBar.Decrease( laneItem.heldItem.conveyorItem.level + 1 );
+                    Damage( laneItem.damage );
                     pushBack = PushBack();
                     laneItem.Destroy();
                     break;
 
                 case ConveyorItem.Type.Split:
-                    _healthBar.Decrease( laneItem.heldItem.conveyorItem.level + 1 );
+                    Damage( laneItem.damage );
                     pushBack = PushBack();
                     laneItem.Split();
                     laneItem.Destroy();
@@ -949,7 +926,7 @@ public class LaneEntity : LaneObject
 
                 case ConveyorItem.Type.Leap:
                 case ConveyorItem.Type.Wreck:
-                    _healthBar.Decrease( laneItem.heldItem.conveyorItem.level + 1);
+                    Damage( laneItem.damage );
                     pushBack = PushBack();
                     laneItem.LeapEntity( this );
                     break;
@@ -975,14 +952,14 @@ public class LaneEntity : LaneObject
             {
                 back.position = new Vector3( front.back - ( front.scale.x * 0.6f ) , back.position.y , back.position.z );
                 back.pushBack = back.PushBack();
-                back._healthBar.Decrease();
+                back.Damage();
             }
             else
             {
                 bool up = position.z > laneEntity.position.z;
                 position = new Vector3( position.x , position.y , up ? laneEntity.top + ( scale.z * 0.6f ) : laneEntity.bottom - ( scale.z * 0.6f ) );
                 changeLane = ChangeLane( up ? -1 : 1 );
-                _healthBar.Decrease();
+                Damage();
             }
         }
     }
@@ -1011,17 +988,22 @@ public class LaneEntity : LaneObject
         }
     }
 
+    public int damageValue => Mathf.CeilToInt( defeatValue / ( _healthBar.initialValue - 1 ) );
+    public int defeatValue => Mathf.CeilToInt( ( _value * 0.5f ) );
+
     public override float front => rect.xMax;
     public override float back => rect.xMin;
+
     protected override float start => lane.start.x;
     protected override float end => lane.end.x;
 
     protected override float speed => base.speed - lane.speed;
 
+    private int _value { get; }
     private int _health => _healthBar.value;
     private HealthBar _healthBar { get; }
 
-    public LaneEntity( string name , float speed , float width , float laneHeightPadding , int health , Lane lane ) : base( "Lane" + name , lane , speed )
+    public LaneEntity( string name , float speed , float width , float laneHeightPadding , int health , int value , Lane lane ) : base( "Lane" + name , lane , speed )
     {
         cube.transform.localScale = new Vector3( width , 1 , lane.height - laneHeightPadding );
 
@@ -1029,6 +1011,7 @@ public class LaneEntity : LaneObject
         meshRenderer.material.color = Color.white;
         textMesh.text = name;
 
+        _value = value;
         _healthBar = new HealthBar( scale.x , base.lane.stage.laneSpacing , 0.1f , 0.1f , 1 , health );
         _healthBar.SetParent( container.transform , Vector3.forward * ( ( scale.z + base.lane.stage.laneSpacing + laneHeightPadding ) * 0.5f ) );
     }
@@ -1042,8 +1025,8 @@ public class HealthBar
 
     private void SetValue( int value )
     {
-        bool different = Mathf.Clamp( value , 0 , _initialValue ) != this.value;
-        this.value = Mathf.Clamp( value , 0 , _initialValue );
+        bool different = Mathf.Clamp( value , 0 , initialValue ) != this.value;
+        this.value = Mathf.Clamp( value , 0 , initialValue );
 
         if ( different )
             for ( int i = 0 ; _segments.Count > i ; i++ )
@@ -1057,13 +1040,13 @@ public class HealthBar
     }
 
     public int value { get; private set; }
+    public int initialValue { get; }
 
     private List<MeshRenderer> _segments { get; }
     private GameObject _container { get; }
     private MeshRenderer _quad { get; }
     private float _width { get; }
     private float _height { get; }
-    private int _initialValue { get; }
 
     public HealthBar( float width , float height , float spacing , float padding , int rows , int value )
     {
@@ -1077,7 +1060,7 @@ public class HealthBar
 
         _width = width;
         _height = height;
-        _initialValue = this.value = value;
+        initialValue = this.value = value;
 
         int perRow = Mathf.CeilToInt( value / rows );
         int remainder = value - ( perRow * rows );
@@ -1373,7 +1356,7 @@ public class EnemyDefinition : EntityDefinition
     public float speed { get; }
     public int health { get; set; }
 
-    public EnemyDefinition( string name , Color color , float width , float laneHeightPadding , float speed , int health ) : base( name , width , laneHeightPadding )
+    public EnemyDefinition( string name , Color color , float width , float laneHeightPadding , float speed , int health , int value ) : base( name , width , laneHeightPadding , value )
     {
         this.color = color;
         this.speed = speed;
@@ -1383,14 +1366,16 @@ public class EnemyDefinition : EntityDefinition
 
 public abstract class EntityDefinition
 {
+    public int value { get; }
     public string name { get; }
     public float width { get; }
     public float laneHeightPadding { get; }
 
-    public EntityDefinition( string name , float width , float laneHeightPadding )
+    public EntityDefinition( string name , float width , float laneHeightPadding , int value )
     {
         this.name = name;
         this.width = width;
+        this.value = value;
         this.laneHeightPadding = laneHeightPadding;
     }
 }
@@ -1405,7 +1390,7 @@ public static class Definitions
     {
         enemyDefinitions = new List<EnemyDefinition>( ( int ) Enemies.Count )
         {
-            new EnemyDefinition( "Enemy" , Color.white , 5 , 1 , 10 , 3 )
+            new EnemyDefinition( "Enemy" , Color.white , 5 , 1 , 10 , 1 , 6 )
         };
     }
 
@@ -1413,5 +1398,57 @@ public static class Definitions
     {
         Default = 0,
         Count = 1
+    }
+}
+
+public class Player
+{
+    public void AddCoins( int value ) => coins += value;
+
+    public string name { get; private set; }
+    public int coins { get; private set; }
+
+    public Player()
+    {
+        name = "Player";
+        coins = 0;
+    }
+
+    public Player( Player player )
+    {
+        name = player.name;
+        coins = player.coins;
+    }
+}
+
+public class CoinCounter
+{
+    public void SetCounterValue( int value ) => textMesh.text = value.ToString();
+
+    public TextMesh textMesh { get; }
+
+    private GameObject _container { get; }
+    private GameObject _quad { get; }
+
+    public CoinCounter( int value = 0 )
+    {
+        _container = new GameObject( "CoinCounter" );
+
+        _quad = GameObject.CreatePrimitive( PrimitiveType.Quad );
+        _quad.transform.SetParent( _container.transform );
+        _quad.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
+        _quad.transform.localScale = new Vector3( 2 , 1 , 1 );
+
+        textMesh = new GameObject( "Counter" ).AddComponent<TextMesh>();
+        textMesh.transform.SetParent( _container.transform );
+        textMesh.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
+        textMesh.alignment = TextAlignment.Center;
+        textMesh.anchor = TextAnchor.MiddleCenter;
+        textMesh.characterSize = 0.15f;
+        textMesh.color = Color.black;
+        textMesh.fontSize = 35;
+
+        textMesh.text = value.ToString();
+        _container.transform.position += new Vector3( -1.75f , 0 , 2 );
     }
 }
