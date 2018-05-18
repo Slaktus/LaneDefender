@@ -69,10 +69,9 @@ public class Entry : MonoBehaviour
 
         quad.SetActive( true );
         textMesh.gameObject.SetActive( true );
-        session.stage.ClearLanes();
+        session.stage.DestroyLanes();
         session.level.HideProgress();
         session.coinCounter.Hide();
-        session.stage.HideLanes();
 
         if ( session.heldItem != null )
         {
@@ -80,8 +79,9 @@ public class Entry : MonoBehaviour
             session.heldItem.Destroy();
         }
 
-        session.conveyor.Clear();
-        session.conveyor.Hide();
+        session.conveyor.Destroy();
+        session.coinCounter.Destroy();
+        session.level.DestroyProgress();
 
         textMesh.text = "STOP";
         wait = Time.time + 3;
@@ -364,11 +364,24 @@ public class Stage
 
     public void ClearLane( int index ) => LaneBy( index ).Clear();
     public void ClearLane<T>( int index ) => LaneBy( index ).Clear<T>();
+    public void DestroyLane( int index ) => LaneBy( index ).Destroy();
 
     public void ClearLanes()
     {
         for ( int i = 0 ; lanes > i ; i++ )
             _lanes[ i ].Clear();
+    }
+
+    public void DestroyLanes()
+    {
+        ClearLanes();
+
+        while ( lanes > 0 )
+        {
+            Lane lane = LaneBy( lanes - 1 );
+            _lanes.Remove( lane );
+            lane.Destroy();
+        }
     }
 
     /// <summary>
@@ -523,6 +536,12 @@ public class Lane
             objects[ objects.Count - 1 ].Destroy();
     }
 
+    public void Destroy()
+    {
+        Clear();
+        GameObject.Destroy( _quad );
+    }
+
     public Color color { get { return _meshRenderer.material.color; } set { _meshRenderer.material.color = value; } }
     public Vector3 start => new Vector3( _rect.xMin , 0 , _rect.yMin + ( height * 0.5f ) );
     public Vector3 end => new Vector3( _rect.xMax , 0 , _rect.yMin + ( height * 0.5f ) );
@@ -637,6 +656,12 @@ public class Conveyor
 
     public void Show() => _quad.SetActive( true );
     public void Hide() => _quad.SetActive( false );
+
+    public void Destroy()
+    {
+        Clear();
+        GameObject.Destroy( _quad );
+    }
 
     /// <summary>
     /// Set the speed at which items travel down the conveyor
@@ -1418,6 +1443,7 @@ public class Level
 
     public void ShowProgress() => _progress.Show();
     public void HideProgress() => _progress.Hide();
+    public void DestroyProgress() => _progress.Destroy();
 
     public int waves => _waves.Count + _currentWaves.Count;
     public float duration { get; private set; }
@@ -1581,6 +1607,7 @@ public class CoinCounter
 {
     public void Show() => _container.SetActive( true );
     public void Hide() => _container.SetActive( false );
+    public void Destroy() => GameObject.Destroy( _container );
     public void SetCounterValue( int value ) => textMesh.text = value.ToString();
 
     public TextMesh textMesh { get; }
@@ -1613,13 +1640,11 @@ public class CoinCounter
 
 public class LevelProgress
 {
-    public void Update()
-    {
-        _indicator.transform.localPosition = new Vector3( Mathf.Lerp( _start , _end , progress ) , _indicator.transform.localPosition.y , _indicator.transform.localPosition.z );
-    }
+    public void Update() => _indicator.transform.localPosition = new Vector3( Mathf.Lerp( _start , _end , progress ) , _indicator.transform.localPosition.y , _indicator.transform.localPosition.z );
 
     public void Show() => _container.SetActive( true );
     public void Hide() => _container.SetActive( false );
+    public void Destroy() => GameObject.Destroy( _container );
 
     public float progress => Mathf.Clamp( _level.time , 0 , _duration ) / _duration;
 
