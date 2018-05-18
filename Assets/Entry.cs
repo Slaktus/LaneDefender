@@ -20,12 +20,77 @@ public class Entry : MonoBehaviour
     /// Start is a special MonoBehaviour method that gets called on the frame the GameObject the MonoBehaviour is attached to gets added to the scene
     /// In this case, the Entry MonoBehaviour is attached to an existing scene object, which is added when the scene is loaded
     /// </summary>
-	void Start ()
+	void Start()
     {
         instance = this;
-        session = new Session( new Player() , width: 25 , height: 15 , spacing: 1 , lanes: 5 );
-        StartCoroutine( session.UpdateHandler() );
-	}
+        StartCoroutine( SessionHandler( new Session( new Player() , width: 25 , height: 15 , spacing: 1 , lanes: 5 ) ) );
+    }
+
+    public IEnumerator SessionHandler( Session session )
+    {
+        Debug.Log( "Start!" );
+
+        for ( int i = 0 ; session.stage.lanes > i ; i++ )
+            session.stage.LaneBy( i ).Hide();
+
+        GameObject quad = GameObject.CreatePrimitive( PrimitiveType.Quad );
+        quad.transform.rotation = Quaternion.Euler( 90 , 0 , 0 );
+        quad.transform.position = Camera.main.ViewportToWorldPoint( new Vector3( 0.5f , 0.5f , Camera.main.transform.position.y ) );
+        quad.transform.localScale = new Vector3( 12 , 4 , 1 );
+
+        TextMesh textMesh = new GameObject( "StartText" ).AddComponent<TextMesh>();
+        textMesh.transform.localRotation = quad.transform.rotation;
+        textMesh.transform.SetPositionAndRotation( quad.transform.position + Vector3.up , quad.transform.rotation );
+        textMesh.fontSize = 200;
+        textMesh.color = Color.black;
+        textMesh.characterSize = 0.15f;
+        textMesh.anchor = TextAnchor.MiddleCenter;
+        textMesh.alignment = TextAlignment.Center;
+        textMesh.text = "START";
+
+        float wait = Time.time + 3;
+
+        while ( wait > Time.time )
+            yield return null;
+
+        quad.SetActive( false );
+        textMesh.gameObject.SetActive( false );
+
+        for ( int i = 0 ; session.stage.lanes > i ; i++ )
+            session.stage.LaneBy( i ).Show();
+
+        while ( 1 > session.level.progress || session.stage.enemies > 0 )
+        {
+            session.Update();
+            yield return null;
+        }
+
+        for ( int i = 0 ; session.stage.lanes > i ; i++ )
+            session.stage.LaneBy( i ).Hide();
+
+        quad.SetActive( true );
+        textMesh.gameObject.SetActive( true );
+
+        textMesh.text = "END";
+
+        wait = Time.time + 3;
+
+        while ( wait > Time.time )
+            yield return null;
+
+        Debug.Log( "Done!" );
+        quad.SetActive( false );
+        textMesh.gameObject.SetActive( false );
+
+        Destroy( textMesh.gameObject );
+        Destroy( quad );
+
+        //boss warning?
+        //boss battle?
+
+        //end of level fanfare
+    }
+
     /*
     /// <summary>
     /// Updates the session
@@ -37,11 +102,6 @@ public class Entry : MonoBehaviour
     /// Singleton-ish instance reference. Useful for accessing assets
     /// </summary>
     public static Entry instance { get; private set; }
-
-    /// <summary>
-    /// The session drives the game
-    /// </summary>
-    private Session session { get; set; }
 }
 
 /// <summary>
@@ -50,24 +110,6 @@ public class Entry : MonoBehaviour
 /// </summary>
 public class Session
 {
-    public IEnumerator UpdateHandler()
-    {
-        Debug.Log( "Start!" );
-
-        while ( 1 > level.progress || stage.enemies > 0 )
-        {
-            Update();
-            yield return null;
-        }
-
-        Debug.Log( "Done!" );
-
-        //boss warning?
-        //boss battle?
-
-        //end of level fanfare
-    }
-
     /// <summary>
     /// Updates the session by fetching data and sharing it with the game handlers
     /// </summary>
@@ -186,6 +228,8 @@ public class Session
     /// </summary>
     public Conveyor conveyor { get; }
 
+    public Level level { get; set; }
+
     /// <summary>
     /// Getter using UnityEngine's Camera class, which features a convenience getter for the first camera in the scene with the tag "Main"
     /// </summary>
@@ -205,8 +249,6 @@ public class Session
     /// Currently held item
     /// </summary>
     private HeldItem heldItem { get; set; }
-
-    private Level level { get; set; }
 
     private Player player { get; }
 
@@ -406,6 +448,10 @@ public class Lane
         Updater -= laneObject.update.MoveNext;
         objects.Remove( laneObject );
     }
+
+    public void Show() => _quad.SetActive( true );
+
+    public void Hide() => _quad.SetActive( false );
 
     /// <summary>
     /// Check if the lane's rect contains a world-space position
@@ -1535,6 +1581,7 @@ public class LevelProgress
         _bar.transform.localPosition = Vector3.zero;
         _bar.transform.localScale = new Vector3( width , height , 1 );
         _bar.GetComponent<MeshRenderer>().material.color = Color.black;
+
 
         _indicator = GameObject.CreatePrimitive( PrimitiveType.Quad );
         _indicator.transform.SetParent( _container.transform );
