@@ -28,10 +28,10 @@ public class Entry : MonoBehaviour
 
     public IEnumerator SessionHandler( Session session )
     {
-        Debug.Log( "Start!" );
-
-        for ( int i = 0 ; session.stage.lanes > i ; i++ )
-            session.stage.LaneBy( i ).Hide();
+        session.level.HideProgress();
+        session.coinCounter.Hide();
+        session.stage.HideLanes();
+        session.conveyor.Hide();
 
         GameObject quad = GameObject.CreatePrimitive( PrimitiveType.Quad );
         quad.transform.rotation = Quaternion.Euler( 90 , 0 , 0 );
@@ -55,9 +55,11 @@ public class Entry : MonoBehaviour
 
         quad.SetActive( false );
         textMesh.gameObject.SetActive( false );
+        session.level.ShowProgress();
+        session.coinCounter.Show();
+        session.stage.ShowLanes();
+        session.conveyor.Show();
 
-        for ( int i = 0 ; session.stage.lanes > i ; i++ )
-            session.stage.LaneBy( i ).Show();
 
         while ( 1 > session.level.progress || session.stage.enemies > 0 )
         {
@@ -65,23 +67,28 @@ public class Entry : MonoBehaviour
             yield return null;
         }
 
-        for ( int i = 0 ; session.stage.lanes > i ; i++ )
-            session.stage.LaneBy( i ).Hide();
-
         quad.SetActive( true );
         textMesh.gameObject.SetActive( true );
+        session.stage.ClearLanes();
+        session.level.HideProgress();
+        session.coinCounter.Hide();
+        session.stage.HideLanes();
+        session.conveyor.Hide();
 
-        textMesh.text = "END";
+        if ( session.heldItem != null )
+        {
+            session.heldItem.conveyorItem.Destroy();
+            session.heldItem.Destroy();
+        }
 
+        textMesh.text = "STOP";
         wait = Time.time + 3;
 
         while ( wait > Time.time )
             yield return null;
 
-        Debug.Log( "Done!" );
         quad.SetActive( false );
         textMesh.gameObject.SetActive( false );
-
         Destroy( textMesh.gameObject );
         Destroy( quad );
 
@@ -230,6 +237,8 @@ public class Session
 
     public Level level { get; set; }
 
+    public CoinCounter coinCounter { get; }
+
     /// <summary>
     /// Getter using UnityEngine's Camera class, which features a convenience getter for the first camera in the scene with the tag "Main"
     /// </summary>
@@ -248,11 +257,9 @@ public class Session
     /// <summary>
     /// Currently held item
     /// </summary>
-    private HeldItem heldItem { get; set; }
+    public HeldItem heldItem { get; set; }
 
     private Player player { get; }
-
-    private CoinCounter coinCounter { get; }
 
     public Session ( Player player , float width , float height , float spacing , int lanes )
     {
@@ -336,6 +343,30 @@ public class Stage
                 return handled;
         }
 
+    }
+
+    public void ShowLane( int index ) => LaneBy( index ).Show();
+    public void HideLane( int index ) => LaneBy( index ).Hide();
+
+    public void ShowLanes()
+    {
+        for ( int i = 0 ; lanes > i ; i++ )
+            ShowLane( i );
+    }
+
+    public void HideLanes()
+    {
+        for ( int i = 0 ; lanes > i ; i++ )
+            HideLane( i );
+    }
+
+    public void ClearLane( int index ) => LaneBy( index ).Clear();
+    public void ClearLane<T>( int index ) => LaneBy( index ).Clear<T>();
+
+    public void ClearLanes()
+    {
+        for ( int i = 0 ; lanes > i ; i++ )
+            _lanes[ i ].Clear();
     }
 
     /// <summary>
@@ -472,6 +503,24 @@ public class Lane
         return count;
     }
 
+    public void Clear<T>()
+    {
+        List<int> toClear = new List<int>( objects.Count );
+
+        for ( int i = 0 ; objects.Count > i ; i++ )
+            if ( objects[ i ] is T )
+                toClear.Add( i );
+
+        for ( int i = 0 ; toClear.Count > i ; i++ )
+            objects[ toClear[ i ] ].Destroy();
+    }
+
+    public void Clear()
+    {
+        while ( objects.Count > 0 )
+            objects[ objects.Count - 1 ].Destroy();
+    }
+
     public Color color { get { return _meshRenderer.material.color; } set { _meshRenderer.material.color = value; } }
     public Vector3 start => new Vector3( _rect.xMin , 0 , _rect.yMin + ( height * 0.5f ) );
     public Vector3 end => new Vector3( _rect.xMax , 0 , _rect.yMin + ( height * 0.5f ) );
@@ -577,6 +626,15 @@ public class Conveyor
             if ( _conveyorItems[ i ] != except )
                 _conveyorItems[ i ].color = color;
     }
+
+    public void ClearConveyor()
+    {
+        while ( _conveyorItems.Count > 0 )
+            _conveyorItems[ _conveyorItems.Count - 1 ].Destroy();
+    }
+
+    public void Show() => _quad.SetActive( true );
+    public void Hide() => _quad.SetActive( false );
 
     /// <summary>
     /// Set the speed at which items travel down the conveyor
@@ -1356,6 +1414,9 @@ public class Level
         Updater -= handler.MoveNext;
     }
 
+    public void ShowProgress() => _progress.Show();
+    public void HideProgress() => _progress.Hide();
+
     public int waves => _waves.Count + _currentWaves.Count;
     public float duration { get; private set; }
     public float time { get; private set; }
@@ -1516,6 +1577,8 @@ public class Player
 
 public class CoinCounter
 {
+    public void Show() => _container.SetActive( true );
+    public void Hide() => _container.SetActive( false );
     public void SetCounterValue( int value ) => textMesh.text = value.ToString();
 
     public TextMesh textMesh { get; }
@@ -1552,6 +1615,9 @@ public class LevelProgress
     {
         _indicator.transform.localPosition = new Vector3( Mathf.Lerp( _start , _end , progress ) , _indicator.transform.localPosition.y , _indicator.transform.localPosition.z );
     }
+
+    public void Show() => _container.SetActive( true );
+    public void Hide() => _container.SetActive( false );
 
     public float progress => Mathf.Clamp( _level.time , 0 , _duration ) / _duration;
 
