@@ -73,13 +73,15 @@ public class Entry : MonoBehaviour
         session.level.HideProgress();
         session.coinCounter.Hide();
         session.stage.HideLanes();
-        session.conveyor.Hide();
 
         if ( session.heldItem != null )
         {
             session.heldItem.conveyorItem.Destroy();
             session.heldItem.Destroy();
         }
+
+        session.conveyor.Clear();
+        session.conveyor.Hide();
 
         textMesh.text = "STOP";
         wait = Time.time + 3;
@@ -627,7 +629,7 @@ public class Conveyor
                 _conveyorItems[ i ].color = color;
     }
 
-    public void ClearConveyor()
+    public void Clear()
     {
         while ( _conveyorItems.Count > 0 )
             _conveyorItems[ _conveyorItems.Count - 1 ].Destroy();
