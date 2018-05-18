@@ -24,14 +24,15 @@ public class Entry : MonoBehaviour
     {
         instance = this;
         session = new Session( new Player() , width: 25 , height: 15 , spacing: 1 , lanes: 5 );
+        StartCoroutine( session.UpdateHandler() );
 	}
-
+    /*
     /// <summary>
     /// Updates the session
     /// Update is another special MonoBehaviour method. It gets called once a frame.
     /// </summary>
     void Update() => session.Update();
-
+    */
     /// <summary>
     /// Singleton-ish instance reference. Useful for accessing assets
     /// </summary>
@@ -49,6 +50,24 @@ public class Entry : MonoBehaviour
 /// </summary>
 public class Session
 {
+    public IEnumerator UpdateHandler()
+    {
+        Debug.Log( "Start!" );
+
+        while ( 1 > level.progress || stage.enemies > 0 )
+        {
+            Update();
+            yield return null;
+        }
+
+        Debug.Log( "Done!" );
+
+        //boss warning?
+        //boss battle?
+
+        //end of level fanfare
+    }
+
     /// <summary>
     /// Updates the session by fetching data and sharing it with the game handlers
     /// </summary>
@@ -200,8 +219,6 @@ public class Session
         //Cube primitives have a mesh filter, mesh renderer and box collider already attached
         ground = GameObject.CreatePrimitive( PrimitiveType.Cube );
 
-        coinCounter = new CoinCounter();
-
         conveyor = new Conveyor( 
             speed: 5 , 
             width: 5 , 
@@ -231,6 +248,8 @@ public class Session
         wave.Add( new SpawnEnemyEvent( enemyDefinition , delay: 0 , lane: 3 ) );
         wave.Add( new SpawnEnemyEvent( enemyDefinition , delay: 2 , lane: 4 ) );
         level.Add( wave );
+
+        coinCounter = new CoinCounter();
 
         //Project the corners of the screen to the ground plane to find out how large the ground plane needs to be to fill the camera's field of view
         Vector3 bottomLeft = camera.ScreenToWorldPoint( new Vector3( 0 , 0 , camera.transform.position.y ) );
@@ -319,6 +338,19 @@ public class Stage
     /// <param name="speed"></param>
     public void SetSpeed( float speed ) => this.speed = speed;
 
+    public int enemies
+    {
+        get
+        {
+            int count = 0;
+
+            for ( int i = 0 ; lanes > i ; i++ )
+                count += _lanes[ i ].Count<Enemy>();
+
+            return count;
+        }
+    }
+
     public int lanes => _lanes.Count;
     public float laneSpacing { get; private set; }
     public Conveyor conveyor { get; private set; }
@@ -382,6 +414,17 @@ public class Lane
     /// <param name="position">Position to check</param>
     /// <returns>True if the rect contains the point, false if not</returns>
     public bool Contains ( Vector3 position ) => _rect.Contains( new Vector2( position.x , position.z ) );
+
+    public int Count<T>()
+    {
+        int count = 0;
+
+        for ( int i = 0 ; objects.Count > i ; i++ )
+            if ( objects[ i ] is T )
+                count++;
+
+        return count;
+    }
 
     public Color color { get { return _meshRenderer.material.color; } set { _meshRenderer.material.color = value; } }
     public Vector3 start => new Vector3( _rect.xMin , 0 , _rect.yMin + ( height * 0.5f ) );
@@ -809,7 +852,8 @@ public class LaneItem : LaneObject
 
     public ConveyorItem.Type type => heldItem != null ? heldItem.conveyorItem.type : ConveyorItem.Type.Wreck;
     public int damage => heldItem != null ? heldItem.conveyorItem.level + 1 : 1;
-    public HeldItem heldItem { get; private set; }
+    public HeldItem heldItem { get; }
+
     public override float front => rect.xMin;
     public override float back => rect.xMax;
 
@@ -834,7 +878,8 @@ public class LaneItem : LaneObject
     {
         cube.transform.localScale = new Vector3( width , 1 , height );
 
-        meshRenderer.material.color = Color.white;
+        meshRenderer.material.color = Color.grey;
+        textMesh.color = Color.white;
         textMesh.text = name;
 
         this.position = position;
@@ -1234,17 +1279,17 @@ public class Level
 {
     public void Update()
     {
-        _time += Time.deltaTime;
-
-        if ( _waves.Count > 0 && _time > _waves.Peek().time )
+        if ( _waves.Count > 0 && time > _waves.Peek().time )
         {
-            _time = 0;
+            time = 0;
             IEnumerator handler = WaveHandler( _waves.Dequeue() );
             _currentHandlers.Add( handler );
             Updater += handler.MoveNext;
         }
 
         Updater();
+        _progress.Update();
+        time += Time.deltaTime;
     }
 
     public void Add( Wave wave ) => _waves.Enqueue( wave );
@@ -1266,13 +1311,14 @@ public class Level
     }
 
     public int waves => _waves.Count + _currentWaves.Count;
-    public float progress => _time / duration;
     public float duration { get; private set; }
+    public float time { get; private set; }
+    public float progress => _progress.progress;
 
+    private LevelProgress _progress { get; }
     private List<IEnumerator> _currentHandlers { get; }
     private List<Wave> _currentWaves { get; }
     private Queue<Wave> _waves { get; }
-    private float _time { get; set; }
     private event Func<bool> Updater;
 
     public Level( float duration )
@@ -1282,6 +1328,7 @@ public class Level
         _waves = new Queue<Wave>();
         _currentWaves = new List<Wave>();
         _currentHandlers = new List<IEnumerator>();
+        _progress = new LevelProgress( this , ( Vector3.forward * 2 ) + ( Vector3.right * 31.175f ) , 5 , 1 , duration );
     }
 }
 
@@ -1354,7 +1401,7 @@ public class EnemyDefinition : EntityDefinition
 {
     public Color color { get; }
     public float speed { get; }
-    public int health { get; set; }
+    public int health { get; }
 
     public EnemyDefinition( string name , Color color , float width , float laneHeightPadding , float speed , int health , int value ) : base( name , width , laneHeightPadding , value )
     {
@@ -1390,7 +1437,7 @@ public static class Definitions
     {
         enemyDefinitions = new List<EnemyDefinition>( ( int ) Enemies.Count )
         {
-            new EnemyDefinition( "Enemy" , Color.white , 5 , 1 , 10 , 1 , 6 )
+            new EnemyDefinition( "Enemy" , Color.white , 5 , 1 , 10 , 3 , 6 )
         };
     }
 
@@ -1450,5 +1497,50 @@ public class CoinCounter
 
         textMesh.text = value.ToString();
         _container.transform.position += new Vector3( -1.75f , 0 , 2 );
+    }
+}
+
+public class LevelProgress
+{
+    public void Update()
+    {
+        _indicator.transform.localPosition = new Vector3( Mathf.Lerp( _start , _end , progress ) , _indicator.transform.localPosition.y , _indicator.transform.localPosition.z );
+    }
+
+    public float progress => Mathf.Clamp( _level.time , 0 , _duration ) / _duration;
+
+    private float _start => ( _height * 0.5f ) - ( _width * 0.5f );
+    private float _end => ( _width * 0.5f ) - ( _height * 0.5f );
+
+    private float _duration { get; }
+    private float _width { get; }
+    private float _height { get; }
+    private Level _level { get; }
+    private GameObject _bar { get; set; }
+    private GameObject _indicator { get; set; }
+    private GameObject _container { get; set; }
+
+    public LevelProgress( Level level , Vector3 position , float width , float height , float duration )
+    {
+        _duration = duration;
+        _height = height;
+        _width = width;
+        _level = level;
+
+        _container = new GameObject( "LevelProgress" );
+        _container.transform.position = position;
+
+        _bar = GameObject.CreatePrimitive( PrimitiveType.Quad );
+        _bar.transform.SetParent( _container.transform );
+        _bar.transform.localPosition = Vector3.zero;
+        _bar.transform.localScale = new Vector3( width , height , 1 );
+        _bar.GetComponent<MeshRenderer>().material.color = Color.black;
+
+        _indicator = GameObject.CreatePrimitive( PrimitiveType.Quad );
+        _indicator.transform.SetParent( _container.transform );
+        _indicator.transform.localPosition = ( Vector3.left * width * 0.5f ) + ( Vector3.right * height * 0.5f ) + ( Vector3.back * 0.1f );
+        _indicator.transform.localScale = new Vector3( height , height , 1 );
+
+        _container.transform.transform.rotation = Quaternion.Euler( 90 , 0 , 0 );
     }
 }
