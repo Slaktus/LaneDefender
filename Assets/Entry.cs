@@ -60,7 +60,6 @@ public class Entry : MonoBehaviour
         session.stage.ShowLanes();
         session.conveyor.Show();
 
-
         while ( 1 > session.level.progress || session.stage.enemies > 0 )
         {
             session.Update();
@@ -289,7 +288,7 @@ public class Session
             player: player );
 
         level = new Level( 10 );
-        Wave wave = new Wave( 3 , stage );
+        Wave wave = new Wave( 1 , stage );
         EnemyDefinition enemyDefinition = Definitions.Enemy( Definitions.Enemies.Default );
         wave.Add( new SpawnEnemyEvent( enemyDefinition , delay: 0 , lane: 0 ) );
         wave.Add( new SpawnEnemyEvent( enemyDefinition , delay: 1 , lane: 1 ) );
@@ -1463,7 +1462,7 @@ public class Level
         _waves = new Queue<Wave>();
         _currentWaves = new List<Wave>();
         _currentHandlers = new List<IEnumerator>();
-        _progress = new LevelProgress( this , ( Vector3.forward * 2 ) + ( Vector3.right * 31.175f ) , 5 , 1 , duration );
+        _progress = new LevelProgress( ( Vector3.forward * 2 ) + ( Vector3.right * 31.175f ) , 5 , 1 , duration );
     }
 }
 
@@ -1640,31 +1639,34 @@ public class CoinCounter
 
 public class LevelProgress
 {
-    public void Update() => _indicator.transform.localPosition = new Vector3( Mathf.Lerp( _start , _end , progress ) , _indicator.transform.localPosition.y , _indicator.transform.localPosition.z );
+    public void Update()
+    {
+        _time += Time.deltaTime;
+        _indicator.transform.localPosition = new Vector3( Mathf.Lerp( _start , _end , progress ) , _indicator.transform.localPosition.y , _indicator.transform.localPosition.z );
+    }
 
     public void Show() => _container.SetActive( true );
     public void Hide() => _container.SetActive( false );
     public void Destroy() => GameObject.Destroy( _container );
 
-    public float progress => Mathf.Clamp( _level.time , 0 , _duration ) / _duration;
+    public float progress => Mathf.Clamp( _time , 0 , _duration ) / _duration;
 
     private float _start => ( _height * 0.5f ) - ( _width * 0.5f );
     private float _end => ( _width * 0.5f ) - ( _height * 0.5f );
 
+    private float _time { get; set; }
     private float _duration { get; }
     private float _width { get; }
     private float _height { get; }
-    private Level _level { get; }
     private GameObject _bar { get; set; }
     private GameObject _indicator { get; set; }
     private GameObject _container { get; set; }
 
-    public LevelProgress( Level level , Vector3 position , float width , float height , float duration )
+    public LevelProgress( Vector3 position , float width , float height , float duration )
     {
         _duration = duration;
         _height = height;
         _width = width;
-        _level = level;
 
         _container = new GameObject( "LevelProgress" );
         _container.transform.position = position;
