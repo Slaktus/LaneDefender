@@ -11,7 +11,7 @@ public class Session
     /// </summary>
     public void Update()
     {
-        coinCounter.SetCounterValue( player.coins );
+        coinCounter.SetCounterValue( player.inventory.coins );
 
         //While there are strictly speaking better ways to get a world-space mouse position, this one has the absolute minimum number of moving parts
         //First we get a ray. The camera has a convenience method that returns a ray from the center of the camera in the direction of a screen point
@@ -111,7 +111,7 @@ public class Session
 
         //Proceed if the item spawn interval has elapsed, and add a new item to the conveyor belt
         if ( Time.time > itemTime )
-            itemTime = conveyor.AddItemToConveyor();
+            itemTime = conveyor.AddItemToConveyor( player.inventory );
     }
 
     /// <summary>
@@ -146,9 +146,9 @@ public class Session
     /// <summary>
     /// Currently held item
     /// </summary>
-    public HeldItem heldItem { get; set; }
+    public HeldItem heldItem { get; private set; }
 
-    private Player player { get; }
+    public Player player { get; }
 
     public Session( Player player , float width , float height , float spacing , int lanes )
     {

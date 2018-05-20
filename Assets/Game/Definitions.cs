@@ -3,8 +3,11 @@ using UnityEngine;
 
 public static class Definitions
 {
+    public static HeroDefinition Hero( Heroes hero ) => heroDefinitions[ ( int ) hero ];
+
     public static EnemyDefinition Enemy( Enemies enemy ) => enemyDefinitions[ ( int ) enemy ];
 
+    private static List<HeroDefinition> heroDefinitions { get; }
     private static List<EnemyDefinition> enemyDefinitions { get; }
 
     static Definitions()
@@ -13,6 +16,17 @@ public static class Definitions
         {
             new EnemyDefinition( "Enemy" , Color.white , 5 , 1 , 10 , 3 , 6 )
         };
+
+        heroDefinitions = new List<HeroDefinition>( ( int ) Heroes.Count )
+        {
+            new HeroDefinition( "Hero" , Color.white , 5 , 1 , 3 )
+        };
+    }
+
+    public enum Heroes
+    {
+        Default = 0,
+        Count = 1
     }
 
     public enum Enemies

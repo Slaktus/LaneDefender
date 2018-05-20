@@ -29,8 +29,9 @@ public class Stage
             default:
                 return handled;
         }
-
     }
+
+    public void AddHero( Lane lane , HeroDefinition heroDefinition ) => lane.Add( new Hero( heroDefinition , lane ) );
 
     public void ShowLane( int index ) => LaneBy( index ).Show();
     public void HideLane( int index ) => LaneBy( index ).Hide();
@@ -100,8 +101,7 @@ public class Stage
         return null;
     }
 
-    public void AddCoins( int value ) => _player.AddCoins( value );
-
+    public void AddCoins( int value ) => _player.inventory.AddCoins( value );
     public int IndexOf( Lane lane ) => _lanes.IndexOf( lane );
     public Lane LaneBy( int index ) => _lanes[ index ];
 

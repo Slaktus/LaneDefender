@@ -32,10 +32,10 @@ public class Conveyor
     /// Add an item to the conveyor. Currently only a placeholder
     /// </summary>
     /// <returns></returns>
-    public float AddItemToConveyor()
+    public float AddItemToConveyor( Inventory inventory )
     {
         if ( _itemLimit > _conveyorItems.Count )
-            _conveyorItems.Add( new ConveyorItem( this , ( ConveyorItem.Type ) UnityEngine.Random.Range( 0 , ( int ) ConveyorItem.Type.Count ) ) );
+            _conveyorItems.Add( new ConveyorItem( this , inventory.items[ Random.Range( 0 , inventory.items.Count ) ] ) );
 
         return Time.time + itemInterval;
     }

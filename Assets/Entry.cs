@@ -58,7 +58,19 @@ public class Entry : MonoBehaviour
         session.stage.ShowLanes();
         session.conveyor.Show();
 
-        session.stage.LaneBy( 2 ).Add( new Hero( new HeroDefinition( "Hero" , Color.white , 5 , 1 , 3 ) , session.stage.LaneBy( 2 ) ) );
+        int heroCount = session.player.inventory.heroes.Count;
+        int start = heroCount == 1
+            ? 2
+            : heroCount == 2
+                ? 1
+                : 0;
+
+        int stride = start == 2
+            ? 0
+            : 2;
+
+        for ( int i = 0 ; session.player.inventory.heroes.Count > i ; i++ )
+            session.stage.AddHero( session.stage.LaneBy( start + ( stride * i ) ) , Definitions.Hero( Definitions.Heroes.Default ) );
 
         while ( 1 > session.level.progress || session.stage.enemies > 0 )
         {

@@ -33,7 +33,6 @@ public class Hero : LaneEntity
             yield return null;
         }
     }
-
     public Color color { get { return meshRenderer.material.color; } set { meshRenderer.material.color = value; } }
 
     public Hero( HeroDefinition heroDefinition , Lane lane ) : base( heroDefinition.name , 0 , heroDefinition.width , heroDefinition.laneHeightPadding , heroDefinition.health , heroDefinition.value , lane )
