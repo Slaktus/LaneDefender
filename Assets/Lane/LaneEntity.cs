@@ -21,8 +21,11 @@ public class LaneEntity : LaneObject
             if ( changeLane != null )
                 move = !changeLane.MoveNext();
 
+            if ( melee != null )
+                move = !melee.MoveNext();
+
             float x = position.x + ( ( speed * Time.deltaTime ) * ( move ? 1 : 0 ) );
-            bool destroy = x > lane.end.x - ( cube.transform.localScale.x * 0.5f ) || 0 >= _health;
+            bool destroy = x > lane.end.x - ( cube.transform.localScale.x * 0.5f ) || 0 >= health;
             position = new Vector3( Mathf.Clamp( x , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
 
             if ( destroy )
@@ -34,7 +37,7 @@ public class LaneEntity : LaneObject
 
     public override void Destroy()
     {
-        if ( _health == 0 )
+        if ( health == 0 )
         {
             lane.stage.AddCoins( defeatValue );
             lane.Add( new LaneItem( lane , "Wreck" , scale.x , scale.z , position ) );
@@ -47,7 +50,7 @@ public class LaneEntity : LaneObject
     {
         _healthBar.Decrease( damage );
 
-        if ( _health > 0 )
+        if ( health > 0 )
             lane.stage.AddCoins( damageValue );
     }
 
@@ -97,20 +100,90 @@ public class LaneEntity : LaneObject
             LaneEntity front = position.x > laneEntity.position.x ? this : laneEntity;
             LaneEntity back = front == this ? laneEntity : this;
 
-            if ( ( back.scale.z * 0.5f > Mathf.Abs( front.position.z - back.position.z ) ) && ( front.Contains( back.frontPoint ) || front.Contains( back.frontPoint + ( Vector3.forward * back.scale.z * 0.5f ) ) || front.Contains( back.frontPoint + ( Vector3.back * back.scale.z * 0.5f ) ) ) )
+            if ( front is Enemy )
             {
-                back.position = new Vector3( front.back - ( front.scale.x * 0.6f ) , back.position.y , back.position.z );
-                back.pushBack = back.PushBack();
-                back.Damage();
+                if ( ( back.scale.z * 0.5f > Mathf.Abs( front.position.z - back.position.z ) ) && ( front.Contains( back.frontPoint ) || front.Contains( back.frontPoint + ( Vector3.forward * back.scale.z * 0.5f ) ) || front.Contains( back.frontPoint + ( Vector3.back * back.scale.z * 0.5f ) ) ) )
+                {
+                    if ( front.melee == null )
+                    {
+                        back.position = new Vector3( front.back - ( back.scale.x * 0.6f ) , back.position.y , back.position.z );
+                        back.pushBack = back.PushBack();
+                        back.Damage();
+                    }
+                    else
+                        back.position = new Vector3( front.back - ( back.scale.x * 0.5f ) , back.position.y , back.position.z );
+                }
+                else
+                {
+                    bool up = position.z > laneEntity.position.z;
+                    position = new Vector3( position.x , position.y , up ? laneEntity.top + ( scale.z * 0.6f ) : laneEntity.bottom - ( scale.z * 0.6f ) );
+                    changeLane = ChangeLane( up ? -1 : 1 );
+                    Damage();
+                }
             }
-            else
+            else if ( front is Hero )
             {
-                bool up = position.z > laneEntity.position.z;
-                position = new Vector3( position.x , position.y , up ? laneEntity.top + ( scale.z * 0.6f ) : laneEntity.bottom - ( scale.z * 0.6f ) );
-                changeLane = ChangeLane( up ? -1 : 1 );
-                Damage();
+                if ( back.melee == null && ( back.scale.z * 0.5f > Mathf.Abs( front.position.z - back.position.z ) ) && ( front.Contains( back.frontPoint ) || front.Contains( back.frontPoint + ( Vector3.forward * back.scale.z * 0.5f ) ) || front.Contains( back.frontPoint + ( Vector3.back * back.scale.z * 0.5f ) ) ) )
+                {
+                    back.position = new Vector3( front.back - ( front.scale.x * 0.6f ) , back.position.y , back.position.z );
+                    back.melee = back.Melee( front );
+                    //back.pushBack = back.PushBack();
+                    //back.Damage();
+                }
+                else if ( back.melee == null )
+                {
+                    bool up = position.z > laneEntity.position.z;
+                    position = new Vector3( position.x , position.y , up ? laneEntity.top + ( scale.z * 0.6f ) : laneEntity.bottom - ( scale.z * 0.6f ) );
+                    changeLane = ChangeLane( up ? -1 : 1 );
+                    Damage();
+                }
             }
         }
+    }
+
+    private IEnumerator Melee( LaneEntity enemy )
+    {
+        float current = position.x;
+        float target = current - 3;
+        float targetTime = Time.time + 1;
+
+        while ( targetTime > Time.time )
+            yield return position = new Vector3( Mathf.Clamp( Mathf.Lerp( current , target , 1f - ( targetTime - Time.time ) ) , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
+
+        targetTime = Time.time + 1;
+
+        while ( targetTime > Time.time )
+            yield return position = new Vector3( Mathf.Clamp( Mathf.Lerp( target , current + 1 , 1f - ( targetTime - Time.time ) ) , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
+
+        if ( overlapping == enemy )
+        {
+            enemy.Damage();
+            enemy.pushAhead = enemy.PushForward();
+        }
+
+        targetTime = Time.time + 1;
+
+        while ( targetTime > Time.time )
+            yield return position = new Vector3( Mathf.Clamp( Mathf.Lerp( current + 1 , current , 1f - ( targetTime - Time.time ) ) , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
+
+        melee = null;
+    }
+
+    private IEnumerator PushForward()
+    {
+        float current = position.x;
+        float target = current + 1;
+        float targetTime = Time.time + 1;
+
+        while ( targetTime > Time.time )
+            yield return position = new Vector3( Mathf.Clamp( Mathf.Lerp( current , target , 1f - ( targetTime - Time.time ) ) , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
+
+        targetTime = Time.time + 1;
+
+        while ( targetTime > Time.time )
+            yield return position = new Vector3( Mathf.Clamp( Mathf.Lerp( target , current , 1f - ( targetTime - Time.time ) ) , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
+
+        pushAhead = null;
     }
 
     private IEnumerator PushBack()
@@ -121,6 +194,16 @@ public class LaneEntity : LaneObject
 
         while ( targetTime > Time.time )
             yield return position = new Vector3( Mathf.Clamp( Mathf.Lerp( current , target , 1f - ( targetTime - Time.time ) ) , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
+
+        if ( this is Hero )
+        {
+            targetTime = Time.time + 1;
+
+            while ( targetTime > Time.time )
+                yield return position = new Vector3( Mathf.Clamp( Mathf.Lerp( target , current , 1f - ( targetTime - Time.time ) ) , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
+        }
+
+        pushBack = null;
     }
 
     public override LaneEntity overlapping
@@ -139,6 +222,7 @@ public class LaneEntity : LaneObject
 
     public int damageValue => Mathf.CeilToInt( defeatValue / ( _healthBar.initialValue - 1 ) );
     public int defeatValue => Mathf.CeilToInt( ( _value * 0.5f ) );
+    public int health => _healthBar.value;
 
     public override float front => rect.xMax;
     public override float back => rect.xMin;
@@ -149,7 +233,6 @@ public class LaneEntity : LaneObject
     protected override float speed => base.speed - lane.speed;
 
     private int _value { get; }
-    private int _health => _healthBar.value;
     private HealthBar _healthBar { get; }
 
     public LaneEntity( string name , float speed , float width , float laneHeightPadding , int health , int value , Lane lane ) : base( "Lane" + name , lane , speed )

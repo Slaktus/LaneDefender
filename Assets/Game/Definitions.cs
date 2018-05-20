@@ -22,6 +22,18 @@ public static class Definitions
     }
 }
 
+public class HeroDefinition : EntityDefinition
+{
+    public Color color { get; }
+    public int health { get; }
+
+    public HeroDefinition( string name , Color color , float width , float laneHeightPadding , int health ) : base( name , width , laneHeightPadding , 0 )
+    {
+        this.color = color;
+        this.health = health;
+    }
+}
+
 public class EnemyDefinition : EntityDefinition
 {
     public Color color { get; }

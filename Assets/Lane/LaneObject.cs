@@ -38,6 +38,8 @@ public abstract class LaneObject
             while ( changeLane.MoveNext() )
                 yield return changeLane.Current;
         }
+
+        changeLane = null;
     }
 
     /// <summary>
@@ -75,7 +77,9 @@ public abstract class LaneObject
     protected GameObject container { get; }
     protected MeshRenderer meshRenderer { get; }
     protected IEnumerator changeLane { get; set; }
+    protected IEnumerator pushAhead { get; set; }
     protected IEnumerator pushBack { get; set; }
+    protected IEnumerator melee { get; set; }
 
     protected virtual float speed { get; }
 

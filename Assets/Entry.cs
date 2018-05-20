@@ -58,6 +58,8 @@ public class Entry : MonoBehaviour
         session.stage.ShowLanes();
         session.conveyor.Show();
 
+        session.stage.LaneBy( 2 ).Add( new Hero( new HeroDefinition( "Hero" , Color.white , 5 , 1 , 3 ) , session.stage.LaneBy( 2 ) ) );
+
         while ( 1 > session.level.progress || session.stage.enemies > 0 )
         {
             session.Update();
