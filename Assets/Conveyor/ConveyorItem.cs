@@ -65,7 +65,7 @@ public class ConveyorItem : MouseObject
 
     public bool held { get; private set; }
     public int level { get; private set; }
-    public Type type { get; }
+    public Definitions.Items type { get; }
 
     private float speed => _conveyor.speed;
     private float limit => bottom + ( height * 0.5f ) + ( ( height + itemSpacing ) * index );
@@ -76,7 +76,7 @@ public class ConveyorItem : MouseObject
     private Conveyor _conveyor { get; }
     private int _maxLevel { get; } = 3;
 
-    public ConveyorItem( Conveyor conveyor , Type type ) : base( "Conveyor" + type.ToString() )
+    public ConveyorItem( Conveyor conveyor , Definitions.Items type ) : base( "Conveyor" + type.ToString() )
     {
         _conveyor = conveyor;
         container.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
@@ -91,20 +91,5 @@ public class ConveyorItem : MouseObject
 
         position = conveyor.top - ( Vector3.forward * height * 0.5f ) + Vector3.up;
         this.type = type;
-    }
-
-    /// <summary>
-    /// All items the conveyor can handle. For mapping
-    /// </summary>
-    public enum Type
-    {
-        LaneUp = 0,
-        LaneDown = 1,
-        Damage = 2,
-        Split = 3,
-        Leap = 4,
-        Count = 5,
-        Part = 6,
-        Wreck = 7
     }
 }

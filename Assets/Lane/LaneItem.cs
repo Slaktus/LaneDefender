@@ -38,7 +38,7 @@ public class LaneItem : LaneObject
 
     public void Split()
     {
-        HeldItem upHeldItem = new HeldItem( new ConveyorItem( lane.stage.conveyor , ConveyorItem.Type.Part ) );
+        HeldItem upHeldItem = new HeldItem( new ConveyorItem( lane.stage.conveyor , Definitions.Items.Part ) );
         LaneItem upItem = new LaneItem( upHeldItem , lane );
         upHeldItem.conveyorItem.Destroy();
         upHeldItem.Destroy();
@@ -46,7 +46,7 @@ public class LaneItem : LaneObject
         upItem.SetPosition( new Vector3( position.x , upItem.position.y , upItem.position.z ) );
         upItem.changeLane = upItem.ChangeLane( -1 );
 
-        HeldItem downHeldItem = new HeldItem( new ConveyorItem( lane.stage.conveyor , ConveyorItem.Type.Part ) );
+        HeldItem downHeldItem = new HeldItem( new ConveyorItem( lane.stage.conveyor , Definitions.Items.Part ) );
         LaneItem downItem = new LaneItem( downHeldItem , lane );
         downHeldItem.conveyorItem.Destroy();
         downHeldItem.Destroy();
@@ -83,7 +83,7 @@ public class LaneItem : LaneObject
         }
     }
 
-    public ConveyorItem.Type type => heldItem != null ? heldItem.conveyorItem.type : ConveyorItem.Type.Wreck;
+    public Definitions.Items type => heldItem != null ? heldItem.conveyorItem.type : Definitions.Items.Wreck;
     public int damage => heldItem != null ? heldItem.conveyorItem.level + 1 : 1;
     public HeldItem heldItem { get; }
 

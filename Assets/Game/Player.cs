@@ -23,24 +23,24 @@ public class Inventory
     public void AddCoins( int value ) => coins += value;
 
     public List<Definitions.Heroes> heroes { get; }
-    public List<ConveyorItem.Type> items { get; }
+    public List<Definitions.Items> items { get; }
     public int coins { get; private set; }
 
     public Inventory()
     {
         heroes = new List<Definitions.Heroes>()
         {
-            Definitions.Heroes.Default ,
+            //Definitions.Heroes.Default ,
             //Definitions.Heroes.Default ,
             //Definitions.Heroes.Default ,
         };
 
-        items = new List<ConveyorItem.Type>()
+        items = new List<Definitions.Items>()
         {
-            ConveyorItem.Type.Leap,
-            ConveyorItem.Type.Damage,
-            ConveyorItem.Type.LaneUp,
-            ConveyorItem.Type.LaneDown,
+            //Definitions.Items.Leap,
+            //Definitions.Items.Damage,
+            //Definitions.Items.LaneUp,
+            //Definitions.Items.LaneDown,
         };
     }
 
@@ -48,6 +48,6 @@ public class Inventory
     {
         coins = inventory.coins;
         heroes = new List<Definitions.Heroes>( inventory.heroes );
-        items = new List<ConveyorItem.Type>( inventory.items );
+        items = new List<Definitions.Items>( inventory.items );
     }
 }

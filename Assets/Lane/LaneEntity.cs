@@ -62,33 +62,33 @@ public class LaneEntity : LaneObject
 
             switch ( laneItem.type )
             {
-                case ConveyorItem.Type.Part:
-                case ConveyorItem.Type.Damage:
+                case Definitions.Items.Part:
+                case Definitions.Items.Damage:
                     Damage( laneItem.damage );
                     pushBack = PushBack();
                     laneItem.Destroy();
                     break;
 
-                case ConveyorItem.Type.Split:
+                case Definitions.Items.Split:
                     Damage( laneItem.damage );
                     pushBack = PushBack();
                     laneItem.Split();
                     laneItem.Destroy();
                     break;
 
-                case ConveyorItem.Type.Leap:
-                case ConveyorItem.Type.Wreck:
+                case Definitions.Items.Leap:
+                case Definitions.Items.Wreck:
                     Damage( laneItem.damage );
                     pushBack = PushBack();
                     laneItem.LeapEntity( this );
                     break;
 
-                case ConveyorItem.Type.LaneDown:
+                case Definitions.Items.LaneDown:
                     changeLane = ChangeLane( laneItem.heldItem.conveyorItem.level + 1 );
                     laneItem.Destroy();
                     break;
 
-                case ConveyorItem.Type.LaneUp:
+                case Definitions.Items.LaneUp:
                     changeLane = ChangeLane( -laneItem.heldItem.conveyorItem.level - 1 );
                     laneItem.Destroy();
                     break;
