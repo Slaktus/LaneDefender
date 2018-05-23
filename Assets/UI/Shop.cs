@@ -7,9 +7,9 @@ public class Shop
 {
     public void Update()
     {
-        //_buyPanel.Update();
-        //_upgradeHeroPanel.Update();
-        //_upgradeItemPanel.Update();
+        _buyPanel.Update();
+        _upgradeHeroPanel.Update();
+        _upgradeItemPanel.Update();
     }
 
     public void Show( Player player )
@@ -184,7 +184,7 @@ public class BuyPanel : Panel
 
 public class UpgradeItemElement : ButtonPanel
 {
-    public UpgradeItemElement( Vector3 localPosition , float width , float height , GameObject parent ) : base( width , height )
+    public UpgradeItemElement( Vector3 localPosition , float width , float height , GameObject parent ) : base( "UpgradeItem" , "Upgrade\nItem" , width , height )
     {
         container.transform.SetParent( parent.transform );
         container.transform.localPosition = localPosition;
@@ -194,7 +194,7 @@ public class UpgradeItemElement : ButtonPanel
 
 public class UpgradeHeroElement : ButtonPanel
 {
-    public UpgradeHeroElement( Vector3 localPosition , float width , float height , GameObject parent ) : base( width , height )
+    public UpgradeHeroElement( Vector3 localPosition , float width , float height , GameObject parent ) : base( "UpgradeHero" , "Upgrade\nHero" , width , height )
     {
         container.transform.SetParent( parent.transform );
         container.transform.localPosition = localPosition;
@@ -204,7 +204,7 @@ public class UpgradeHeroElement : ButtonPanel
 
 public class BuyItemElement : ButtonPanel
 {
-    public BuyItemElement( Vector3 localPosition , float width , float height , GameObject parent ) : base( width , height )
+    public BuyItemElement( Vector3 localPosition , float width , float height , GameObject parent ) : base( "BuyItem" , "Buy\nItem" , width , height )
     {
         container.transform.SetParent( parent.transform );
         container.transform.localPosition = localPosition;
@@ -214,7 +214,7 @@ public class BuyItemElement : ButtonPanel
 
 public class BuyHeroElement : ButtonPanel
 {
-    public BuyHeroElement( Vector3 localPosition , float width , float height , GameObject parent ) : base( width , height )
+    public BuyHeroElement( Vector3 localPosition , float width , float height , GameObject parent ) : base( "BuyHero" , "Buy\nHero" , width , height )
     {
         container.transform.SetParent( parent.transform );
         container.transform.localPosition = localPosition;
@@ -232,9 +232,9 @@ public class ButtonPanel : Panel
 
     public Button button { get; private set; }
 
-    public ButtonPanel ( float width , float height ) : base ( "BuyHero" , width , height )
+    public ButtonPanel ( string name , string label , float width , float height ) : base ( name , width , height )
     {
-        button = new Button( "BuyHero" , width - 1 , height - 1 , container );
+        button = new Button( name , label , width - 1 , height - 1 , container );
     }
 }
 
@@ -314,7 +314,7 @@ public class Button : Element
 
     private bool _hovering { get; set; }
 
-    public Button( string label , float width , float height , GameObject parent , Action Enter = null , Action Stay = null , Action Exit = null ) : base( label + typeof( Button ).Name , width , height )
+    public Button( string name , string label , float width , float height , GameObject parent , Action Enter = null , Action Stay = null , Action Exit = null ) : base( name + typeof( Button ).Name , width , height )
     {
         SetEnter( Enter );
         SetStay( Stay );
