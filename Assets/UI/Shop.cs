@@ -1,14 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class Shop
 {
     public void Update()
     {
-        _buyPanel.Update();
-        _upgradeHeroPanel.Update();
-        _upgradeItemPanel.Update();
+        //_buyPanel.Update();
+        //_upgradeHeroPanel.Update();
+        //_upgradeItemPanel.Update();
     }
 
     public void Show( Player player )
@@ -30,7 +31,12 @@ public class Shop
         _upgradeHeroPanel = new UpgradeHeroPanel( heroesToUpgrade , 10 , 10 , 0.1f , 0.5f , itemsToUpgrade.Count > 0 ? itemsToUpgrade.Count : 1 );
     }
 
-    public void Hide() { }
+    public void Hide()
+    {
+        _buyPanel.Destroy();
+        _upgradeItemPanel.Destroy();
+        _upgradeHeroPanel.Destroy();
+    }
 
     public List<HeroDefinition> availableHeroes { get; }
     public List<ItemDefinition> availableItems { get; }
@@ -62,16 +68,10 @@ public class UpgradeHeroPanel : Panel
     public void Update()
     {
         for ( int i = 0 ; contents.Count > i ; i++ )
-        {
-            BuyItemElement element = contents[ i ] as BuyItemElement;
-            Vector3 mousePos = Camera.main.ScreenToWorldPoint( new Vector3( Input.mousePosition.x , Input.mousePosition.y , Camera.main.transform.position.y ) );
-
-            if ( element.button.Contains( mousePos ) )
-                Debug.Log( "UpgradeHero" );
-        }
+            ( contents[ i ] as BuyItemElement ).button.Update();
     }
 
-    public UpgradeHeroPanel( List<HeroDefinition> heroes , float width , float height , float spacing , float padding , int rows ) : base( width , height )
+    public UpgradeHeroPanel( List<HeroDefinition> heroes , float width , float height , float spacing , float padding , int rows ) : base( "UpgradeHero" , width , height )
     {
         int count = heroes.Count;
         int perRow = Mathf.CeilToInt( count / rows );
@@ -106,16 +106,10 @@ public class UpgradeItemPanel : Panel
     public void Update()
     {
         for ( int i = 0 ; contents.Count > i ; i++ )
-        {
-            UpgradeItemElement element = contents[ i ] as UpgradeItemElement;
-            Vector3 mousePos = Camera.main.ScreenToWorldPoint( new Vector3( Input.mousePosition.x , Input.mousePosition.y , Camera.main.transform.position.y ) );
-
-            if ( element.button.Contains( mousePos ) )
-                Debug.Log( "UpgradeItem" );
-        }
+            ( contents[ i ] as UpgradeItemElement ).button.Update();
     }
 
-    public UpgradeItemPanel( List<ItemDefinition> items , float width , float height , float spacing , float padding , int rows ) : base( width , height )
+    public UpgradeItemPanel( List<ItemDefinition> items , float width , float height , float spacing , float padding , int rows ) : base( "UpgradeItem" , width , height )
     {
         int count = items.Count;
         int perRow = Mathf.CeilToInt( count / rows );
@@ -152,25 +146,13 @@ public class BuyPanel : Panel
         for ( int i = 0 ; contents.Count > i ; i++ )
         {
             if ( contents[ i ] is BuyItemElement )
-            {
-                BuyItemElement element = contents[ i ] as BuyItemElement;
-                Vector3 mousePos = Camera.main.ScreenToWorldPoint( new Vector3( Input.mousePosition.x , Input.mousePosition.y , Camera.main.transform.position.y ) );
-
-                if ( element.button.Contains( mousePos ) )
-                    Debug.Log( "BuyItemElement" );
-            }
+                ( contents[ i ] as BuyItemElement ).button.Update();
             else
-            {
-                BuyHeroElement element = contents[ i ] as BuyHeroElement;
-                Vector3 mousePos = Camera.main.ScreenToWorldPoint( new Vector3( Input.mousePosition.x , Input.mousePosition.y , Camera.main.transform.position.y ) );
-
-                if ( element.button.Contains( mousePos ) )
-                    Debug.Log( "BuyHeroElement" );
-            }
+                ( contents[ i ] as BuyHeroElement ).button.Update();
         }
     }
 
-    public BuyPanel( List<HeroDefinition> heroes , List<ItemDefinition> items , float width , float height , float spacing , float padding , int rows ) : base ( width , height )
+    public BuyPanel( List<HeroDefinition> heroes , List<ItemDefinition> items , float width , float height , float spacing , float padding , int rows ) : base ( "Buy" , width , height )
     {
         int count = heroes.Count + items.Count;
         int perRow = Mathf.CeilToInt( count / rows );
@@ -200,68 +182,81 @@ public class BuyPanel : Panel
     }
 }
 
-public class UpgradeItemElement : Panel
+public class UpgradeItemElement : ButtonPanel
 {
-    public Button button { get; private set; }
-
     public UpgradeItemElement( Vector3 localPosition , float width , float height , GameObject parent ) : base( width , height )
     {
         container.transform.SetParent( parent.transform );
         container.transform.localPosition = localPosition;
-        button = new Button( "Upgrade\nItem" , width - 1 , height - 1 , container );
         quad.material.color = Color.red;
     }
 }
 
-public class UpgradeHeroElement : Panel
+public class UpgradeHeroElement : ButtonPanel
 {
-    public Button button { get; private set; }
-
     public UpgradeHeroElement( Vector3 localPosition , float width , float height , GameObject parent ) : base( width , height )
     {
         container.transform.SetParent( parent.transform );
         container.transform.localPosition = localPosition;
-        button = new Button( "Upgrade\nItem" , width - 1 , height - 1 , container );
         quad.material.color = Color.yellow;
     }
 }
 
-public class BuyItemElement : Panel
+public class BuyItemElement : ButtonPanel
 {
-    public Button button { get; private set; }
-
     public BuyItemElement( Vector3 localPosition , float width , float height , GameObject parent ) : base( width , height )
     {
         container.transform.SetParent( parent.transform );
         container.transform.localPosition = localPosition;
-        button = new Button( "Buy Item" , width - 1 , height - 1 , container );
         quad.material.color = Color.red;
     }
 }
 
-public class BuyHeroElement : Panel
+public class BuyHeroElement : ButtonPanel
 {
-    public Button button { get; private set; }
-
     public BuyHeroElement( Vector3 localPosition , float width , float height , GameObject parent ) : base( width , height )
     {
         container.transform.SetParent( parent.transform );
         container.transform.localPosition = localPosition;
-        button = new Button( "Buy Hero" , width - 1 , height - 1 , container );
         quad.material.color = Color.yellow;
+    }
+}
+
+public class ButtonPanel : Panel
+{
+    public override void Destroy()
+    {
+        button.Destroy();
+        base.Destroy();
+    }
+
+    public Button button { get; private set; }
+
+    public ButtonPanel ( float width , float height ) : base ( "BuyHero" , width , height )
+    {
+        button = new Button( "BuyHero" , width - 1 , height - 1 , container );
     }
 }
 
 public class Panel : Element
 {
+    public override void Destroy()
+    {
+        for ( int i = 0 ; contents.Count > i ; i++ )
+            contents[ i ].Destroy();
+
+        contents.Clear();
+        GameObject.Destroy( container );
+    }
+
     protected List<Element> contents { get; set; }
     protected MeshRenderer quad { get; set; }
 
-    public Panel( float width , float height ) : base( typeof( Button ).Name , width , height )
+    public Panel( string name , float width , float height ) : base( name + typeof( Panel ).Name , width , height )
     {
         this.width = width;
         this.height = height;
-        container = new GameObject( "Panel" );
+        contents = new List<Element>();
 
         quad = GameObject.CreatePrimitive( PrimitiveType.Quad ).GetComponent<MeshRenderer>();
         quad.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
@@ -269,21 +264,62 @@ public class Panel : Element
         quad.transform.SetParent( container.transform );
         quad.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
         quad.transform.localScale = new Vector3( width , height , 1 );
-        quad.transform.name = "PanelBG";
+        quad.transform.name = name + "PanelBG";
     }
 }
 
 public class Button : Element
 {
-    public bool Contains( Vector3 position ) => rect.Contains( new Vector2( position.x , position.z ) );
+    public override void Destroy()
+    {
+        GameObject.Destroy( container );
+    }
+
+    public void Update()
+    {
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint( new Vector3( Input.mousePosition.x , Input.mousePosition.y , Camera.main.transform.position.y ) );
+
+        if ( Contains( mousePos ) )
+        {
+            if ( !_hovering )
+            {
+                Enter();
+                _hovering = true;
+            }
+            else
+                Stay();
+
+        }
+        else if ( _hovering )
+        {
+            Exit();
+            _hovering = false;
+        }
+    }
+
+    public void SetEnter( Action Enter ) => this.Enter = Enter == null ? () => { } : Enter;
+    public void SetStay( Action Stay ) => this.Stay = Stay == null ? () => { } : Stay;
+    public void SetExit( Action Exit ) => this.Exit = Exit == null ? () => { } : Exit;
+
+    private Action Enter { get; set; }
+    private Action Stay { get; set; }
+    private Action Exit { get; set; }
+
+    protected bool Contains( Vector3 position ) => rect.Contains( new Vector2( position.x , position.z ) );
 
     public Rect rect => new Rect( container.transform.position.x - ( width * 0.5f ) , container.transform.position.z - ( height * 0.5f ) , width , height );
     public Vector2 screenPosition => Camera.main.WorldToScreenPoint( new Vector3( container.transform.position.x - ( width * 0.5f ) , container.transform.position.z - ( height * 0.5f ) , Camera.main.transform.position.z ) );
     protected MeshRenderer quad { get; set; }
     protected TextMesh textMesh { get; set; }
 
-    public Button( string label , float width , float height , GameObject parent ) : base( typeof( Button ).Name , width , height )
+    private bool _hovering { get; set; }
+
+    public Button( string label , float width , float height , GameObject parent , Action Enter = null , Action Stay = null , Action Exit = null ) : base( label + typeof( Button ).Name , width , height )
     {
+        SetEnter( Enter );
+        SetStay( Stay );
+        SetExit( Exit );
+
         quad = GameObject.CreatePrimitive( PrimitiveType.Quad ).GetComponent<MeshRenderer>();
         quad.transform.SetParent( container.transform );
         quad.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
@@ -308,6 +344,8 @@ public class Button : Element
 
 public abstract class Element
 {
+    public abstract void Destroy();
+
     protected GameObject container { get; set; }
     protected float width { get; set; }
     protected float height { get; set; }
