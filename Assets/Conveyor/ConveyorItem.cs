@@ -92,4 +92,21 @@ public class ConveyorItem : MouseObject
         position = conveyor.top - ( Vector3.forward * height * 0.5f ) + Vector3.up;
         this.type = type;
     }
+
+    public ConveyorItem( Conveyor conveyor , ItemDefinition definition ) : base( "Conveyor" + definition.type.ToString() )
+    {
+        _conveyor = conveyor;
+        container.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
+
+        quad.transform.localRotation = Quaternion.identity;
+        quad.transform.localScale = new Vector3( width , height , 1 );
+
+        meshRenderer.material.color = Color.white;
+
+        textMesh.transform.localRotation = Quaternion.identity;
+        textMesh.text = type.ToString() + "\n" + level;
+
+        position = conveyor.top - ( Vector3.forward * height * 0.5f ) + Vector3.up;
+        type = definition.type;
+    }
 }

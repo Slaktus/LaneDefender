@@ -38,9 +38,9 @@ public class Inventory
         items = new List<Definitions.Items>()
         {
             //Definitions.Items.Leap,
-            //Definitions.Items.Damage,
-            //Definitions.Items.LaneUp,
-            //Definitions.Items.LaneDown,
+            Definitions.Items.Damage,
+            Definitions.Items.LaneUp,
+            Definitions.Items.LaneDown,
         };
     }
 
