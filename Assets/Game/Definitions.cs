@@ -17,12 +17,12 @@ public static class Definitions
     {
         enemyDefinitions = new List<EnemyDefinition>( ( int ) Enemies.Count )
         {
-            new EnemyDefinition( "Enemy" , Color.white , 5 , 1 , 10 , 3 , 6 )
+            new EnemyDefinition( "Enemy" , 5 , 1 , 6 )
         };
 
         heroDefinitions = new List<HeroDefinition>( ( int ) Heroes.Count )
         {
-            new HeroDefinition( "Hero" , Color.white , 5 , 1 , 3 )
+            new HeroDefinition( "Hero" , 5 , 1 )
         };
 
         itemDefinitions = new List<ItemDefinition>( ( int ) Items.Count )
@@ -62,6 +62,43 @@ public static class Definitions
     }
 }
 
+public class ItemSettings
+{
+    //actually maybe item settings and item definitions are redundant
+    //what do we need?
+    //we need levels etc, data that is individual to an instance
+    //then we need a base, the basic stats of an item
+    //ok sounds like settings is the individual settings
+    //definition is the non-individual stuff
+    //say name, portrait, other stuff like that
+}
+
+public class HeroSettings
+{
+    public Color color { get; }
+    public int health { get; }
+
+    public HeroSettings( Color color , int health )
+    {
+        this.color = color;
+        this.health = health;
+    }
+}
+
+public class EnemySettings
+{
+    public Color color { get; }
+    public float speed { get; }
+    public int health { get; }
+
+    public EnemySettings( Color color , int health , float speed )
+    {
+        this.color = color;
+        this.speed = speed;
+        this.health = health;
+    }
+}
+
 public class ItemDefinition
 {
     public Definitions.Items type { get; }
@@ -75,13 +112,9 @@ public class ItemDefinition
 public class HeroDefinition : EntityDefinition
 {
     public Definitions.Heroes type { get; }
-    public Color color { get; }
-    public int health { get; }
 
-    public HeroDefinition( string name , Color color , float width , float laneHeightPadding , int health ) : base( name , width , laneHeightPadding , 0 )
+    public HeroDefinition( string name , float width , float laneHeightPadding  ) : base( name , width , laneHeightPadding , 0 )
     {
-        this.color = color;
-        this.health = health;
         type = Definitions.Heroes.Default;
     }
 }
@@ -89,15 +122,9 @@ public class HeroDefinition : EntityDefinition
 public class EnemyDefinition : EntityDefinition
 {
     public Definitions.Enemies type { get; }
-    public Color color { get; }
-    public float speed { get; }
-    public int health { get; }
 
-    public EnemyDefinition( string name , Color color , float width , float laneHeightPadding , float speed , int health , int value ) : base( name , width , laneHeightPadding , value )
+    public EnemyDefinition( string name , float width , float laneHeightPadding , int value ) : base( name , width , laneHeightPadding , value )
     {
-        this.color = color;
-        this.speed = speed;
-        this.health = health;
         type = Definitions.Enemies.Default;
     }
 }

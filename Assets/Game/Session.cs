@@ -55,7 +55,7 @@ public class Session
             }
 
             if ( Input.GetMouseButtonDown( 1 ) )
-                hoveredLane?.Add( new Enemy( Definitions.Enemy( Definitions.Enemies.Default ) , hoveredLane ) );
+                hoveredLane?.Add( new Enemy( Definitions.Enemy( Definitions.Enemies.Default ) , new EnemySettings( Color.white , 3 , 8 ) , hoveredLane ) );
 
             //Reset lane colors
             stage.SetLaneColor( Color.black );
@@ -63,10 +63,6 @@ public class Session
             //Proceed if a lane is hovered and an item is held
             if ( heldItem != null && hoveredLane != null )
             {
-                int laneIndex = stage.IndexOf( hoveredLane );
-                int lane1Up = laneIndex - 1 >= 0 ? laneIndex - 1 : -1;
-                int lane1Down = stage.lanes > laneIndex + 1 ? laneIndex + 1 : -1;
-
                 hoveredLane.color = Color.yellow;
 
                 //Proceed if the left mouse button is not held

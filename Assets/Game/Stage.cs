@@ -22,7 +22,7 @@ public class Stage
                         handled = false;
 
                 if ( handled )
-                    lane.Add( new Enemy( ( waveEvent as SpawnEnemyEvent ).enemyDefinition , lane ) );
+                    lane.Add( new Enemy( ( waveEvent as SpawnEnemyEvent ).enemyDefinition , new EnemySettings( Color.white , 3 , 8 ) , lane ) );
 
                 return handled;
 
@@ -31,7 +31,7 @@ public class Stage
         }
     }
 
-    public void AddHero( Lane lane , HeroDefinition heroDefinition ) => lane.Add( new Hero( heroDefinition , lane ) );
+    public void AddHero( Lane lane , HeroDefinition heroDefinition ) => lane.Add( new Hero( heroDefinition , new HeroSettings( Color.white , 3 ) , lane ) );
 
     public void ShowLane( int index ) => LaneBy( index ).Show();
     public void HideLane( int index ) => LaneBy( index ).Hide();

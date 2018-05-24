@@ -14,17 +14,17 @@ public class Shop
 
     public void Show( Player player )
     {
-        List<HeroDefinition> heroesToBuy = new List<HeroDefinition>( availableHeroes.Count - player.inventory.heroes.Count );
-        List<HeroDefinition> heroesToUpgrade = new List<HeroDefinition>( player.inventory.heroes.Count );
+        List<Definitions.Heroes> heroesToBuy = new List<Definitions.Heroes>( availableHeroes.Count - player.inventory.heroes.Count );
+        List<Definitions.Heroes> heroesToUpgrade = new List<Definitions.Heroes>( player.inventory.heroes.Count );
 
         for ( int i = 0 ; availableHeroes.Count > i ; i++ )
-            ( player.inventory.heroes.Contains( availableHeroes[ i ].type ) ? heroesToUpgrade : heroesToBuy ).Add( availableHeroes[ i ] );
+            ( player.inventory.heroes.Contains( availableHeroes[ i ] ) ? heroesToUpgrade : heroesToBuy ).Add( availableHeroes[ i ] );
 
-        List<ItemDefinition> itemsToBuy = new List<ItemDefinition>( availableItems.Count - player.inventory.items.Count );
-        List<ItemDefinition> itemsToUpgrade = new List<ItemDefinition>( player.inventory.items.Count );
+        List<Definitions.Items> itemsToBuy = new List<Definitions.Items>( availableItems.Count - player.inventory.items.Count );
+        List<Definitions.Items> itemsToUpgrade = new List<Definitions.Items>( player.inventory.items.Count );
 
         for ( int i = 0 ; availableItems.Count > i ; i++ )
-            ( player.inventory.items.Contains( availableItems[ i ].type ) ? itemsToUpgrade : itemsToBuy ).Add( availableItems[ i ] );
+            ( player.inventory.items.Contains( availableItems[ i ] ) ? itemsToUpgrade : itemsToBuy ).Add( availableItems[ i ] );
 
         _buyPanel = new BuyPanel( heroesToBuy , itemsToBuy , 20 , 5 , 0.1f , 0.5f , 1 );
         _upgradeItemPanel = new UpgradeItemPanel( itemsToUpgrade , 10 , 10 , 0.1f , 0.5f , itemsToUpgrade.Count > 0 ? itemsToUpgrade.Count : 1 );
@@ -38,8 +38,8 @@ public class Shop
         _upgradeHeroPanel.Destroy();
     }
 
-    public List<HeroDefinition> availableHeroes { get; }
-    public List<ItemDefinition> availableItems { get; }
+    public List<Definitions.Heroes> availableHeroes { get; }
+    public List<Definitions.Items> availableItems { get; }
 
     private BuyPanel _buyPanel { get; set; }
     private UpgradeItemPanel _upgradeItemPanel { get; set; }
@@ -47,31 +47,25 @@ public class Shop
 
     public Shop()
     {
-        availableHeroes = new List<HeroDefinition>()
+        availableHeroes = new List<Definitions.Heroes>()
         {
-            Definitions.Hero( Definitions.Heroes.Default )
+            Definitions.Heroes.Default
         };
 
-        availableItems = new List<ItemDefinition>()
+        availableItems = new List<Definitions.Items>()
         {
-            Definitions.Item( Definitions.Items.Damage ) ,
-            Definitions.Item( Definitions.Items.LaneDown ) ,
-            Definitions.Item( Definitions.Items.LaneUp ) ,
-            Definitions.Item( Definitions.Items.Split ) ,
-            Definitions.Item( Definitions.Items.Leap )
+            Definitions.Items.Damage ,
+            Definitions.Items.LaneDown ,
+            Definitions.Items.LaneUp ,
+            Definitions.Items.Split ,
+            Definitions.Items.Leap
         };
     }
 }
 
 public class UpgradeHeroPanel : Panel
 {
-    public void Update()
-    {
-        for ( int i = 0 ; contents.Count > i ; i++ )
-            ( contents[ i ] as BuyItemElement ).button.Update();
-    }
-
-    public UpgradeHeroPanel( List<HeroDefinition> heroes , float width , float height , float spacing , float padding , int rows ) : base( "UpgradeHero" , width , height )
+    public UpgradeHeroPanel( List<Definitions.Heroes> heroes , float width , float height , float spacing , float padding , int rows ) : base( "UpgradeHero" , width , height )
     {
         int count = heroes.Count;
         int perRow = Mathf.CeilToInt( count / rows );
@@ -103,13 +97,7 @@ public class UpgradeHeroPanel : Panel
 
 public class UpgradeItemPanel : Panel
 {
-    public void Update()
-    {
-        for ( int i = 0 ; contents.Count > i ; i++ )
-            ( contents[ i ] as UpgradeItemElement ).button.Update();
-    }
-
-    public UpgradeItemPanel( List<ItemDefinition> items , float width , float height , float spacing , float padding , int rows ) : base( "UpgradeItem" , width , height )
+    public UpgradeItemPanel( List<Definitions.Items> items , float width , float height , float spacing , float padding , int rows ) : base( "UpgradeItem" , width , height )
     {
         int count = items.Count;
         int perRow = Mathf.CeilToInt( count / rows );
@@ -141,18 +129,13 @@ public class UpgradeItemPanel : Panel
 
 public class BuyPanel : Panel
 {
-    public void Update()
+    public override void Update()
     {
         for ( int i = 0 ; contents.Count > i ; i++ )
-        {
-            if ( contents[ i ] is BuyItemElement )
-                ( contents[ i ] as BuyItemElement ).button.Update();
-            else
-                ( contents[ i ] as BuyHeroElement ).button.Update();
-        }
+            contents[ i ].Update();
     }
 
-    public BuyPanel( List<HeroDefinition> heroes , List<ItemDefinition> items , float width , float height , float spacing , float padding , int rows ) : base ( "Buy" , width , height )
+    public BuyPanel( List<Definitions.Heroes> heroes , List<Definitions.Items> items , float width , float height , float spacing , float padding , int rows ) : base ( "Buy" , width , height )
     {
         int count = heroes.Count + items.Count;
         int perRow = Mathf.CeilToInt( count / rows );
@@ -224,6 +207,12 @@ public class BuyHeroElement : ButtonPanel
 
 public class ButtonPanel : Panel
 {
+    public override void Update()
+    {
+        button.Update();
+        base.Update();
+    }
+
     public override void Destroy()
     {
         button.Destroy();
@@ -240,6 +229,12 @@ public class ButtonPanel : Panel
 
 public class Panel : Element
 {
+    public override void Update()
+    {
+        for ( int i = 0 ; contents.Count > i ; i++ )
+            ( contents[ i ] as UpgradeItemElement ).button.Update();
+    }
+
     public override void Destroy()
     {
         for ( int i = 0 ; contents.Count > i ; i++ )
@@ -275,7 +270,7 @@ public class Button : Element
         GameObject.Destroy( container );
     }
 
-    public void Update()
+    public override void Update()
     {
         Vector3 mousePos = Camera.main.ScreenToWorldPoint( new Vector3( Input.mousePosition.x , Input.mousePosition.y , Camera.main.transform.position.y ) );
 
@@ -344,6 +339,7 @@ public class Button : Element
 
 public abstract class Element
 {
+    public virtual void Update() { }
     public abstract void Destroy();
 
     protected GameObject container { get; set; }
