@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class Player
 {
@@ -20,8 +21,24 @@ public class Player
 
 public class Inventory
 {
+    public ItemSettings Settings( Definitions.Items item ) => itemSettings[ items.IndexOf( item ) ];
+    public HeroSettings Settings( Definitions.Heroes hero ) => heroSettings[ heroes.IndexOf( hero ) ];
     public void AddCoins( int value ) => coins += value;
 
+    public void AddHero( Definitions.Heroes hero )
+    {
+        heroes.Add( hero );
+        heroSettings.Add( new HeroSettings( Color.white , 3 ) );
+    }
+
+    public void AddItem( Definitions.Heroes hero )
+    {
+        heroes.Add( hero );
+        heroSettings.Add( new HeroSettings( Color.white , 3 ) );
+    }
+
+    public List<HeroSettings> heroSettings { get; }
+    public List<ItemSettings> itemSettings { get; }
     public List<Definitions.Heroes> heroes { get; }
     public List<Definitions.Items> items { get; }
     public int coins { get; private set; }
@@ -35,12 +52,20 @@ public class Inventory
             //Definitions.Heroes.Default ,
         };
 
+        heroSettings = new List<HeroSettings>();
+
         items = new List<Definitions.Items>()
         {
-            //Definitions.Items.Leap,
             Definitions.Items.Damage,
             Definitions.Items.LaneUp,
             Definitions.Items.LaneDown,
+        };
+
+        itemSettings = new List<ItemSettings>( items.Count )
+        {
+            new ItemSettings( 0 ) ,
+            new ItemSettings( 0 ) ,
+            new ItemSettings( 0 )
         };
     }
 

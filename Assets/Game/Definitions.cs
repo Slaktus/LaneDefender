@@ -64,13 +64,25 @@ public static class Definitions
 
 public class ItemSettings
 {
-    //actually maybe item settings and item definitions are redundant
-    //what do we need?
-    //we need levels etc, data that is individual to an instance
-    //then we need a base, the basic stats of an item
-    //ok sounds like settings is the individual settings
-    //definition is the non-individual stuff
-    //say name, portrait, other stuff like that
+    public void SetLevel( int level ) => this.level = level;
+
+    public int level { get; private set; }
+    public int damage
+    {
+        get
+        {
+            switch ( level )
+            {
+                default:
+                    return 1;
+            }
+        }
+    }
+
+    public ItemSettings ( int level  )
+    {
+        this.level = level;
+    }
 }
 
 public class HeroSettings

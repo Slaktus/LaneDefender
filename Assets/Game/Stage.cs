@@ -32,7 +32,6 @@ public class Stage
     }
 
     public void AddHero( Lane lane , HeroDefinition heroDefinition ) => lane.Add( new Hero( heroDefinition , new HeroSettings( Color.white , 3 ) , lane ) );
-
     public void ShowLane( int index ) => LaneBy( index ).Show();
     public void HideLane( int index ) => LaneBy( index ).Hide();
 
