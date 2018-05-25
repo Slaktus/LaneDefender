@@ -76,3 +76,38 @@ public class Inventory
         items = new List<Definitions.Items>( inventory.items );
     }
 }
+
+public class ItemSettings
+{
+    public void SetLevel( int level ) => this.level = level;
+
+    public int level { get; private set; }
+    public int damage
+    {
+        get
+        {
+            switch ( level )
+            {
+                default:
+                    return 1;
+            }
+        }
+    }
+
+    public ItemSettings( int level )
+    {
+        this.level = level;
+    }
+}
+
+public class HeroSettings
+{
+    public Color color { get; }
+    public int health { get; }
+
+    public HeroSettings( Color color , int health )
+    {
+        this.color = color;
+        this.health = health;
+    }
+}

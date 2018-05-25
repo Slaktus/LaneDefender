@@ -38,7 +38,7 @@ public class LaneItem : LaneObject
 
     public void Split()
     {
-        HeldItem upHeldItem = new HeldItem( new ConveyorItem( lane.stage.conveyor , Definitions.Items.Part ) );
+        HeldItem upHeldItem = new HeldItem( new ConveyorItem( lane.stage.conveyor , Definitions.Item( Definitions.Items.Part ) , heldItem.conveyorItem.settings ) );
         LaneItem upItem = new LaneItem( upHeldItem , lane );
         upHeldItem.conveyorItem.Destroy();
         upHeldItem.Destroy();
@@ -46,7 +46,7 @@ public class LaneItem : LaneObject
         upItem.SetPosition( new Vector3( position.x , upItem.position.y , upItem.position.z ) );
         upItem.changeLane = upItem.ChangeLane( -1 );
 
-        HeldItem downHeldItem = new HeldItem( new ConveyorItem( lane.stage.conveyor , Definitions.Items.Part ) );
+        HeldItem downHeldItem = new HeldItem( new ConveyorItem( lane.stage.conveyor , Definitions.Item( Definitions.Items.Part ) , heldItem.conveyorItem.settings ) );
         LaneItem downItem = new LaneItem( downHeldItem , lane );
         downHeldItem.conveyorItem.Destroy();
         downHeldItem.Destroy();
@@ -84,7 +84,7 @@ public class LaneItem : LaneObject
     }
 
     public Definitions.Items type => heldItem != null ? heldItem.conveyorItem.type : Definitions.Items.Wreck;
-    public int damage => heldItem != null ? heldItem.conveyorItem.level + 1 : 1;
+    public int damage => heldItem != null ? heldItem.conveyorItem.damage : 1;
     public HeldItem heldItem { get; }
 
     public override float front => rect.xMin;

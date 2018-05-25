@@ -20,7 +20,7 @@ public class Conveyor
             {
                 ItemAt( i + 2 ).Destroy();
                 ItemAt( i + 1 ).Destroy();
-                _conveyorItems[ i ].Upgrade();
+                _conveyorItems[ i ].PowerUp();
             }
 
             //Update the conveyor item
@@ -35,7 +35,10 @@ public class Conveyor
     public float AddItemToConveyor( Inventory inventory )
     {
         if ( _itemLimit > _conveyorItems.Count )
-            _conveyorItems.Add( new ConveyorItem( this , inventory.items[ Random.Range( 0 , inventory.items.Count ) ] ) );
+        {
+            Definitions.Items item = inventory.items[ Random.Range( 0 , inventory.items.Count ) ];
+            _conveyorItems.Add( new ConveyorItem( this , Definitions.Item( item ) , inventory.Settings( item ) ) );
+        }
 
         return Time.time + itemInterval;
     }

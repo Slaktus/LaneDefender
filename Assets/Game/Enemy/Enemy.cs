@@ -9,3 +9,17 @@ public class Enemy : LaneEntity
         color = settings.color;
     }
 }
+
+public class EnemySettings
+{
+    public Color color { get; }
+    public float speed { get; }
+    public int health { get; }
+
+    public EnemySettings( Color color , int health , float speed )
+    {
+        this.color = color;
+        this.speed = speed;
+        this.health = health;
+    }
+}

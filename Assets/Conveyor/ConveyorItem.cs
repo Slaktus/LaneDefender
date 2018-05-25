@@ -23,7 +23,7 @@ public class ConveyorItem : MouseObject
     /// <summary>
     /// Upgrade the item and update the label
     /// </summary>
-    public void Upgrade() => textMesh.text = type.ToString() + "\n" + ++level;
+    public void PowerUp() => textMesh.text = type.ToString() + "\n" + ++power;
 
     /// <summary>
     /// Update the item's position
@@ -63,9 +63,12 @@ public class ConveyorItem : MouseObject
     /// </summary>
     public bool settled => !held && Mathf.Approximately( position.z , limit );
 
+    public ItemSettings settings { get; }
+    public int power { get; private set; }
     public bool held { get; private set; }
-    public int level { get; private set; }
-    public Definitions.Items type { get; }
+    public Definitions.Items type => _definition.type;
+    public int damage => settings.damage;
+    public int level => settings.level;
 
     private float speed => _conveyor.speed;
     private float limit => bottom + ( height * 0.5f ) + ( ( height + itemSpacing ) * index );
@@ -75,10 +78,13 @@ public class ConveyorItem : MouseObject
 
     private Conveyor _conveyor { get; }
     private int _maxLevel { get; } = 3;
+    private ItemDefinition _definition { get; }
 
-    public ConveyorItem( Conveyor conveyor , Definitions.Items type ) : base( "Conveyor" + type.ToString() )
+    public ConveyorItem( Conveyor conveyor , ItemDefinition definition , ItemSettings settings ) : base( "Conveyor" + definition.type.ToString() )
     {
         _conveyor = conveyor;
+        this.settings = settings;
+        _definition = definition;
         container.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
 
         quad.transform.localRotation = Quaternion.identity;
@@ -90,23 +96,5 @@ public class ConveyorItem : MouseObject
         textMesh.text = type.ToString() + "\n" + level;
 
         position = conveyor.top - ( Vector3.forward * height * 0.5f ) + Vector3.up;
-        this.type = type;
-    }
-
-    public ConveyorItem( Conveyor conveyor , ItemDefinition definition ) : base( "Conveyor" + definition.type.ToString() )
-    {
-        _conveyor = conveyor;
-        container.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
-
-        quad.transform.localRotation = Quaternion.identity;
-        quad.transform.localScale = new Vector3( width , height , 1 );
-
-        meshRenderer.material.color = Color.white;
-
-        textMesh.transform.localRotation = Quaternion.identity;
-        textMesh.text = type.ToString() + "\n" + level;
-
-        position = conveyor.top - ( Vector3.forward * height * 0.5f ) + Vector3.up;
-        type = definition.type;
     }
 }
