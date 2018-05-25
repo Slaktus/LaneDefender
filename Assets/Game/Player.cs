@@ -31,10 +31,10 @@ public class Inventory
         heroSettings.Add( new HeroSettings( Color.white , 3 ) );
     }
 
-    public void AddItem( Definitions.Heroes hero )
+    public void AddItem( Definitions.Items hero , int level = 0 )
     {
-        heroes.Add( hero );
-        heroSettings.Add( new HeroSettings( Color.white , 3 ) );
+        items.Add( hero );
+        itemSettings.Add( new ItemSettings( level ) );
     }
 
     public List<HeroSettings> heroSettings { get; }

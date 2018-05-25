@@ -26,7 +26,7 @@ public class Shop
         for ( int i = 0 ; availableItems.Count > i ; i++ )
             ( player.inventory.items.Contains( availableItems[ i ] ) ? itemsToUpgrade : itemsToBuy ).Add( availableItems[ i ] );
 
-        _buyPanel = new BuyPanel( heroesToBuy , itemsToBuy , 20 , 5 , 0.1f , 0.5f , 1 );
+        _buyPanel = new BuyPanel( this , player , heroesToBuy , itemsToBuy , 20 , 5 , 0.1f , 0.5f , 1 );
         _upgradeItemPanel = new UpgradeItemPanel( itemsToUpgrade , 10 , 10 , 0.1f , 0.5f , itemsToUpgrade.Count > 0 ? itemsToUpgrade.Count : 1 );
         _upgradeHeroPanel = new UpgradeHeroPanel( heroesToUpgrade , 10 , 10 , 0.1f , 0.5f , itemsToUpgrade.Count > 0 ? itemsToUpgrade.Count : 1 );
     }
@@ -36,6 +36,12 @@ public class Shop
         _buyPanel.Destroy();
         _upgradeItemPanel.Destroy();
         _upgradeHeroPanel.Destroy();
+    }
+
+    public void Refresh( Player player )
+    {
+        Hide();
+        Show( player );
     }
 
     public List<Definitions.Heroes> availableHeroes { get; }
@@ -135,7 +141,7 @@ public class BuyPanel : Panel
             contents[ i ].Update();
     }
 
-    public BuyPanel( List<Definitions.Heroes> heroes , List<Definitions.Items> items , float width , float height , float spacing , float padding , int rows ) : base ( "Buy" , width , height )
+    public BuyPanel( Shop shop , Player player , List<Definitions.Heroes> heroes , List<Definitions.Items> items , float width , float height , float spacing , float padding , int rows ) : base ( "Buy" , width , height )
     {
         int count = heroes.Count + items.Count;
         int perRow = Mathf.CeilToInt( count / rows );
@@ -149,14 +155,38 @@ public class BuyPanel : Panel
 
         for ( int i = 0 ; count > i ; i++ )
         {
+            int index = i;
+
             if ( x > perRow - 1 )
             {
                 x = 0;
                 y++;
             }
-
+            
             Vector3 localPosition = new Vector3( ( -width * 0.5f ) + ( size.x * x ) + ( size.x * 0.5f ) + ( spacing * x ) + padding , 1 , ( height * 0.5f ) - ( size.y * y ) - ( size.y * 0.5f ) - ( spacing * y ) - padding );
-            contents.Add( i >= heroes.Count ? new BuyItemElement( localPosition , size.x , size.y , container ) as Panel : new BuyHeroElement( localPosition , size.x , size.y , container ) as Panel );
+            contents.Add( i >= heroes.Count 
+                ? new BuyItemElement( localPosition , size.x , size.y , container , 
+                    Enter: ( Button button ) => button.SetColor( Color.green ) ,
+                    Stay: ( Button button ) => 
+                    {
+                        if ( Input.GetMouseButtonDown( 0 ) )
+                        {
+                            player.inventory.AddItem( items[ index - heroes.Count ] );
+                            shop.Refresh( player );
+                        }
+                    } ,
+                    Exit: ( Button button ) => button.SetColor( Color.white ) ) as Panel 
+                : new BuyHeroElement( localPosition , size.x , size.y , container ,
+                    Enter: ( Button button ) => button.SetColor( Color.green ) ,
+                    Stay: ( Button button ) =>
+                    {
+                        if ( Input.GetMouseButtonDown( 0 ) )
+                        {
+                            player.inventory.AddHero( heroes[ index ] );
+                            shop.Refresh( player );
+                        }
+                    } ,
+                    Exit: ( Button button ) => button.SetColor( Color.white ) ) as Panel );
             x++;
         }
 
@@ -187,7 +217,7 @@ public class UpgradeHeroElement : ButtonPanel
 
 public class BuyItemElement : ButtonPanel
 {
-    public BuyItemElement( Vector3 localPosition , float width , float height , GameObject parent ) : base( "BuyItem" , "Buy\nItem" , width , height )
+    public BuyItemElement( Vector3 localPosition , float width , float height , GameObject parent , Action<Button> Enter , Action<Button> Stay , Action<Button> Exit ) : base( "BuyItem" , "Buy\nItem" , width , height , Enter , Stay , Exit )
     {
         container.transform.SetParent( parent.transform );
         container.transform.localPosition = localPosition;
@@ -197,7 +227,7 @@ public class BuyItemElement : ButtonPanel
 
 public class BuyHeroElement : ButtonPanel
 {
-    public BuyHeroElement( Vector3 localPosition , float width , float height , GameObject parent ) : base( "BuyHero" , "Buy\nHero" , width , height )
+    public BuyHeroElement( Vector3 localPosition , float width , float height , GameObject parent , Action<Button> Enter , Action<Button> Stay , Action<Button> Exit ) : base( "BuyHero" , "Buy\nHero" , width , height , Enter , Stay , Exit )
     {
         container.transform.SetParent( parent.transform );
         container.transform.localPosition = localPosition;
@@ -221,9 +251,9 @@ public class ButtonPanel : Panel
 
     public Button button { get; private set; }
 
-    public ButtonPanel ( string name , string label , float width , float height ) : base ( name , width , height )
+    public ButtonPanel ( string name , string label , float width , float height , Action<Button> Enter = null , Action<Button> Stay = null , Action<Button> Exit = null ) : base ( name , width , height )
     {
-        button = new Button( name , label , width - 1 , height - 1 , container );
+        button = new Button( name , label , width - 1 , height - 1 , container , Enter , Stay , Exit );
     }
 }
 
@@ -232,7 +262,7 @@ public class Panel : Element
     public override void Update()
     {
         for ( int i = 0 ; contents.Count > i ; i++ )
-            ( contents[ i ] as UpgradeItemElement ).button.Update();
+            ( contents[ i ] as UpgradeItemElement )?.button?.Update();
     }
 
     public override void Destroy()
@@ -278,27 +308,28 @@ public class Button : Element
         {
             if ( !_hovering )
             {
-                Enter();
+                Enter( this );
                 _hovering = true;
             }
             else
-                Stay();
+                Stay( this );
 
         }
         else if ( _hovering )
         {
-            Exit();
+            Exit( this );
             _hovering = false;
         }
     }
 
-    public void SetEnter( Action Enter ) => this.Enter = Enter == null ? () => { } : Enter;
-    public void SetStay( Action Stay ) => this.Stay = Stay == null ? () => { } : Stay;
-    public void SetExit( Action Exit ) => this.Exit = Exit == null ? () => { } : Exit;
+    public void SetColor( Color color ) => quad.material.color = color;
+    public void SetEnter( Action<Button> Enter ) => this.Enter = Enter == null ? ( Button button ) => { } : Enter;
+    public void SetStay( Action<Button> Stay ) => this.Stay = Stay == null ? ( Button button ) => { } : Stay;
+    public void SetExit( Action<Button> Exit ) => this.Exit = Exit == null ? ( Button button ) => { } : Exit;
 
-    private Action Enter { get; set; }
-    private Action Stay { get; set; }
-    private Action Exit { get; set; }
+    private Action<Button> Enter { get; set; }
+    private Action<Button> Stay { get; set; }
+    private Action<Button> Exit { get; set; }
 
     protected bool Contains( Vector3 position ) => rect.Contains( new Vector2( position.x , position.z ) );
 
@@ -309,7 +340,7 @@ public class Button : Element
 
     private bool _hovering { get; set; }
 
-    public Button( string name , string label , float width , float height , GameObject parent , Action Enter = null , Action Stay = null , Action Exit = null ) : base( name + typeof( Button ).Name , width , height )
+    public Button( string name , string label , float width , float height , GameObject parent , Action<Button> Enter = null , Action<Button> Stay = null , Action<Button> Exit = null ) : base( name + typeof( Button ).Name , width , height )
     {
         SetEnter( Enter );
         SetStay( Stay );

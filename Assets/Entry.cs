@@ -21,15 +21,15 @@ public class Entry : MonoBehaviour
 	void Start()
     {
         instance = this;
-        StartCoroutine( SessionHandler( new Session( new Player() , width: 25 , height: 15 , spacing: 1 , lanes: 5 ) ) );
-        //Player player = new Player();
-        //shop = new Shop();
-        //shop.Show( player );
+        //StartCoroutine( SessionHandler( new Session( new Player() , width: 25 , height: 15 , spacing: 1 , lanes: 5 ) ) );
+        Player player = new Player();
+        shop = new Shop();
+        shop.Show( player );
     }
 
-    //Shop shop;
+    Shop shop;
 
-    //void Update() => shop.Update();
+    void Update() => shop.Update();
 
     public IEnumerator SessionHandler( Session session )
     {
