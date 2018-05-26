@@ -27,8 +27,8 @@ public class Shop
             ( player.inventory.items.Contains( availableItems[ i ] ) ? itemsToUpgrade : itemsToBuy ).Add( availableItems[ i ] );
 
         _buyPanel = new BuyPanel( this , player , heroesToBuy , itemsToBuy , 20 , 5 , 0.1f , 0.5f , 1 );
-        _upgradeItemPanel = new UpgradeItemPanel( itemsToUpgrade , 10 , 10 , 0.1f , 0.5f , itemsToUpgrade.Count > 0 ? itemsToUpgrade.Count : 1 );
-        _upgradeHeroPanel = new UpgradeHeroPanel( heroesToUpgrade , 10 , 10 , 0.1f , 0.5f , itemsToUpgrade.Count > 0 ? itemsToUpgrade.Count : 1 );
+        _upgradeItemPanel = new UpgradeItemPanel( player , itemsToUpgrade , 10 , 10 , 0.1f , 0.5f , itemsToUpgrade.Count > 0 ? itemsToUpgrade.Count : 1 );
+        _upgradeHeroPanel = new UpgradeHeroPanel( player , heroesToUpgrade , 10 , 10 , 0.1f , 0.5f , heroesToUpgrade.Count > 0 ? heroesToUpgrade.Count : 1 );
     }
 
     public void Hide()
@@ -71,7 +71,7 @@ public class Shop
 
 public class UpgradeHeroPanel : Panel
 {
-    public UpgradeHeroPanel( List<Definitions.Heroes> heroes , float width , float height , float spacing , float padding , int rows ) : base( "UpgradeHero" , width , height )
+    public UpgradeHeroPanel( Player player , List<Definitions.Heroes> heroes , float width , float height , float spacing , float padding , int rows ) : base( "UpgradeHero" , width , height )
     {
         int count = heroes.Count;
         int perRow = Mathf.CeilToInt( count / rows );
@@ -92,7 +92,11 @@ public class UpgradeHeroPanel : Panel
             }
 
             Vector3 localPosition = new Vector3( ( -width * 0.5f ) + ( size.x * x ) + ( size.x * 0.5f ) + ( spacing * x ) + padding , 1 , ( height * 0.5f ) - ( size.y * y ) - ( size.y * 0.5f ) - ( spacing * y ) - padding );
-            contents.Add( new UpgradeHeroElement( localPosition , size.x , size.y , container ) );
+            contents.Add( new UpgradeHeroElement( localPosition , size.x , size.y , container , 
+                ( Button button ) => button.SetColor( Color.green ) ,
+                ( Button button ) => { } ,
+                ( Button button ) => button.SetColor( Color.white ) ) );
+
             x++;
         }
 
@@ -103,7 +107,7 @@ public class UpgradeHeroPanel : Panel
 
 public class UpgradeItemPanel : Panel
 {
-    public UpgradeItemPanel( List<Definitions.Items> items , float width , float height , float spacing , float padding , int rows ) : base( "UpgradeItem" , width , height )
+    public UpgradeItemPanel( Player player , List<Definitions.Items> items , float width , float height , float spacing , float padding , int rows ) : base( "UpgradeItem" , width , height )
     {
         int count = items.Count;
         int perRow = Mathf.CeilToInt( count / rows );
@@ -124,7 +128,10 @@ public class UpgradeItemPanel : Panel
             }
 
             Vector3 localPosition = new Vector3( ( -width * 0.5f ) + ( size.x * x ) + ( size.x * 0.5f ) + ( spacing * x ) + padding , 1 , ( height * 0.5f ) - ( size.y * y ) - ( size.y * 0.5f ) - ( spacing * y ) - padding );
-            contents.Add( new UpgradeItemElement( localPosition , size.x , size.y , container ) );
+            contents.Add( new UpgradeItemElement( localPosition , size.x , size.y , container , 
+                ( Button button ) => button.SetColor( Color.green ) ,
+                ( Button button ) => { } ,
+                ( Button button ) => button.SetColor( Color.white ) ) );
             x++;
         }
 
@@ -197,7 +204,7 @@ public class BuyPanel : Panel
 
 public class UpgradeItemElement : ButtonPanel
 {
-    public UpgradeItemElement( Vector3 localPosition , float width , float height , GameObject parent ) : base( "UpgradeItem" , "Upgrade\nItem" , width , height )
+    public UpgradeItemElement( Vector3 localPosition , float width , float height , GameObject parent , Action<Button> Enter = null , Action<Button> Stay = null , Action<Button> Exit = null ) : base( "UpgradeItem" , "Upgrade\nItem" , width , height , Enter , Stay , Exit )
     {
         container.transform.SetParent( parent.transform );
         container.transform.localPosition = localPosition;
@@ -207,7 +214,7 @@ public class UpgradeItemElement : ButtonPanel
 
 public class UpgradeHeroElement : ButtonPanel
 {
-    public UpgradeHeroElement( Vector3 localPosition , float width , float height , GameObject parent ) : base( "UpgradeHero" , "Upgrade\nHero" , width , height )
+    public UpgradeHeroElement( Vector3 localPosition , float width , float height , GameObject parent , Action<Button> Enter = null , Action<Button> Stay = null , Action<Button> Exit = null ) : base( "UpgradeHero" , "Upgrade\nHero" , width , height , Enter , Stay , Exit )
     {
         container.transform.SetParent( parent.transform );
         container.transform.localPosition = localPosition;
@@ -262,7 +269,7 @@ public class Panel : Element
     public override void Update()
     {
         for ( int i = 0 ; contents.Count > i ; i++ )
-            ( contents[ i ] as UpgradeItemElement )?.button?.Update();
+            contents[ i ].Update();
     }
 
     public override void Destroy()
