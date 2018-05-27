@@ -26,9 +26,9 @@ public class Shop
         for ( int i = 0 ; availableItems.Count > i ; i++ )
             ( player.inventory.items.Contains( availableItems[ i ] ) ? itemsToUpgrade : itemsToBuy ).Add( availableItems[ i ] );
 
-        _buyPanel = new BuyPanel( this , player , heroesToBuy , itemsToBuy , 20 , 5 , 0.1f , 0.5f , 1 );
-        _upgradeItemPanel = new UpgradeItemPanel( player , itemsToUpgrade , 10 , 10 , 0.1f , 0.5f , itemsToUpgrade.Count > 0 ? itemsToUpgrade.Count : 1 );
-        _upgradeHeroPanel = new UpgradeHeroPanel( player , heroesToUpgrade , 10 , 10 , 0.1f , 0.5f , heroesToUpgrade.Count > 0 ? heroesToUpgrade.Count : 1 );
+        _buyPanel = new BuyPanel( this , player , heroesToBuy , itemsToBuy , 10 * ( heroesToBuy.Count + itemsToBuy.Count ) , 4 , 0.1f , 0.5f , 1 );
+        _upgradeItemPanel = new UpgradeItemPanel( player , itemsToUpgrade , 10 , 3 * itemsToUpgrade.Count , 0.1f , 0.5f , itemsToUpgrade.Count > 0 ? itemsToUpgrade.Count : 1 );
+        _upgradeHeroPanel = new UpgradeHeroPanel( player , heroesToUpgrade , 10 , 3 * heroesToUpgrade.Count , 0.1f , 0.5f , heroesToUpgrade.Count > 0 ? heroesToUpgrade.Count : 1 );
     }
 
     public void Hide()
@@ -91,10 +91,15 @@ public class UpgradeHeroPanel : Panel
                 y++;
             }
 
+            int index = i;
             Vector3 localPosition = new Vector3( ( -width * 0.5f ) + ( size.x * x ) + ( size.x * 0.5f ) + ( spacing * x ) + padding , 1 , ( height * 0.5f ) - ( size.y * y ) - ( size.y * 0.5f ) - ( spacing * y ) - padding );
             contents.Add( new UpgradeHeroElement( localPosition , size.x , size.y , container , 
                 ( Button button ) => button.SetColor( Color.green ) ,
-                ( Button button ) => { } ,
+                ( Button button ) => 
+                {
+                    if ( Input.GetMouseButtonDown( 0 ) )
+                        player.inventory.Settings( heroes[ index ] ).Upgrade();
+                } ,
                 ( Button button ) => button.SetColor( Color.white ) ) );
 
             x++;
@@ -127,10 +132,15 @@ public class UpgradeItemPanel : Panel
                 y++;
             }
 
+            int index = i;
             Vector3 localPosition = new Vector3( ( -width * 0.5f ) + ( size.x * x ) + ( size.x * 0.5f ) + ( spacing * x ) + padding , 1 , ( height * 0.5f ) - ( size.y * y ) - ( size.y * 0.5f ) - ( spacing * y ) - padding );
             contents.Add( new UpgradeItemElement( localPosition , size.x , size.y , container , 
                 ( Button button ) => button.SetColor( Color.green ) ,
-                ( Button button ) => { } ,
+                ( Button button ) => 
+                {
+                    if ( Input.GetMouseButtonDown( 0 ) )
+                        player.inventory.Settings( items[ index ] ).Upgrade();
+                } ,
                 ( Button button ) => button.SetColor( Color.white ) ) );
             x++;
         }

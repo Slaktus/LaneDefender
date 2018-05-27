@@ -79,6 +79,11 @@ public class Inventory
 
 public class ItemSettings
 {
+    public void Upgrade()
+    {
+        Debug.Log( "Item Upgrade" );
+    }
+
     public void SetLevel( int level ) => this.level = level;
 
     public int level { get; private set; }
@@ -102,6 +107,11 @@ public class ItemSettings
 
 public class HeroSettings
 {
+    public void Upgrade()
+    {
+        Debug.Log( "Item Upgrade" );
+    }
+
     public Color color { get; }
     public int health { get; }
 
