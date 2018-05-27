@@ -21,15 +21,10 @@ public class Entry : MonoBehaviour
 	void Start()
     {
         instance = this;
-        //StartCoroutine( SessionHandler( new Session( new Player() , width: 25 , height: 15 , spacing: 1 , lanes: 5 ) ) );
-        Player player = new Player();
-        shop = new Shop();
-        shop.Show( player );
+        Session( new Player() );
     }
 
-    Shop shop;
-
-    void Update() => shop.Update();
+    void Session( Player player ) => StartCoroutine( SessionHandler( new Session( player , width: 25 , height: 15 , spacing: 1 , lanes: 5 ) ) );
 
     public IEnumerator SessionHandler( Session session )
     {
@@ -79,9 +74,9 @@ public class Entry : MonoBehaviour
         for ( int i = 0 ; session.player.inventory.heroes.Count > i ; i++ )
             session.stage.AddHero( session.stage.LaneBy( start + ( stride * i ) ) , Definitions.Hero( Definitions.Heroes.Default ) );
 
-        while ( 1 > session.level.progress || session.stage.enemies > 0 )
+        while ( 1 > session.level.progress || session.stage.enemies > 0 || session.stage.items > 0 )
         {
-            session.Update();
+            session.Update( 1 > session.level.progress );
             yield return null;
         }
 
@@ -97,6 +92,7 @@ public class Entry : MonoBehaviour
             session.heldItem.Destroy();
         }
 
+        Destroy( session.ground );
         session.conveyor.Destroy();
         session.coinCounter.Destroy();
         session.level.DestroyProgress();
@@ -116,6 +112,18 @@ public class Entry : MonoBehaviour
         //boss battle?
 
         //end of level fanfare
+
+        Shop shop = new Shop();
+        shop.Show( session.player );
+
+        while ( !Input.GetMouseButtonDown( 1 ) )
+        {
+            shop.Update();
+            yield return null;
+        }
+
+        shop.Hide();
+        Session( session.player );
     }
 
     /*

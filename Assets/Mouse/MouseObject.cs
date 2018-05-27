@@ -17,7 +17,7 @@ public abstract class MouseObject
 
     public MouseObject( string name )
     {
-        container = new GameObject( "Held" + name );
+        container = new GameObject( name );
         quad = GameObject.CreatePrimitive( PrimitiveType.Quad );
         quad.transform.SetParent( container.transform );
         meshRenderer = quad.GetComponent<MeshRenderer>();

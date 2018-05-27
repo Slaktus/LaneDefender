@@ -93,7 +93,7 @@ public class UpgradeHeroPanel : Panel
 
             int index = i;
             Vector3 localPosition = new Vector3( ( -width * 0.5f ) + ( size.x * x ) + ( size.x * 0.5f ) + ( spacing * x ) + padding , 1 , ( height * 0.5f ) - ( size.y * y ) - ( size.y * 0.5f ) - ( spacing * y ) - padding );
-            contents.Add( new UpgradeHeroElement( localPosition , size.x , size.y , container , 
+            contents.Add(  new UpgradeHeroElement( heroes[ i ].ToString() , localPosition , size.x , size.y , container , 
                 ( Button button ) => button.SetColor( Color.green ) ,
                 ( Button button ) => 
                 {
@@ -134,7 +134,7 @@ public class UpgradeItemPanel : Panel
 
             int index = i;
             Vector3 localPosition = new Vector3( ( -width * 0.5f ) + ( size.x * x ) + ( size.x * 0.5f ) + ( spacing * x ) + padding , 1 , ( height * 0.5f ) - ( size.y * y ) - ( size.y * 0.5f ) - ( spacing * y ) - padding );
-            contents.Add( new UpgradeItemElement( localPosition , size.x , size.y , container , 
+            contents.Add( new UpgradeItemElement( items[ i ].ToString() , localPosition , size.x , size.y , container , 
                 ( Button button ) => button.SetColor( Color.green ) ,
                 ( Button button ) => 
                 {
@@ -182,7 +182,7 @@ public class BuyPanel : Panel
             
             Vector3 localPosition = new Vector3( ( -width * 0.5f ) + ( size.x * x ) + ( size.x * 0.5f ) + ( spacing * x ) + padding , 1 , ( height * 0.5f ) - ( size.y * y ) - ( size.y * 0.5f ) - ( spacing * y ) - padding );
             contents.Add( i >= heroes.Count 
-                ? new BuyItemElement( localPosition , size.x , size.y , container , 
+                ? new BuyItemElement( items[ index - heroes.Count ].ToString() , localPosition , size.x , size.y , container , 
                     Enter: ( Button button ) => button.SetColor( Color.green ) ,
                     Stay: ( Button button ) => 
                     {
@@ -193,7 +193,7 @@ public class BuyPanel : Panel
                         }
                     } ,
                     Exit: ( Button button ) => button.SetColor( Color.white ) ) as Panel 
-                : new BuyHeroElement( localPosition , size.x , size.y , container ,
+                : new BuyHeroElement( heroes[ index ].ToString() , localPosition , size.x , size.y , container ,
                     Enter: ( Button button ) => button.SetColor( Color.green ) ,
                     Stay: ( Button button ) =>
                     {
@@ -214,7 +214,7 @@ public class BuyPanel : Panel
 
 public class UpgradeItemElement : ButtonPanel
 {
-    public UpgradeItemElement( Vector3 localPosition , float width , float height , GameObject parent , Action<Button> Enter = null , Action<Button> Stay = null , Action<Button> Exit = null ) : base( "UpgradeItem" , "Upgrade\nItem" , width , height , Enter , Stay , Exit )
+    public UpgradeItemElement( string name , Vector3 localPosition , float width , float height , GameObject parent , Action<Button> Enter = null , Action<Button> Stay = null , Action<Button> Exit = null ) : base( "Upgrade" + name , "Upgrade\n" + name , width , height , Enter , Stay , Exit )
     {
         container.transform.SetParent( parent.transform );
         container.transform.localPosition = localPosition;
@@ -224,7 +224,7 @@ public class UpgradeItemElement : ButtonPanel
 
 public class UpgradeHeroElement : ButtonPanel
 {
-    public UpgradeHeroElement( Vector3 localPosition , float width , float height , GameObject parent , Action<Button> Enter = null , Action<Button> Stay = null , Action<Button> Exit = null ) : base( "UpgradeHero" , "Upgrade\nHero" , width , height , Enter , Stay , Exit )
+    public UpgradeHeroElement( string name , Vector3 localPosition , float width , float height , GameObject parent , Action<Button> Enter = null , Action<Button> Stay = null , Action<Button> Exit = null ) : base( "Upgrade" + name , "Upgrade\n" + name , width , height , Enter , Stay , Exit )
     {
         container.transform.SetParent( parent.transform );
         container.transform.localPosition = localPosition;
@@ -234,7 +234,7 @@ public class UpgradeHeroElement : ButtonPanel
 
 public class BuyItemElement : ButtonPanel
 {
-    public BuyItemElement( Vector3 localPosition , float width , float height , GameObject parent , Action<Button> Enter , Action<Button> Stay , Action<Button> Exit ) : base( "BuyItem" , "Buy\nItem" , width , height , Enter , Stay , Exit )
+    public BuyItemElement( string name , Vector3 localPosition , float width , float height , GameObject parent , Action<Button> Enter , Action<Button> Stay , Action<Button> Exit ) : base( "Buy" + name , "Buy\n" + name , width , height , Enter , Stay , Exit )
     {
         container.transform.SetParent( parent.transform );
         container.transform.localPosition = localPosition;
@@ -244,7 +244,7 @@ public class BuyItemElement : ButtonPanel
 
 public class BuyHeroElement : ButtonPanel
 {
-    public BuyHeroElement( Vector3 localPosition , float width , float height , GameObject parent , Action<Button> Enter , Action<Button> Stay , Action<Button> Exit ) : base( "BuyHero" , "Buy\nHero" , width , height , Enter , Stay , Exit )
+    public BuyHeroElement( string name , Vector3 localPosition , float width , float height , GameObject parent , Action<Button> Enter , Action<Button> Stay , Action<Button> Exit ) : base( "Buy" + name , "Buy\n" + name , width , height , Enter , Stay , Exit )
     {
         container.transform.SetParent( parent.transform );
         container.transform.localPosition = localPosition;

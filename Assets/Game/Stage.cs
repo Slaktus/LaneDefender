@@ -123,6 +123,19 @@ public class Stage
         }
     }
 
+    public int items
+    {
+        get
+        {
+            int count = 0;
+
+            for ( int i = 0 ; lanes > i ; i++ )
+                count += _lanes[ i ].Count<LaneItem>();
+
+            return count;
+        }
+    }
+
     public int lanes => _lanes.Count;
     public float laneSpacing { get; private set; }
     public Conveyor conveyor { get; private set; }

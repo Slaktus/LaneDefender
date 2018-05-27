@@ -9,7 +9,7 @@ public class Session
     /// <summary>
     /// Updates the session by fetching data and sharing it with the game handlers
     /// </summary>
-    public void Update()
+    public void Update( bool addConveyorItems )
     {
         coinCounter.SetCounterValue( player.inventory.coins );
 
@@ -106,7 +106,7 @@ public class Session
         level.Update();
 
         //Proceed if the item spawn interval has elapsed, and add a new item to the conveyor belt
-        if ( Time.time > itemTime )
+        if ( Time.time > itemTime && addConveyorItems )
             itemTime = conveyor.AddItemToConveyor( player.inventory );
     }
 
@@ -132,7 +132,7 @@ public class Session
     /// <summary>
     /// Ground plane GameObject. Has a BoxCollider attached
     /// </summary>
-    private GameObject ground { get; }
+    public GameObject ground { get; }
 
     /// <summary>
     /// Last time an item was added to the conveyor

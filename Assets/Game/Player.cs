@@ -79,12 +79,7 @@ public class Inventory
 
 public class ItemSettings
 {
-    public void Upgrade()
-    {
-        Debug.Log( "Item Upgrade" );
-    }
-
-    public void SetLevel( int level ) => this.level = level;
+    public void Upgrade() => level++;
 
     public int level { get; private set; }
     public int damage
@@ -107,17 +102,26 @@ public class ItemSettings
 
 public class HeroSettings
 {
-    public void Upgrade()
+    public void Upgrade() => level++;
+
+    public int health
     {
-        Debug.Log( "Item Upgrade" );
+        get
+        {
+            switch ( level )
+            {
+                default:
+                    return 3;
+            }
+        }
     }
 
     public Color color { get; }
-    public int health { get; }
+    public int level { get; private set; }
 
-    public HeroSettings( Color color , int health )
+    public HeroSettings( Color color , int level = 0 )
     {
         this.color = color;
-        this.health = health;
+        this.level = level;
     }
 }
