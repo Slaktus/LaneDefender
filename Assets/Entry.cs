@@ -18,12 +18,16 @@ public class Entry : MonoBehaviour
     /// Start is a special MonoBehaviour method that gets called on the frame the GameObject the MonoBehaviour is attached to gets added to the scene
     /// In this case, the Entry MonoBehaviour is attached to an existing scene object, which is added when the scene is loaded
     /// </summary>
-	void Start()
+	void Awake()
     {
         instance = this;
         //StartSession( new Player() );
-        WaveEditor waveEditor = new WaveEditor();
+        waveEditor = new WaveEditor();
     }
+
+    WaveEditor waveEditor;
+
+    private void Update() => waveEditor.Update();
 
     void StartSession( Player player ) => StartCoroutine( SessionHandler( new Session( player , width: 25 , height: 15 , spacing: 1 , lanes: 5 ) ) );
 

@@ -291,6 +291,24 @@ public class Panel : Element
         GameObject.Destroy( container );
     }
 
+    public void Add<T>( T element ) where T : Element => Add( element as Element );
+    public void Remove<T>( T element ) where T : Element => Remove( element as Element );
+
+    public void Add( Element element ) => contents.Add( element );
+    public void Remove( Element element ) => contents.Remove( element );
+
+    public void Add<T>( List<T> elements ) where T : Element
+    {
+        for ( int i = 0 ; elements.Count > i ; i++ )
+            Add( elements[ i ] );
+    }
+
+    public void Remove<T>( List<T> elements ) where T : Element
+    {
+        for ( int i = 0 ; elements.Count > i ; i++ )
+            Remove( elements[ i ] );
+    }
+
     protected List<Element> contents { get; set; }
     protected MeshRenderer quad { get; set; }
 

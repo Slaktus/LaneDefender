@@ -4,5 +4,5 @@ using UnityEngine;
 
 public class WaveSet : ScriptableObject
 {
-    public List<WaveDefinition> waveDefinitions;
+    public List<WaveDefinition> waveDefinitions = new List<WaveDefinition>();
 }
