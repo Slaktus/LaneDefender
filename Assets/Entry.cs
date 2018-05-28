@@ -21,10 +21,11 @@ public class Entry : MonoBehaviour
 	void Start()
     {
         instance = this;
-        Session( new Player() );
+        //StartSession( new Player() );
+        WaveEditor waveEditor = new WaveEditor();
     }
 
-    void Session( Player player ) => StartCoroutine( SessionHandler( new Session( player , width: 25 , height: 15 , spacing: 1 , lanes: 5 ) ) );
+    void StartSession( Player player ) => StartCoroutine( SessionHandler( new Session( player , width: 25 , height: 15 , spacing: 1 , lanes: 5 ) ) );
 
     public IEnumerator SessionHandler( Session session )
     {
@@ -123,7 +124,7 @@ public class Entry : MonoBehaviour
         }
 
         shop.Hide();
-        Session( session.player );
+        StartSession( session.player );
     }
 
     /*
@@ -134,8 +135,7 @@ public class Entry : MonoBehaviour
     void Update() => session.Update();
     */
     /// <summary>
-    /// Singleton-ish instance reference. Useful for accessing assets
+    /// Singleton-ish self-reference. Useful for accessing assets
     /// </summary>
     public static Entry instance { get; private set; }
 }
-

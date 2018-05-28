@@ -9,21 +9,19 @@ public class Hero : LaneEntity
     /// </summary>
     public override IEnumerator Update()
     {
-        bool move = true;
-
         while ( container != null )
         {
             if ( overlap )
                 Interaction( overlapping );
 
             if ( pushBack != null )
-                move = !pushBack.MoveNext();
+                pushBack.MoveNext();
 
             if ( changeLane != null )
-                move = !changeLane.MoveNext();
+                changeLane.MoveNext();
 
             if ( pushAhead != null )
-                move = !pushAhead.MoveNext();
+                pushAhead.MoveNext();
 
             bool destroy = 0 >= health;
 
