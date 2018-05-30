@@ -8,7 +8,7 @@ public class WaveEditor
 {
     public void Update()
     {
-        waveSetPanel.Update();
+        waveSetLayout.Update();
     }
 
     public void Load() => waveData = AssetDatabase.LoadAssetAtPath<WaveData>( waveDataPath + "WaveData.asset" );
@@ -46,11 +46,11 @@ public class WaveEditor
             for ( int i = 0 ; waveData.waveSets.Count > i ; i++ )
                 buttons.Add( new Button( "WaveSet" , "Wave Set" , 10 , 3 , waveSetContainer ) );
 
-        waveSetPanel = new Panel( "WaveSetButtons" , 10 , 3 * buttons.Count );
-        waveSetPanel.Add( buttons );
+        waveSetLayout = new Layout( "WaveSetButtons" , 10 , 3 * buttons.Count , 1 , 0.1f , 1 );
+        waveSetLayout.Add( buttons );
     }
 
-    private void HideWaveSets() => waveSetPanel.Destroy();
+    private void HideWaveSets() => waveSetLayout.Destroy();
 
     private void ShowWaveDefinitions( List<WaveDefinition> waveDefinitions )
     {
@@ -66,7 +66,7 @@ public class WaveEditor
 
     public GameObject container { get; }
     public WaveData waveData { get; private set; }
-    public Panel waveSetPanel { get; private set; }
+    public Layout waveSetLayout { get; private set; }
     public GameObject waveSetContainer { get; private set; }
     private const string waveDataPath = "Assets/Data/Waves/";
 
