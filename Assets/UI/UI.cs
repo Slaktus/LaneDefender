@@ -161,6 +161,7 @@ public class Layout : Panel
             Refresh();
     }
 
+    public Vector3 position => container.transform.position;
     public float padding { get; protected set; }
     public float spacing { get; protected set; }
     public int rows { get; protected set; }

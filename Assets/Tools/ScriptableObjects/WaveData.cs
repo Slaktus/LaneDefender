@@ -5,7 +5,7 @@ using UnityEditor;
 
 public class WaveData : ScriptableObject
 {
-    public void Add()
+    public void AddWaveSet()
     {
         WaveSet waveSet = ScriptableObject.CreateInstance<WaveSet>();
         waveSets.Add( waveSet );
