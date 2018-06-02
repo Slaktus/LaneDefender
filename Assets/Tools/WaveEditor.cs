@@ -28,7 +28,17 @@ public class WaveEditor
             stage.SetLaneColor( Color.black );
 
             if ( hoveredLane != null )
+            {
                 hoveredLane.color = Color.yellow;
+
+                if ( Input.GetMouseButtonDown( 0 ) )
+                {
+                    int index = stage.IndexOf( hoveredLane );
+                    WaveEventDefinition waveEventDefinition = ScriptableObject.CreateInstance<WaveEventDefinition>();
+                    waveEventDefinition.Initialize( 0 , index , WaveEvent.Type.SpawnEnemy );
+                    selectedWaveDefinition.AddWaveEvent( waveEventDefinition );
+                }
+            }
         }
 
         stage?.Update();
@@ -128,6 +138,23 @@ public class WaveEditor
                                 laneCount: 5 ,
                                 conveyor: null ,
                                 player: new Player() );
+
+                            waveEventLayouts = new List<Layout>();
+                            List<List<Button>> waveEventButtons = new List<List<Button>>();
+
+                            for ( int j = 0 ; stage.lanes > j ; j++ )
+                                waveEventButtons.Add( new List<Button>() );
+
+                            for ( int j = 0 ; selectedWaveDefinition.waveEvents.Count > j ; j++ )
+                                waveEventButtons[ selectedWaveDefinition.waveEvents[ j ].lane ].Add( new Button( "WaveEvent" + j.ToString() , j.ToString() , 1 , 1 , container ) );
+
+                            for ( int j = 0 ; waveEventButtons.Count > j ; j++ )
+                            {
+                                Layout layout = new Layout( "WaveEventLayout" , waveEventButtons[ j ].Count , 1 , 0 , 0.1f , 1 );
+                                layout.SetLocalPosition( stage.LaneBy( j ).start );
+                                layout.Add( waveEventButtons[ j ] );
+                                waveEventLayouts.Add( layout );
+                            }
                         }
                     } ,
                     Exit: ( Button button ) => button.SetColor( Color.white ) ) );
@@ -138,9 +165,11 @@ public class WaveEditor
         waveDefinitionLayout.Add( buttons , true );
     }
 
+    List<Layout> waveEventLayouts { get; set; }
 
     private void HideWaveDefinitions() => waveDefinitionLayout?.Destroy();
 
+    public Camera camera { get; }
     public GameObject container { get; }
     public Stage stage { get; private set; }
     public WaveData waveData { get; private set; }
@@ -149,9 +178,9 @@ public class WaveEditor
 
     public WaveSet selectedWaveSet { get; private set; }
     public WaveDefinition selectedWaveDefinition { get; private set; }
+
     public GameObject waveSetContainer { get; private set; }
     public GameObject waveDefinitionContainer { get; private set; }
-    public Camera camera { get; }
 
     private const string waveDataPath = "Assets/Data/Waves/";
 
