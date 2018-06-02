@@ -110,6 +110,30 @@ public class Session
             itemTime = conveyor.AddItemToConveyor( player.inventory );
     }
 
+    public void Destroy()
+    {
+        stage.Destroy();
+        coinCounter.Destroy();
+        level.DestroyProgress();
+        GameObject.Destroy( ground );
+    }
+
+    public void Show()
+    {
+        level.ShowProgress();
+        coinCounter.Show();
+        stage.ShowLanes();
+        conveyor.Show();
+    }
+
+    public void Hide()
+    {
+        level.HideProgress();
+        coinCounter.Hide();
+        stage.HideLanes();
+        conveyor.Hide();
+    }
+
     /// <summary>
     /// Level holds the lanes and methods for operating on them
     /// </summary>
@@ -132,7 +156,7 @@ public class Session
     /// <summary>
     /// Ground plane GameObject. Has a BoxCollider attached
     /// </summary>
-    public GameObject ground { get; }
+    public GameObject ground { get; } //probably wanna move this to stage to avoid duplication
 
     /// <summary>
     /// Last time an item was added to the conveyor

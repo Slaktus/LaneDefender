@@ -37,10 +37,7 @@ public class Entry : MonoBehaviour
 
     public IEnumerator SessionHandler( Session session )
     {
-        session.level.HideProgress();
-        session.coinCounter.Hide();
-        session.stage.HideLanes();
-        session.conveyor.Hide();
+        session.Hide();
 
         GameObject quad = GameObject.CreatePrimitive( PrimitiveType.Quad );
         quad.transform.rotation = Quaternion.Euler( 90 , 0 , 0 );
@@ -64,10 +61,7 @@ public class Entry : MonoBehaviour
 
         quad.SetActive( false );
         textMesh.gameObject.SetActive( false );
-        session.level.ShowProgress();
-        session.coinCounter.Show();
-        session.stage.ShowLanes();
-        session.conveyor.Show();
+        session.Show();
 
         int heroCount = session.player.inventory.heroes.Count;
         int start = heroCount == 1
@@ -101,10 +95,7 @@ public class Entry : MonoBehaviour
             session.heldItem.Destroy();
         }
 
-        Destroy( session.ground );
-        session.conveyor.Destroy();
-        session.coinCounter.Destroy();
-        session.level.DestroyProgress();
+        session.Destroy();
 
         textMesh.text = "STOP";
         wait = Time.time + 3;

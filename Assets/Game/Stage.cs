@@ -69,9 +69,14 @@ public class Stage
         }
     }
 
+    public void Destroy()
+    {
+        DestroyLanes();
+        conveyor?.Destroy();
+    }
+
     /// <summary>
     /// Updates all lanes
-    /// Should strictly speaking be an event, but right now this is safe
     /// </summary>
     public void Update() => Updater();
 

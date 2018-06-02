@@ -48,12 +48,14 @@ public class SpawnEnemyEvent : WaveEvent
 
 public abstract class WaveEvent
 {
+    public float entryPoint { get; }
     public float delay { get; }
     public Type type { get; }
     public int lane { get; }
 
-    public WaveEvent( float delay , int lane , Type type )
+    public WaveEvent( float delay , int lane , Type type , float entryPoint = 0 )
     {
+        this.entryPoint = entryPoint;
         this.delay = delay;
         this.lane = lane;
         this.type = type;
