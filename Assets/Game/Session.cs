@@ -115,7 +115,6 @@ public class Session
         stage.Destroy();
         coinCounter.Destroy();
         level.DestroyProgress();
-        GameObject.Destroy( ground );
     }
 
     public void Show()
@@ -154,11 +153,6 @@ public class Session
     private Camera camera => Camera.main;
 
     /// <summary>
-    /// Ground plane GameObject. Has a BoxCollider attached
-    /// </summary>
-    public GameObject ground { get; } //probably wanna move this to stage to avoid duplication
-
-    /// <summary>
     /// Last time an item was added to the conveyor
     /// </summary>
     private float itemTime { get; set; }
@@ -174,9 +168,6 @@ public class Session
     {
         this.player = player;
 
-        //Cube primitives have a mesh filter, mesh renderer and box collider already attached
-        ground = GameObject.CreatePrimitive( PrimitiveType.Cube );
-
         conveyor = new Conveyor(
             speed: 5 ,
             width: 5 ,
@@ -190,7 +181,7 @@ public class Session
             speed: 5 ,
             width: width ,
             height: height ,
-            laneSpacing: spacing ,
+            spacing: spacing ,
             laneCount: lanes ,
             conveyor: conveyor ,
             player: player );
@@ -213,18 +204,5 @@ public class Session
         level.Add( wave2 );
 
         coinCounter = new CoinCounter();
-
-        //Project the corners of the screen to the ground plane to find out how large the ground plane needs to be to fill the camera's field of view
-        Vector3 bottomLeft = camera.ScreenToWorldPoint( new Vector3( 0 , 0 , camera.transform.position.y ) );
-        Vector3 topRight = camera.ScreenToWorldPoint( new Vector3( Screen.width , Screen.height , camera.transform.position.y ) );
-
-        //Transforms give GameObjects' positions, rotations and scales
-        ground.transform.localScale = new Vector3( topRight.x - bottomLeft.x , 1 , topRight.z - bottomLeft.z );
-        ground.transform.position = new Vector3( width * 0.5f , -1 , ( -height * 0.5f ) - spacing * 0.5f );
-        ground.name = "Ground";
-
-        //Disable the ground mesh renderer -- we don't want to see the cube
-        //GetComponent lets us fetch references to components attached to GameObjects in a scene
-        ground.GetComponent<MeshRenderer>().enabled = false;
     }
 }

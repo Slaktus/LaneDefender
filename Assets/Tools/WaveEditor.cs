@@ -124,7 +124,7 @@ public class WaveEditor
                                 speed: 5 ,
                                 width: 25 ,
                                 height: 15 ,
-                                laneSpacing: 1 ,
+                                spacing: 1 ,
                                 laneCount: 5 ,
                                 conveyor: null ,
                                 player: new Player() );
@@ -141,9 +141,8 @@ public class WaveEditor
 
     private void HideWaveDefinitions() => waveDefinitionLayout?.Destroy();
 
-    public Stage stage { get; private set; }
-    public GameObject ground { get; }
     public GameObject container { get; }
+    public Stage stage { get; private set; }
     public WaveData waveData { get; private set; }
     public Layout waveSetLayout { get; private set; }
     public Layout waveDefinitionLayout { get; private set; }
@@ -172,20 +171,5 @@ public class WaveEditor
             Create();
 
         ShowWaveSets();
-
-        ground = GameObject.CreatePrimitive( PrimitiveType.Cube );
-
-        //Project the corners of the screen to the ground plane to find out how large the ground plane needs to be to fill the camera's field of view
-        Vector3 bottomLeft = camera.ScreenToWorldPoint( new Vector3( 0 , 0 , camera.transform.position.y ) );
-        Vector3 topRight = camera.ScreenToWorldPoint( new Vector3( Screen.width , Screen.height , camera.transform.position.y ) );
-
-        //Transforms give GameObjects' positions, rotations and scales
-        ground.transform.localScale = new Vector3( topRight.x - bottomLeft.x , 1 , topRight.z - bottomLeft.z );
-        ground.transform.position = new Vector3( 25 * 0.5f , -1 , ( -15 * 0.5f ) - 1 * 0.5f );
-        ground.name = "Ground";
-
-        //Disable the ground mesh renderer -- we don't want to see the cube
-        //GetComponent lets us fetch references to components attached to GameObjects in a scene
-        ground.GetComponent<MeshRenderer>().enabled = false;
     }
 }

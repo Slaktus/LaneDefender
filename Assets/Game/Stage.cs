@@ -73,6 +73,7 @@ public class Stage
     {
         DestroyLanes();
         conveyor?.Destroy();
+        GameObject.Destroy( ground );
     }
 
     /// <summary>
@@ -150,12 +151,17 @@ public class Stage
     private List<Lane> _lanes { get; }
     private event Action Updater;
 
-    public Stage( float speed , float width , float height , float laneSpacing , int laneCount , Conveyor conveyor , Player player )
+    /// <summary>
+    /// Ground plane GameObject. Has a BoxCollider attached
+    /// </summary>
+    public GameObject ground { get; }
+
+    public Stage( float speed , float width , float height , float spacing , int laneCount , Conveyor conveyor , Player player )
     {
         _player = player;
         this.speed = speed;
         this.conveyor = conveyor;
-        this.laneSpacing = laneSpacing;
+        this.laneSpacing = spacing;
         float laneHeight = height / laneCount;
         _lanes = new List<Lane>( laneCount );
 
@@ -163,7 +169,7 @@ public class Stage
         {
             Lane lane = new Lane(
                    stage: this ,
-                   depth: ( i * ( laneHeight + laneSpacing ) ) + ( laneHeight * 0.5f ) ,
+                   depth: ( i * ( laneHeight + spacing ) ) + ( laneHeight * 0.5f ) ,
                    width: width ,
                    height: laneHeight ,
                    name: "Lane" + i );
@@ -171,5 +177,21 @@ public class Stage
             _lanes.Add( lane );
             Updater += lane.Update;
         }
+
+        //Cube primitives have a mesh filter, mesh renderer and box collider already attached
+        ground = GameObject.CreatePrimitive( PrimitiveType.Cube );
+
+        //Project the corners of the screen to the ground plane to find out how large the ground plane needs to be to fill the camera's field of view
+        Vector3 bottomLeft = Camera.main.ScreenToWorldPoint( new Vector3( 0 , 0 , Camera.main.transform.position.y ) );
+        Vector3 topRight = Camera.main.ScreenToWorldPoint( new Vector3( Screen.width , Screen.height , Camera.main.transform.position.y ) );
+
+        //Transforms give GameObjects' positions, rotations and scales
+        ground.transform.localScale = new Vector3( topRight.x - bottomLeft.x , 1 , topRight.z - bottomLeft.z );
+        ground.transform.position = new Vector3( width * 0.5f , -1 , ( -height * 0.5f ) - spacing * 0.5f );
+        ground.name = "Ground";
+
+        //Disable the ground mesh renderer -- we don't want to see the cube
+        //GetComponent lets us fetch references to components attached to GameObjects in a scene
+        ground.GetComponent<MeshRenderer>().enabled = false;
     }
 }
