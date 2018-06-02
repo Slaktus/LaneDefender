@@ -44,6 +44,9 @@ public class WaveEditor
         stage?.Update();
         waveSetLayout?.Update();
         waveDefinitionLayout?.Update();
+
+        for ( int i = 0 ; waveEventLayouts.Count > i ; i++ )
+            waveEventLayouts[ i ].Update();
     }
 
     public void Load() => waveData = AssetDatabase.LoadAssetAtPath<WaveData>( waveDataPath + "WaveData.asset" );
@@ -139,14 +142,17 @@ public class WaveEditor
                                 conveyor: null ,
                                 player: new Player() );
 
-                            waveEventLayouts = new List<Layout>();
+                            waveEventLayouts.Clear();
                             List<List<Button>> waveEventButtons = new List<List<Button>>();
 
                             for ( int j = 0 ; stage.lanes > j ; j++ )
                                 waveEventButtons.Add( new List<Button>() );
 
                             for ( int j = 0 ; selectedWaveDefinition.waveEvents.Count > j ; j++ )
-                                waveEventButtons[ selectedWaveDefinition.waveEvents[ j ].lane ].Add( new Button( "WaveEvent" + j.ToString() , j.ToString() , 1 , 1 , container ) );
+                                waveEventButtons[ selectedWaveDefinition.waveEvents[ j ].lane ].Add( new Button( "WaveEvent" + j.ToString() , j.ToString() , 1 , 1 , container , 
+                                    Enter: ( Button b ) => b.SetColor( Color.red ) ,
+                                    Stay: ( Button b ) => { } ,
+                                    Exit: ( Button b ) => b.SetColor( Color.white ) ) );
 
                             for ( int j = 0 ; waveEventButtons.Count > j ; j++ )
                             {
@@ -154,6 +160,7 @@ public class WaveEditor
                                 layout.SetLocalPosition( stage.LaneBy( j ).start );
                                 layout.Add( waveEventButtons[ j ] );
                                 waveEventLayouts.Add( layout );
+                                layout.Refresh();
                             }
                         }
                     } ,
@@ -165,7 +172,7 @@ public class WaveEditor
         waveDefinitionLayout.Add( buttons , true );
     }
 
-    List<Layout> waveEventLayouts { get; set; }
+    List<Layout> waveEventLayouts { get; }
 
     private void HideWaveDefinitions() => waveDefinitionLayout?.Destroy();
 
@@ -190,10 +197,10 @@ public class WaveEditor
         container = new GameObject( "Container" );
         waveSetContainer = new GameObject( "WaveSetContainer" );
         waveDefinitionContainer = new GameObject( "WaveDefinitionContainer" );
-
         waveSetContainer.transform.SetParent( container.transform );
         waveDefinitionContainer.transform.SetParent( container.transform );
 
+        waveEventLayouts = new List<Layout>();
         Load();
 
         if ( waveData == null )
