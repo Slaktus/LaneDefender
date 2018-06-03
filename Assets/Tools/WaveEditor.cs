@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿#if UNITY_EDITOR
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -36,7 +37,7 @@ public class WaveEditor
                     int index = stage.IndexOf( hoveredLane );
                     WaveEventDefinition waveEventDefinition = ScriptableObject.CreateInstance<WaveEventDefinition>();
                     waveEventDefinition.Initialize( 0 , index , WaveEvent.Type.SpawnEnemy );
-                    selectedWaveDefinition.AddWaveEvent( waveEventDefinition );
+                    ScriptableObjects.Add( waveEventDefinition , selectedWaveDefinition );
                     HideWaveEventButtons();
                     ShowWaveEventButtons();
                 }
@@ -90,7 +91,7 @@ public class WaveEditor
             {
                 if ( Input.GetMouseButtonDown( 0 ) )
                 {
-                    waveData.AddWaveSet();
+                    waveData.Add( ScriptableObject.CreateInstance<WaveSet>() );
                     HideWaveSets();
                     ShowWaveSets();
                 }
@@ -134,7 +135,7 @@ public class WaveEditor
             {
                 if ( selectedWaveSet != null && Input.GetMouseButtonDown( 0 ) )
                 {
-                    selectedWaveSet.AddWaveDefinition();
+                    selectedWaveSet.Add( ScriptableObject.CreateInstance<WaveDefinition>() );
                     HideWaveDefinitions();
                     ShowWaveDefinitions( selectedWaveSet.waveDefinitions );
                 }
@@ -288,3 +289,4 @@ public class WaveEditor
         ShowWaveSets();
     }
 }
+#endif //UNITY_EDITOR

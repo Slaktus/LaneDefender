@@ -1,8 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class WaveEventDefinition : ScriptableObject
+﻿public class WaveEventDefinition : DefinitionBase
 {
     public void SetLane( int lane ) => this.lane = lane;
 

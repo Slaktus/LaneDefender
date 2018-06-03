@@ -1,18 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 
-public class WaveData : ScriptableObject
+public class WaveData : DefinitionBase
 {
-    public void AddWaveSet()
-    {
-        WaveSet waveSet = ScriptableObject.CreateInstance<WaveSet>();
-        waveSets.Add( waveSet );
-
-        AssetDatabase.AddObjectToAsset( waveSet , this );
-        AssetDatabase.SaveAssets();
-    }
-
+    public override void Add( ScriptableObject toAdd ) => waveSets.Add( toAdd as WaveSet );
+    public override void Remove( ScriptableObject toRemove ) => waveSets.Add( toRemove as WaveSet );
+    
     public List<WaveSet> waveSets = new List<WaveSet>();
 }
