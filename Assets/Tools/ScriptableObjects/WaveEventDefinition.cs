@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class WaveEventDefinition : ScriptableObject
 {
+    public void SetLane( int lane ) => this.lane = lane;
+
     public void Initialize( float delay , int lane , WaveEvent.Type type , float entryPoint = 0 )
     {
         this.entryPoint = entryPoint;

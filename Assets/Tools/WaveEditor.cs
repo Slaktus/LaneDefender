@@ -41,6 +41,25 @@ public class WaveEditor
                     ShowWaveEventButtons();
                 }
             }
+
+            if ( heldWaveEvent != null )
+            {
+                heldWaveEvent.SetPosition( mousePosition );
+
+                if ( Input.GetMouseButtonUp( 0 ) )
+                {
+                    if ( hoveredLane != null )
+                    {
+                        Debug.Log( "add stuff to lane yo" );
+                        heldWaveEvent.waveEventDefinition.SetLane( stage.IndexOf( hoveredLane ) );
+                        HideWaveEventButtons();
+                        ShowWaveEventButtons();
+                    }
+
+                    heldWaveEvent.Destroy();
+                    heldWaveEvent = null;
+                }
+            }
         }
 
         stage?.Update();
@@ -166,19 +185,29 @@ public class WaveEditor
             waveEventButtons.Add( new List<Button>() );
 
         for ( int j = 0 ; selectedWaveDefinition.waveEvents.Count > j ; j++ )
+        {
+            int index = j;
+
             waveEventButtons[ selectedWaveDefinition.waveEvents[ j ].lane ].Add( new Button( "WaveEvent" + j.ToString() , j.ToString() , 1 , 1 , container ,
                 Enter: ( Button b ) => b.SetColor( Color.red ) ,
-                Stay: ( Button b ) => 
+                Stay: ( Button b ) =>
                 {
-                    if ( Input.GetMouseButtonDown( 0 ) )
+                    if ( heldWaveEvent == null && Input.GetMouseButtonDown( 0 ) )
                     {
-                        heldWaveEvent = new Label( j.ToString() , new Color( 1 , 1 , 1 , 0.5f ) , 1 , 1 );
-                        waveEventEditorLayout?.Destroy();
+                        //ok, need to handle:
+                        //  - popping context menu (setting type etc)
+                        //  - dragging to new lane
+
+                        heldWaveEvent = new HeldEvent( b.rect.position , selectedWaveDefinition.waveEvents[ index ] , selectedWaveDefinition.waveEvents[ index ].lane );
+                        heldWaveEvent.SetText( index.ToString() );
+
+                        /*waveEventEditorLayout?.Destroy();
                         waveEventEditorLayout = new Layout( "WaveEventEditor" , 10 , 15 , 1 , 0.1f , 1 );
-                        waveEventEditorLayout.SetLocalPosition( Camera.main.ViewportToWorldPoint( new Vector3( 1 , 1 , Camera.main.transform.position.y ) ) + new Vector3( -5 , 0 , -15 * 0.5f ) );
+                        waveEventEditorLayout.SetLocalPosition( Camera.main.ViewportToWorldPoint( new Vector3( 1 , 1 , Camera.main.transform.position.y ) ) + new Vector3( -5 , 0 , -15 * 0.5f ) );*/
                     }
                 } ,
                 Exit: ( Button b ) => b.SetColor( Color.white ) ) );
+        }
 
         for ( int j = 0 ; waveEventButtons.Count > j ; j++ )
         {
@@ -190,7 +219,7 @@ public class WaveEditor
         }
     }
 
-    private Label heldWaveEvent;
+    private HeldEvent heldWaveEvent;
 
     private void HideWaveEventButtons()
     {
