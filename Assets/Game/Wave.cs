@@ -44,6 +44,11 @@ public class SpawnEnemyEvent : WaveEvent
     {
         this.enemyDefinition = enemyDefinition;
     }
+
+    public SpawnEnemyEvent( EnemyDefinition enemyDefinition , WaveEventDefinition waveEventDefinition ) : base( waveEventDefinition )
+    {
+        this.enemyDefinition = enemyDefinition;
+    }
 }
 
 public abstract class WaveEvent
@@ -61,8 +66,10 @@ public abstract class WaveEvent
         this.type = type;
     }
 
+    public WaveEvent( WaveEventDefinition waveEventDefinition ) : this( waveEventDefinition.delay , waveEventDefinition.lane , ( Type ) waveEventDefinition.type , waveEventDefinition.entryPoint ) { }
+
     public enum Type
     {
-        SpawnEnemy
+        SpawnEnemy = 0
     }
 }

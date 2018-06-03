@@ -5,6 +5,16 @@ public abstract class LaneObject
 {
     public abstract IEnumerator Update();
 
+    public IEnumerator Enter( float entryPoint )
+    {
+        while ( !overlap && entryPoint - ( scale.x * 0.5f ) > position.x - lane.start.x )
+        {
+            float x = position.x + ( speed * Time.deltaTime * 3 );
+            position = new Vector3( Mathf.Clamp( x , start + ( scale.x * 0.5f ) , start + entryPoint - ( scale.x * 0.5f ) ) , position.y , position.z );
+            yield return null;
+        }
+    }
+
     public IEnumerator ChangeLane( int change )
     {
         Stage stage = lane.stage;
@@ -80,6 +90,7 @@ public abstract class LaneObject
     protected IEnumerator pushAhead { get; set; }
     protected IEnumerator pushBack { get; set; }
     protected IEnumerator melee { get; set; }
+    protected IEnumerator enter { get; set; }
 
     protected virtual float speed { get; }
 

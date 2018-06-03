@@ -24,6 +24,9 @@ public class LaneEntity : LaneObject
             if ( melee != null )
                 move = !melee.MoveNext();
 
+            if ( enter != null )
+                move = !enter.MoveNext();
+
             float x = position.x + ( ( speed * Time.deltaTime ) * ( move ? 1 : 0 ) );
             bool destroy = x > lane.end.x - ( cube.transform.localScale.x * 0.5f ) || 0 >= health;
             position = new Vector3( Mathf.Clamp( x , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
@@ -104,7 +107,7 @@ public class LaneEntity : LaneObject
             {
                 if ( ( back.scale.z * 0.5f > Mathf.Abs( front.position.z - back.position.z ) ) && ( front.Contains( back.frontPoint ) || front.Contains( back.frontPoint + ( Vector3.forward * back.scale.z * 0.5f ) ) || front.Contains( back.frontPoint + ( Vector3.back * back.scale.z * 0.5f ) ) ) )
                 {
-                    if ( front.melee == null )
+                    if ( front.pushBack != null )
                     {
                         back.position = new Vector3( front.back - ( back.scale.x * 0.6f ) , back.position.y , back.position.z );
                         back.pushBack = back.PushBack();

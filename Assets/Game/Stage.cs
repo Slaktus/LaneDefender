@@ -22,7 +22,7 @@ public class Stage
                         handled = false;
 
                 if ( handled )
-                    lane.Add( new Enemy( ( waveEvent as SpawnEnemyEvent ).enemyDefinition , new EnemySettings( Color.white , 3 , 8 ) , lane ) );
+                    lane.Add( new Enemy( ( waveEvent as SpawnEnemyEvent ).enemyDefinition , new EnemySettings( Color.white , 3 , 8 ) , lane , 10 ) );
 
                 return handled;
 
