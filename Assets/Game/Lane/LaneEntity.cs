@@ -241,7 +241,7 @@ public class LaneEntity : LaneObject
 
         position = lane.start + ( Vector3.up * 0.5f ) + ( Vector3.right * cube.transform.localScale.x * 0.5f );
         meshRenderer.material.color = Color.white;
-        textMesh.text = name;
+        label.SetText( name );
 
         _value = value;
         _healthBar = new HealthBar( scale.x , base.lane.stage.laneSpacing , 0.1f , 0.1f , 1 , health );

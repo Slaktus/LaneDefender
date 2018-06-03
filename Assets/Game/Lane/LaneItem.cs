@@ -101,7 +101,7 @@ public class LaneItem : LaneObject
         cube.transform.localScale = new Vector3( heldItem.conveyorItem.width , 1 , heldItem.conveyorItem.height );
 
         meshRenderer.material.color = Color.white;
-        textMesh.text = heldItem.conveyorItem.text;
+        label.SetText( heldItem.conveyorItem.text );
 
         position = lane.end + ( Vector3.up * 0.5f ) + ( Vector3.left * cube.transform.localScale.x * 0.5f );
         this.heldItem = heldItem;
@@ -112,8 +112,8 @@ public class LaneItem : LaneObject
         cube.transform.localScale = new Vector3( width , 1 , height );
 
         meshRenderer.material.color = Color.grey;
-        textMesh.color = Color.white;
-        textMesh.text = name;
+        label.SetColor( Color.white );
+        label.SetText( name );
 
         this.position = position;
         heldItem = null;

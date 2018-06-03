@@ -23,7 +23,7 @@ public class ConveyorItem : MouseObject
     /// <summary>
     /// Upgrade the item and update the label
     /// </summary>
-    public void PowerUp() => textMesh.text = type.ToString() + "\n" + ++power;
+    public void PowerUp() => label.SetText( type.ToString() + "\n" + ++power );
 
     /// <summary>
     /// Update the item's position
@@ -92,8 +92,8 @@ public class ConveyorItem : MouseObject
 
         meshRenderer.material.color = Color.white;
 
-        textMesh.transform.localRotation = Quaternion.identity;
-        textMesh.text = type.ToString() + "\n" + level;
+        label.SetLocalRotation( Quaternion.identity );
+        label.SetText( type.ToString() + "\n" + level );
 
         position = conveyor.top - ( Vector3.forward * height * 0.5f ) + Vector3.up;
     }

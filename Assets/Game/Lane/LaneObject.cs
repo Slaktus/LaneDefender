@@ -73,7 +73,7 @@ public abstract class LaneObject
 
     protected Lane lane { get; set; }
     protected GameObject cube { get; }
-    protected TextMesh textMesh { get; }
+    protected Label label { get; }
     protected GameObject container { get; }
     protected MeshRenderer meshRenderer { get; }
     protected IEnumerator changeLane { get; set; }
@@ -100,14 +100,7 @@ public abstract class LaneObject
         meshRenderer = cube.GetComponent<MeshRenderer>();
         meshRenderer.material = Entry.instance.unlitColor;
 
-        textMesh = new GameObject( containerName + "Label" ).AddComponent<TextMesh>();
-        textMesh.transform.SetParent( container.transform );
-        textMesh.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
-
-        textMesh.fontSize = 35;
-        textMesh.color = Color.black;
-        textMesh.characterSize = 0.15f;
-        textMesh.anchor = TextAnchor.MiddleCenter;
-        textMesh.alignment = TextAlignment.Center;
+        label = new Label( string.Empty , Color.black , 1 , 1 , container );
+        label.SetLocalRotation( Quaternion.Euler( 90 , 0 , 0 ) );
     }
 }

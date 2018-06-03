@@ -48,7 +48,7 @@ public class Button : Element
     public Rect rect => new Rect( container.transform.position.x - ( width * 0.5f ) , container.transform.position.z - ( height * 0.5f ) , width , height );
     public Vector2 screenPosition => Camera.main.WorldToScreenPoint( new Vector3( container.transform.position.x - ( width * 0.5f ) , container.transform.position.z - ( height * 0.5f ) , Camera.main.transform.position.z ) );
     protected MeshRenderer quad { get; set; }
-    protected TextMesh textMesh { get; set; }
+    protected Label label { get; set; }
 
     private bool _hovering { get; set; }
 
@@ -64,19 +64,39 @@ public class Button : Element
         quad.transform.localScale = new Vector3( width , height , 1 );
         quad.transform.name = "ButtonBG";
 
-        textMesh = new GameObject( "ButtonLabel" ).AddComponent<TextMesh>();
-        textMesh.transform.SetParent( container.transform );
-        textMesh.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
-
-        textMesh.fontSize = 35;
-        textMesh.color = Color.black;
-        textMesh.characterSize = 0.15f;
-        textMesh.anchor = TextAnchor.MiddleCenter;
-        textMesh.alignment = TextAlignment.Center;
-        textMesh.text = label;
-
         container.transform.SetParent( parent.transform );
         container.transform.localPosition = Vector3.up;
+
+        this.label = new Label( label , Color.black , width , height , container );
+    }
+}
+
+public class Label : Element
+{
+    public void SetText( string text ) => textMesh.text = text;
+    public void SetColor( Color color ) => textMesh.color = color;
+    public void SetLocalRotation( Quaternion localRotation ) => textMesh.transform.localRotation = localRotation;
+    public override void SetLocalScale( Vector3 localScale ) => textMesh.transform.localScale = localScale;
+    public override void Destroy() => GameObject.Destroy( container );
+
+    public string text => textMesh.text;
+
+    protected TextMesh textMesh { get; }
+
+    public Label( string text , Color color , float width , float height , GameObject parent = null , string name = "Label" , int fontSize = 35 , float characterSize = 0.15f , TextAnchor anchor = TextAnchor.MiddleCenter , TextAlignment alignment = TextAlignment.Center ) : base( name , width , height )
+    {
+        textMesh = new GameObject( name ).AddComponent<TextMesh>();
+        textMesh.transform.SetParent( container.transform );
+        textMesh.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
+        textMesh.characterSize = characterSize;
+        textMesh.alignment = alignment;
+        textMesh.fontSize = fontSize;
+        textMesh.anchor = anchor;
+        textMesh.color = color;
+        textMesh.text = text;
+
+        if ( parent != null )
+            SetParent( parent );
     }
 }
 
@@ -168,12 +188,15 @@ public class Layout : Panel
 
     protected List<Element> contents { get; set; }
 
-    public Layout( string name , float width , float height , float padding , float spacing , int rows ) : base( name , width , height )
+    public Layout( string name , float width , float height , float padding , float spacing , int rows , GameObject parent = null ) : base( name , width , height )
     {
         contents = new List<Element>();
         this.padding = padding;
         this.spacing = spacing;
         this.rows = rows;
+
+        if ( parent != null )
+            SetParent( parent );
     }
 }
 

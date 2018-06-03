@@ -34,8 +34,8 @@ public class HeldItem : MouseObject
 
         meshRenderer.material.color = Color.white;
 
-        textMesh.transform.localRotation = Quaternion.identity;
-        textMesh.text = conveyorItem.text;
+        label.SetLocalRotation( Quaternion.identity );
+        label.SetText( conveyorItem.text );
 
         position = conveyorItem.position + Vector3.forward;
         this.conveyorItem = conveyorItem;
