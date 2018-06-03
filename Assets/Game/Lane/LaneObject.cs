@@ -7,12 +7,16 @@ public abstract class LaneObject
 
     public IEnumerator Enter( float entryPoint )
     {
-        while ( !overlap && entryPoint - ( scale.x * 0.5f ) > position.x - lane.start.x )
+        bool interrupt = false;
+
+        while ( !interrupt && entryPoint - ( scale.x * 0.5f ) > position.x - lane.start.x )
         {
             float x = position.x + ( speed * Time.deltaTime * 3 );
             position = new Vector3( Mathf.Clamp( x , start + ( scale.x * 0.5f ) , start + entryPoint - ( scale.x * 0.5f ) ) , position.y , position.z );
-            yield return null;
+            yield return interrupt = overlap;
         }
+
+        enter = null;
     }
 
     public IEnumerator ChangeLane( int change )
