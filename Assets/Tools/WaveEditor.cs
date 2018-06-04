@@ -21,7 +21,7 @@ public class WaveEditor
 
         //Proceed if we hit the ground plane
         if ( stage != null && hits.Length > 0 )
-        {            
+        {
             //Get the mouse position on the ground plane
             Vector3 mousePosition = hits[ 0 ].point;
 
@@ -79,6 +79,15 @@ public class WaveEditor
         waveData = ScriptableObject.CreateInstance<WaveData>();
         AssetDatabase.CreateAsset( waveData , waveDataPath + "WaveData.asset" );
         AssetDatabase.SaveAssets();
+    }
+
+    public void Show() => ShowWaveSets();
+    public void Hide()
+    {
+        stage?.Destroy();
+        HideWaveEventButtons();
+        HideWaveDefinitions();
+        HideWaveSets();
     }
 
     private void ShowWaveSets()
@@ -267,14 +276,17 @@ public class WaveEditor
 
     private const string waveDataPath = "Assets/Data/Waves/";
 
-    public WaveEditor()
+    public WaveEditor( bool show = false , GameObject parent = null )
     {
         camera = Camera.main;
-        container = new GameObject( "Container" );
+        container = new GameObject( "WaveEditor" );
         waveSetContainer = new GameObject( "WaveSetContainer" );
         waveDefinitionContainer = new GameObject( "WaveDefinitionContainer" );
         waveSetContainer.transform.SetParent( container.transform );
         waveDefinitionContainer.transform.SetParent( container.transform );
+
+        if ( parent != null )
+            container.transform.SetParent( parent.transform );
 
         waveEventLayouts = new List<Layout>();
         Load();
@@ -282,7 +294,8 @@ public class WaveEditor
         if ( waveData == null )
             Create();
 
-        ShowWaveSets();
+        if ( show )
+            ShowWaveSets();
     }
 }
 #endif //UNITY_EDITOR

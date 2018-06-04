@@ -151,6 +151,20 @@ public class Button : Element
 
     public void ShowQuad() => quad.enabled = true;
     public void HideQuad() => quad.enabled = false;
+    public void ShowLabel() => label.Show();
+    public void HideLabel() => label.Hide();
+
+    public void Show()
+    {
+        ShowQuad();
+        ShowLabel();
+    }
+
+    public void Hide()
+    {
+        HideQuad();
+        HideLabel();
+    }
 
     public override void SetLocalScale( Vector3 localScale ) => quad.transform.localScale = localScale;
 
@@ -159,17 +173,16 @@ public class Button : Element
     public void SetStay( Action<Button> Stay ) => this.Stay = Stay == null ? ( Button button ) => { } : Stay;
     public void SetExit( Action<Button> Exit ) => this.Exit = Exit == null ? ( Button button ) => { } : Exit;
 
-    private Action<Button> Enter { get; set; }
-    private Action<Button> Stay { get; set; }
-    private Action<Button> Exit { get; set; }
-
-    protected bool Contains( Vector3 position ) => rect.Contains( new Vector2( position.x , position.z ) );
-
     public Rect rect => new Rect( container.transform.position.x - ( width * 0.5f ) , container.transform.position.z - ( height * 0.5f ) , width , height );
     public Vector2 screenPosition => Camera.main.WorldToScreenPoint( new Vector3( container.transform.position.x - ( width * 0.5f ) , container.transform.position.z - ( height * 0.5f ) , Camera.main.transform.position.z ) );
+
+    protected bool Contains( Vector3 position ) => rect.Contains( new Vector2( position.x , position.z ) );
     protected MeshRenderer quad { get; set; }
     protected Label label { get; set; }
 
+    private Action<Button> Enter { get; set; }
+    private Action<Button> Stay { get; set; }
+    private Action<Button> Exit { get; set; }
     private bool _hovering { get; set; }
 
     public Button( string name , string label , float width , float height , GameObject parent , Action<Button> Enter = null , Action<Button> Stay = null , Action<Button> Exit = null , bool hideQuad = false ) : base( name + typeof( Button ).Name , width , height )
@@ -199,6 +212,8 @@ public class Button : Element
 
 public class Label : Element
 {
+    public void Show() => textMesh.gameObject.SetActive( true );
+    public void Hide() => textMesh.gameObject.SetActive( false );
     public void SetText( string text ) => textMesh.text = text;
     public void SetColor( Color color ) => textMesh.color = color;
     public void SetLocalRotation( Quaternion localRotation ) => textMesh.transform.localRotation = localRotation;

@@ -22,16 +22,16 @@ public class Entry : MonoBehaviour
     {
         instance = this;
         //StartSession( new Player() );
-        waveEditor = new WaveEditor();
+        editor = new Editor();
         //shop = new Shop( new Player() );
     }
 
     Shop shop;
-    WaveEditor waveEditor;
+    Editor editor;
     Field field;
 
     //private void Update() => field?.Update();
-    private void Update() => waveEditor?.Update();
+    private void Update() => editor?.Update();
     //private void Update() => shop?.Update();
 
     void StartSession( Player player ) => StartCoroutine( SessionHandler( new Session( player , width: 25 , height: 15 , spacing: 1 , lanes: 5 ) ) );
