@@ -10,8 +10,8 @@
         this.type = ( int ) type;
     }
 
-    public int type { get; private set; }
-    public float entryPoint { get; private set; }
-    public float delay { get; private set; }
-    public int lane { get; private set; }
+    public float entryPoint;
+    public float delay;
+    public int type;
+    public int lane;
 }

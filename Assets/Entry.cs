@@ -21,15 +21,15 @@ public class Entry : MonoBehaviour
 	void Awake()
     {
         instance = this;
-        StartSession( new Player() );
-        //waveEditor = new WaveEditor();
+        //StartSession( new Player() );
+        waveEditor = new WaveEditor();
         //shop = new Shop( new Player() );
     }
 
     Shop shop;
-    //WaveEditor waveEditor;
+    WaveEditor waveEditor;
 
-    //private void Update() => waveEditor.Update();
+    private void Update() => waveEditor.Update();
     //private void Update() => shop.Update();
 
     void StartSession( Player player ) => StartCoroutine( SessionHandler( new Session( player , width: 25 , height: 15 , spacing: 1 , lanes: 5 ) ) );

@@ -91,7 +91,7 @@ public class WaveEditor
             {
                 if ( Input.GetMouseButtonDown( 0 ) )
                 {
-                    waveData.Add( ScriptableObject.CreateInstance<WaveSet>() );
+                    ScriptableObjects.Add( ScriptableObject.CreateInstance<WaveSet>() , waveData );
                     HideWaveSets();
                     ShowWaveSets();
                 }
@@ -135,7 +135,7 @@ public class WaveEditor
             {
                 if ( selectedWaveSet != null && Input.GetMouseButtonDown( 0 ) )
                 {
-                    selectedWaveSet.Add( ScriptableObject.CreateInstance<WaveDefinition>() );
+                    ScriptableObjects.Add( ScriptableObject.CreateInstance<WaveDefinition>() , selectedWaveSet );
                     HideWaveDefinitions();
                     ShowWaveDefinitions( selectedWaveSet.waveDefinitions );
                 }
