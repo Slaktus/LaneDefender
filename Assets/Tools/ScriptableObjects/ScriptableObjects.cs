@@ -4,17 +4,17 @@ using UnityEditor;
 
 public static class ScriptableObjects
 {
+    public static void Save() => AssetDatabase.SaveAssets();
+
     public static void Add<T,Y>( T toAdd , Y addTo ) where T : ScriptableObject where Y : DefinitionBase
     {
         addTo.Add( toAdd );
         AssetDatabase.AddObjectToAsset( toAdd , addTo );
-        AssetDatabase.SaveAssets();
     }
 
     public static void Remove<T,Y>( T toRemove , Y removeFrom ) where T : ScriptableObject where Y : DefinitionBase
     {
         removeFrom.Remove( toRemove );
-        AssetDatabase.SaveAssets();
     }
 }
 #endif //UNITY_EDITOR

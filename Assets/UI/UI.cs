@@ -18,6 +18,7 @@ public class Field : Button
 
     private IEnumerator Handler()
     {
+        StartInput?.Invoke( this );
         ShowQuad();
 
         while ( Input.GetMouseButton( 0 ) )
@@ -65,9 +66,12 @@ public class Field : Button
             yield return null;
         }
 
+        EndInput?.Invoke( this );
         _handler = null;
         HideQuad();
     }
+
+    public new Label label => base.label;
 
     private bool _doubleClick
     {
@@ -83,13 +87,17 @@ public class Field : Button
     }
 
     private static float _doubleClickInterval = 0.2f;
+    private Action<Field> StartInput { get; set; }
+    private Action<Field> EndInput { get; set; }
     private float _doubleClickTime { get; set; }
     private IEnumerator _handler { get; set; }
     private Mode mode { get; set; } 
     private bool _click;
 
-    public Field( string name , string label , float width , float height , GameObject parent = null , Mode mode = Mode.TextAndNumbers ) : base( name , label , width , height , parent , hideQuad: true )
+    public Field( string name , string label , float width , float height , GameObject parent = null , Mode mode = Mode.TextAndNumbers , Action<Field> StartInput = null , Action<Field> EndInput = null ) : base( name , label , width , height , parent , hideQuad: true )
     {
+        this.StartInput = StartInput;
+        this.EndInput = EndInput;
         this.mode = mode;
 
         SetStay( ( Button button ) =>

@@ -182,14 +182,13 @@ public class WaveEditor
     {
         List<List<Button>> waveEventButtons = new List<List<Button>>();
 
-        for ( int j = 0 ; stage.lanes > j ; j++ )
+        for ( int i = 0 ; stage.lanes > i ; i++ )
             waveEventButtons.Add( new List<Button>() );
 
-        for ( int j = 0 ; selectedWaveDefinition.waveEvents.Count > j ; j++ )
+        for ( int i = 0 ; selectedWaveDefinition.waveEvents.Count > i ; i++ )
         {
-            int index = j;
-
-            waveEventButtons[ selectedWaveDefinition.waveEvents[ j ].lane ].Add( new Button( "WaveEvent" + j.ToString() , j.ToString() , 1 , 1 , container ,
+            int index = i;
+            waveEventButtons[ selectedWaveDefinition.waveEvents[ i ].lane ].Add( new Button( "WaveEvent" + i.ToString() , i.ToString() , 1 , 1 , container ,
                 Enter: ( Button butt ) => butt.SetColor( Color.red ) ,
                 Stay: ( Button butt ) =>
                 {
@@ -205,18 +204,18 @@ public class WaveEditor
                             Stay: ( Button b ) => { } ,
                             Exit: ( Button b ) => b.SetColor( Color.white ) ) ,
 
-                            new Label("Entry:" , Color.black , 1 , 1 , container) ,
-                            new Field( "EntryButton" , "Entry" , 5 , 3 , container , Field.Mode.Numbers ) ,
-
                             new Label("Delay:" , Color.black , 1 , 1 , container) ,
-                            new Field( "DelayButton" , "Delay" , 5 , 3 , container , Field.Mode.Numbers )
+                            new Field( "DelayButton" , selectedWaveDefinition.waveEvents[ index ].delay.ToString() , 5 , 3 , container , Field.Mode.Numbers  , EndInput: ( Field field ) => float.TryParse( field.label.text , out selectedWaveDefinition.waveEvents[ index ].delay ) ) ,
+
+                            new Label("Entry Point:" , Color.black , 1 , 1 , container) ,
+                            new Field( "EntryButton" , selectedWaveDefinition.waveEvents[ index ].entryPoint.ToString() , 5 , 3 , container , Field.Mode.Numbers , EndInput: ( Field field ) => float.TryParse( field.label.text , out selectedWaveDefinition.waveEvents[ index ].entryPoint ) )
                         };
 
                         waveEventEditor = new Layout( "WaveEventEditor" , 5 , waveEventEditorButtons.Count * 3 , 1 , 0.1f , waveEventEditorButtons.Count / 2 , container );
                         waveEventEditor.Add( waveEventEditorButtons , true );
                     }
                 } ,
-                Exit: ( Button butt ) => 
+                Exit: ( Button butt ) =>
                 {
                     if ( heldWaveEvent == null && Input.GetMouseButton( 0 ) )
                     {
@@ -228,11 +227,11 @@ public class WaveEditor
                 } ) );
         }
 
-        for ( int j = 0 ; waveEventButtons.Count > j ; j++ )
+        for ( int i = 0 ; waveEventButtons.Count > i ; i++ )
         {
-            Layout layout = new Layout( "WaveEventLayout" , waveEventButtons[ j ].Count , 1 , 0 , 0.1f , 1 );
-            layout.SetLocalPosition( stage.LaneBy( j ).start );
-            layout.Add( waveEventButtons[ j ] , true );
+            Layout layout = new Layout( "WaveEventLayout" , waveEventButtons[ i ].Count , 1 , 0 , 0.1f , 1 );
+            layout.SetLocalPosition( stage.LaneBy( i ).start );
+            layout.Add( waveEventButtons[ i ] , true );
             waveEventLayouts.Add( layout );
         }
     }
