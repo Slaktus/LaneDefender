@@ -20,10 +20,9 @@ public class Entry : MonoBehaviour
     /// </summary>
 	void Awake()
     {
-        field = new Field( "Field" , "test" , 5 , 5 );
         instance = this;
         //StartSession( new Player() );
-        //waveEditor = new WaveEditor();
+        waveEditor = new WaveEditor();
         //shop = new Shop( new Player() );
     }
 
@@ -31,8 +30,8 @@ public class Entry : MonoBehaviour
     WaveEditor waveEditor;
     Field field;
 
-    private void Update() => field?.Update();
-    //private void Update() => waveEditor?.Update();
+    //private void Update() => field?.Update();
+    private void Update() => waveEditor?.Update();
     //private void Update() => shop?.Update();
 
     void StartSession( Player player ) => StartCoroutine( SessionHandler( new Session( player , width: 25 , height: 15 , spacing: 1 , lanes: 5 ) ) );

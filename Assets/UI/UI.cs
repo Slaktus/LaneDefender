@@ -42,8 +42,23 @@ public class Field : Button
             }
             else if ( !string.IsNullOrEmpty( current ) )
             {
-                input = input + current;
-                count += current.Length;
+                int parsedInt = -1;
+                char[] chars = current.ToCharArray();
+
+                bool isPunctuation = false;
+
+                for ( int i = 0 ; chars.Length > i && !isPunctuation ; i++ )
+                    if ( chars[ i ] == '.' )
+                        isPunctuation = true;
+
+                bool isNumber = int.TryParse( current , out parsedInt );
+                bool valid =  mode == Mode.TextAndNumbers || ( mode == Mode.Text && !isNumber ) || ( mode == Mode.Numbers && ( isNumber || isPunctuation ) );
+
+                if ( valid )
+                {
+                    input = input + current;
+                    count += current.Length;
+                }
             }
 
             label.SetText( input );
@@ -53,7 +68,6 @@ public class Field : Button
         _handler = null;
         HideQuad();
     }
-
 
     private bool _doubleClick
     {
@@ -71,10 +85,13 @@ public class Field : Button
     private static float _doubleClickInterval = 0.2f;
     private float _doubleClickTime { get; set; }
     private IEnumerator _handler { get; set; }
+    private Mode mode { get; set; } 
     private bool _click;
 
-    public Field( string name , string label , float width , float height , GameObject parent = null ) : base( name , label , width , height , parent , hideQuad: true )
+    public Field( string name , string label , float width , float height , GameObject parent = null , Mode mode = Mode.TextAndNumbers ) : base( name , label , width , height , parent , hideQuad: true )
     {
+        this.mode = mode;
+
         SetStay( ( Button button ) =>
         {
             if ( Input.GetMouseButtonDown( 0 ) )
@@ -85,6 +102,13 @@ public class Field : Button
                     _doubleClick = true;
             }
         } );
+    }
+
+    public enum Mode
+    {
+        Text,
+        Numbers,
+        TextAndNumbers,
     }
 }
 
@@ -231,7 +255,10 @@ public class Layout : Panel
             }
 
             Vector3 localPosition = new Vector3( ( -width * 0.5f ) + ( size.x * x ) + ( size.x * 0.5f ) + ( spacing * x ) + padding , 1 , ( height * 0.5f ) - ( size.y * y ) - ( size.y * 0.5f ) - ( spacing * y ) - padding );
-            contents[ i ].SetLocalScale( new Vector3( size.x , size.y , 1 ) );
+
+            if ( !( contents[ i ] is Label ) )
+                contents[ i ].SetLocalScale( new Vector3( size.x , size.y , 1 ) );
+
             contents[ i ].SetLocalPosition( localPosition );
             x++;
         }

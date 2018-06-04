@@ -197,25 +197,22 @@ public class WaveEditor
                     {
                         waveEventEditor?.Destroy();
 
-                        List<Button> waveEventEditorButtons = new List<Button>()
+                        List<Element> waveEventEditorButtons = new List<Element>()
                         {
+                            new Label("Type:" , Color.black , 1 , 1 , container) ,
                             new Button( "TypeButton" , "Type" , 5 , 3 , container ,
                             Enter: ( Button b ) => b.SetColor( Color.green ) ,
                             Stay: ( Button b ) => { } ,
                             Exit: ( Button b ) => b.SetColor( Color.white ) ) ,
 
-                            new Button( "EntryButton" , "Entry" , 5 , 3 , container ,
-                            Enter: ( Button b ) => b.SetColor( Color.green ) ,
-                            Stay: ( Button b ) => { } ,
-                            Exit: ( Button b ) => b.SetColor( Color.white ) ) ,
+                            new Label("Entry:" , Color.black , 1 , 1 , container) ,
+                            new Field( "EntryButton" , "Entry" , 5 , 3 , container , Field.Mode.Numbers ) ,
 
-                            new Button( "DelayButton" , "Delay" , 5 , 3 , container ,
-                            Enter: ( Button b ) => b.SetColor( Color.green ) ,
-                            Stay: ( Button b ) => { } ,
-                            Exit: ( Button b ) => b.SetColor( Color.white ) ) ,
+                            new Label("Delay:" , Color.black , 1 , 1 , container) ,
+                            new Field( "DelayButton" , "Delay" , 5 , 3 , container , Field.Mode.Numbers )
                         };
 
-                        waveEventEditor = new Layout( "WaveEventEditor" , 5 , waveEventEditorButtons.Count * 3 , 1 , 0.1f , waveEventEditorButtons.Count , container );
+                        waveEventEditor = new Layout( "WaveEventEditor" , 5 , waveEventEditorButtons.Count * 3 , 1 , 0.1f , waveEventEditorButtons.Count / 2 , container );
                         waveEventEditor.Add( waveEventEditorButtons , true );
                     }
                 } ,
