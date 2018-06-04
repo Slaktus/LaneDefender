@@ -3,6 +3,91 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
+public class Field : Button
+{
+    public override void Update()
+    {
+        if ( _handler != null )
+            _handler.MoveNext();
+
+        if ( Time.time > _doubleClickTime )
+            _click = false;
+
+        base.Update();
+    }
+
+    private IEnumerator Handler()
+    {
+        ShowQuad();
+
+        while ( Input.GetMouseButton( 0 ) )
+            yield return null;
+
+        string input = label.text;
+        int count = input.Length;
+        bool done = false;
+
+        while ( !done )
+        {
+            string current = Input.inputString;
+
+            if ( Input.GetMouseButton( 1 ) || Input.GetKeyDown( KeyCode.Return ) || Input.GetKeyDown( KeyCode.KeypadEnter ) )
+            {
+                done = true;
+            }
+            else if ( count > 0 && Input.GetKeyDown( KeyCode.Backspace ) )
+            {
+                string changed = input.Remove( ( count-- ) - 1 , 1 );
+                input = changed.Trim();
+            }
+            else if ( !string.IsNullOrEmpty( current ) )
+            {
+                input = input + current;
+                count += current.Length;
+            }
+
+            label.SetText( input );
+            yield return null;
+        }
+
+        _handler = null;
+        HideQuad();
+    }
+
+
+    private bool _doubleClick
+    {
+        get
+        {
+            return _click;
+        }
+        set
+        {
+            _doubleClickTime = Time.time + _doubleClickInterval;
+            _click = value;
+        }
+    }
+
+    private static float _doubleClickInterval = 0.2f;
+    private float _doubleClickTime { get; set; }
+    private IEnumerator _handler { get; set; }
+    private bool _click;
+
+    public Field( string name , string label , float width , float height , GameObject parent = null ) : base( name , label , width , height , parent , hideQuad: true )
+    {
+        SetStay( ( Button button ) =>
+        {
+            if ( Input.GetMouseButtonDown( 0 ) )
+            {
+                if ( _doubleClick )
+                    _handler = Handler();
+                else
+                    _doubleClick = true;
+            }
+        } );
+    }
+}
+
 public class Button : Element
 {
     public override void Destroy()
@@ -32,6 +117,9 @@ public class Button : Element
         }
     }
 
+    public void ShowQuad() => quad.enabled = true;
+    public void HideQuad() => quad.enabled = false;
+
     public override void SetLocalScale( Vector3 localScale ) => quad.transform.localScale = localScale;
 
     public void SetColor( Color color ) => quad.material.color = color;
@@ -52,7 +140,7 @@ public class Button : Element
 
     private bool _hovering { get; set; }
 
-    public Button( string name , string label , float width , float height , GameObject parent , Action<Button> Enter = null , Action<Button> Stay = null , Action<Button> Exit = null ) : base( name + typeof( Button ).Name , width , height )
+    public Button( string name , string label , float width , float height , GameObject parent , Action<Button> Enter = null , Action<Button> Stay = null , Action<Button> Exit = null , bool hideQuad = false ) : base( name + typeof( Button ).Name , width , height )
     {
         SetEnter( Enter );
         SetStay( Stay );
@@ -64,10 +152,16 @@ public class Button : Element
         quad.transform.localScale = new Vector3( width , height , 1 );
         quad.transform.name = "ButtonBG";
 
-        container.transform.SetParent( parent.transform );
-        container.transform.localPosition = Vector3.up;
+        if ( parent != null )
+        {
+            container.transform.SetParent( parent.transform );
+            container.transform.localPosition = Vector3.up;
+        }
 
         this.label = new Label( label , Color.black , width , height , container );
+
+        if ( hideQuad )
+            HideQuad();
     }
 }
 
