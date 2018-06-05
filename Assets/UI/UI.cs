@@ -175,6 +175,7 @@ public class Button : Element
 
     public Rect rect => new Rect( container.transform.position.x - ( width * 0.5f ) , container.transform.position.z - ( height * 0.5f ) , width , height );
     public Vector2 screenPosition => Camera.main.WorldToScreenPoint( new Vector3( container.transform.position.x - ( width * 0.5f ) , container.transform.position.z - ( height * 0.5f ) , Camera.main.transform.position.z ) );
+    public Vector3 localPosition => container.transform.localPosition;
 
     protected bool Contains( Vector3 position ) => rect.Contains( new Vector2( position.x , position.z ) );
     protected MeshRenderer quad { get; set; }
@@ -185,7 +186,7 @@ public class Button : Element
     private Action<Button> Exit { get; set; }
     private bool _hovering { get; set; }
 
-    public Button( string name , string label , float width , float height , GameObject parent , Action<Button> Enter = null , Action<Button> Stay = null , Action<Button> Exit = null , bool hideQuad = false ) : base( name + typeof( Button ).Name , width , height )
+    public Button( string name , string label , float width , float height , GameObject parent , Action<Button> Enter = null , Action<Button> Stay = null , Action<Button> Exit = null , bool hideQuad = false , int fontSize = 35 , float characterSize = 0.15f ) : base( name + typeof( Button ).Name , width , height )
     {
         SetEnter( Enter );
         SetStay( Stay );
@@ -203,7 +204,7 @@ public class Button : Element
             container.transform.localPosition = Vector3.up;
         }
 
-        this.label = new Label( label , Color.black , width , height , container );
+        this.label = new Label( label , Color.black , width , height , container , fontSize: fontSize, characterSize: characterSize );
 
         if ( hideQuad )
             HideQuad();
@@ -267,7 +268,7 @@ public class Layout : Panel
         int x = 0;
         int y = 0;
 
-        Vector2 size = new Vector2( ( width - ( padding * 2 ) - ( spacing * ( perRow - 1 ) ) ) / perRow , ( height - ( padding * 2 ) - ( spacing * ( rows - 1 ) ) ) / rows );
+        Vector2 size = new Vector2( ( width - ( padding * 2 ) - ( spacing * ( perRow - 1 ) ) ) / perRow , ( height - ( padding ) - ( spacing * ( rows - 1 ) ) ) / rows );
 
         for ( int i = 0 ; contents.Count > i ; i++ )
         {
@@ -366,6 +367,7 @@ public class Panel : Element
 
 public abstract class Element
 {
+    public void SetViewportPosition( Vector2 viewportPosition ) => SetLocalPosition( Camera.main.ViewportToWorldPoint( new Vector3( viewportPosition.x , viewportPosition.y , Camera.main.transform.position.y ) ) + ( Vector3.right * width * 0.5f ) + ( Vector3.back * height * 0.5f ) );
     public void SetLocalPosition( Vector3 localPosition ) => container.transform.localPosition = localPosition;
     public void SetParent( GameObject parent ) => container.transform.SetParent( parent.transform );
 
@@ -375,8 +377,8 @@ public abstract class Element
     public abstract void Destroy();
 
     protected GameObject container { get; set; }
-    protected float width { get; set; }
-    protected float height { get; set; }
+    public float width { get; protected set; }
+    public float height { get; protected set; }
 
     public Element( string name , float width , float height )
     {

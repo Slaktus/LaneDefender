@@ -10,21 +10,12 @@ public class WaveEditor
     public void Update()
     {
         Ray mouseRay = camera.ScreenPointToRay( Input.mousePosition );
-
-        //The actual raycast returns an array with all the targets the ray passed through
-        //Note that we don't pass in the ray itself -- that's because the method taking a ray as argument flat-out doesn't work
-        //We don't bother constraining the raycast by layer mask just yet, since the ground plane is the only collider in the scene
         RaycastHit[] hits = Physics.RaycastAll( mouseRay.origin , mouseRay.direction , float.PositiveInfinity );
-
-        //These references might be populated later
         Lane hoveredLane = null;
 
-        //Proceed if we hit the ground plane
         if ( stage != null && hits.Length > 0 )
         {
-            //Get the mouse position on the ground plane
             Vector3 mousePosition = hits[ 0 ].point;
-
             hoveredLane = stage.GetHoveredLane( mousePosition );
             stage.SetLaneColor( Color.black );
 
@@ -81,7 +72,7 @@ public class WaveEditor
         AssetDatabase.SaveAssets();
     }
 
-    public void Show() => ShowWaveSets();
+    public void Show( Vector3 localPosition ) => ShowWaveSets( localPosition );
     public void Hide()
     {
         stage?.Destroy();
@@ -90,11 +81,12 @@ public class WaveEditor
         HideWaveSets();
     }
 
-    private void ShowWaveSets()
+    private void ShowWaveSets( Vector3 localPosition , float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
     {
         List<Button> buttons = new List<Button>();
 
-        buttons.Add( new Button( "AddWaveSet" , "Add Wave Set" , 10 , 3 , waveSetContainer ,
+        buttons.Add( new Button( "AddWaveSet" , "Add Wave Set" , width , height , waveSetContainer , 
+            fontSize: 20 ,
             Enter: ( Button button ) => button.SetColor( Color.green ) ,
             Stay: ( Button button ) =>
             {
@@ -102,7 +94,7 @@ public class WaveEditor
                 {
                     ScriptableObjects.Add( ScriptableObject.CreateInstance<WaveSet>() , waveData );
                     HideWaveSets();
-                    ShowWaveSets();
+                    ShowWaveSets( localPosition );
                 }
             } ,
             Exit: ( Button button ) => button.SetColor( Color.white ) ) );
@@ -111,7 +103,8 @@ public class WaveEditor
             for ( int i = 0 ; waveData.waveSets.Count > i ; i++ )
             {
                 int index = i;
-                buttons.Add( new Button( "WaveSet" , "Wave Set" , 10 , 3 , waveSetContainer ,
+                buttons.Add( new Button( "WaveSet" , "Wave Set" , width , height , waveSetContainer , 
+                    fontSize: 20 ,
                     Enter: ( Button button ) => button.SetColor( Color.green ) ,
                     Stay: ( Button button ) =>
                     {
@@ -125,12 +118,10 @@ public class WaveEditor
                     Exit: ( Button button ) => button.SetColor( Color.white ) ) );
             }
 
-        waveSetLayout = new Layout( "WaveSetButtons" , 10 , 3 * buttons.Count , 1 , 0.1f , buttons.Count , waveSetContainer );
-        waveSetLayout.SetLocalPosition( Camera.main.ViewportToWorldPoint( new Vector3( 0 , 1 , Camera.main.transform.position.y ) ) + new Vector3( 5 , 0 , -buttons.Count * 3 * 0.5f ) );
+        waveSetLayout = new Layout( "WaveSetButtons" , width , height * buttons.Count , padding , spacing , buttons.Count , waveSetContainer );
+        waveSetLayout.SetLocalPosition( localPosition + ( Vector3.back * height * ( buttons.Count - 1 ) * 0.5f ) );
         waveSetLayout.Add( buttons , true );        
     }
-
-    Session session { get; set; }
 
     private void HideWaveSets() => waveSetLayout?.Destroy();
 
@@ -245,9 +236,7 @@ public class WaveEditor
         }
     }
 
-    private HeldEvent heldWaveEvent;
-    private Layout waveEventEditor;
-
+    
     private void HideWaveEventButtons()
     {
         for ( int i = 0 ; waveEventLayouts.Count > i ; i++ )
@@ -256,7 +245,6 @@ public class WaveEditor
         waveEventLayouts.Clear();
     }
 
-    List<Layout> waveEventLayouts { get; }
 
     private void HideWaveDefinitions() => waveDefinitionLayout?.Destroy();
 
@@ -275,8 +263,11 @@ public class WaveEditor
     public GameObject waveDefinitionContainer { get; private set; }
 
     private const string waveDataPath = "Assets/Data/Waves/";
+    private List<Layout> waveEventLayouts { get; }
+    private HeldEvent heldWaveEvent { get; set; }
+    private Layout waveEventEditor { get; set; }
 
-    public WaveEditor( bool show = false , GameObject parent = null )
+    public WaveEditor( GameObject parent = null )
     {
         camera = Camera.main;
         container = new GameObject( "WaveEditor" );
@@ -293,9 +284,6 @@ public class WaveEditor
 
         if ( waveData == null )
             Create();
-
-        if ( show )
-            ShowWaveSets();
     }
 }
 #endif //UNITY_EDITOR

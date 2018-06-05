@@ -17,15 +17,21 @@ public class Editor
 
     public Editor()
     {
-        waveEditor = new WaveEditor( parent: container = new GameObject( "Editor" ) );
-        waveEditorButton = new Button( "WaveEditor" , "Wave Editor" , 5 , 3 , container ,
+        int fontSize = 20;
+        float buttonWidth = 3;
+        float buttonHeight = 1;
+        container = new GameObject( "Editor" );
+
+        waveEditorButton = new Button( "WaveEditor" , "Wave Editor" , buttonWidth , buttonHeight , container ,
+            fontSize: fontSize ,
+            Enter: ( Button button ) => button.SetColor( Color.green ) ,
             Stay: ( Button button ) =>
             {
                 if ( Input.GetMouseButtonDown( 0 ) )
                 {
                     if ( !showingWaveEditor )
                     {
-                        waveEditor.Show();
+                        waveEditor.Show( waveEditorButton.localPosition + ( Vector3.back * waveEditorButton.height ) );
                         showingWaveEditor = true;
                     }
                     else
@@ -34,6 +40,11 @@ public class Editor
                         showingWaveEditor = false;
                     }
                 }
-            } );
+            } ,
+            Exit: ( Button button ) => button.SetColor( Color.white ) );
+
+        waveEditorButton.SetViewportPosition( new Vector2( 0 , 1 ) );
+
+        waveEditor = new WaveEditor( container );
     }
 }
