@@ -10,10 +10,9 @@ public class Editor
         waveEditorButton?.Update();
     }
 
+    public Button waveEditorButton { get; }
     GameObject container { get; }
     WaveEditor waveEditor { get; }
-    Button waveEditorButton { get; }
-    bool showingWaveEditor { get; set; }
 
     public Editor()
     {
@@ -24,27 +23,22 @@ public class Editor
 
         waveEditorButton = new Button( "WaveEditor" , "Wave Editor" , buttonWidth , buttonHeight , container ,
             fontSize: fontSize ,
-            Enter: ( Button button ) => button.SetColor( Color.green ) ,
+            Enter: ( Button button ) => button.SetColor( !waveEditor.showingWaveSets ? Color.green : button.color ) ,
             Stay: ( Button button ) =>
             {
                 if ( Input.GetMouseButtonDown( 0 ) )
                 {
-                    if ( !showingWaveEditor )
+                    if ( !waveEditor.showingWaveSets )
                     {
+                        button.SetColor( Color.yellow );
                         waveEditor.Show( waveEditorButton.localPosition + ( Vector3.back * waveEditorButton.height ) );
-                        showingWaveEditor = true;
-                    }
-                    else
-                    {
-                        waveEditor.Hide();
-                        showingWaveEditor = false;
                     }
                 }
             } ,
-            Exit: ( Button button ) => button.SetColor( Color.white ) );
+            Exit: ( Button button ) => button.SetColor( !waveEditor.showingWaveSets ? Color.white : button.color ) );
 
         waveEditorButton.SetViewportPosition( new Vector2( 0 , 1 ) );
 
-        waveEditor = new WaveEditor( container );
+        waveEditor = new WaveEditor( this , container );
     }
 }

@@ -154,8 +154,8 @@ public class BuyPanel : Layout
 {
     public override void Update()
     {
-        for ( int i = 0 ; contents.Count > i ; i++ )
-            contents[ i ].Update();
+        for ( int i = 0 ; elements.Count > i ; i++ )
+            elements[ i ].Update();
     }
 
     public BuyPanel( Shop shop , Player player , List<Definitions.Heroes> heroes , List<Definitions.Items> items , float width , float height , float spacing , float padding , int rows ) : base ( "Buy" , width , height , padding , spacing , rows )

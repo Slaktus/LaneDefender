@@ -18,6 +18,7 @@ public class Field : Button
 
     private IEnumerator Handler()
     {
+        SetColor( Color.green );
         StartInput?.Invoke( this );
         ShowQuad();
 
@@ -66,6 +67,7 @@ public class Field : Button
             yield return null;
         }
 
+        SetColor( Color.white );
         EndInput?.Invoke( this );
         _handler = null;
         HideQuad();
@@ -94,7 +96,7 @@ public class Field : Button
     private Mode mode { get; set; } 
     private bool _click;
 
-    public Field( string name , string label , float width , float height , GameObject parent = null , Mode mode = Mode.TextAndNumbers , Action<Field> StartInput = null , Action<Field> EndInput = null ) : base( name , label , width , height , parent , hideQuad: true )
+    public Field( string name , string label , float width , float height , int fontSize = 35 , GameObject parent = null , Mode mode = Mode.TextAndNumbers , Action<Field> StartInput = null , Action<Field> EndInput = null ) : base( name , label , width , height , parent , hideQuad: true , fontSize: fontSize )
     {
         this.StartInput = StartInput;
         this.EndInput = EndInput;
@@ -176,6 +178,9 @@ public class Button : Element
     public Rect rect => new Rect( container.transform.position.x - ( width * 0.5f ) , container.transform.position.z - ( height * 0.5f ) , width , height );
     public Vector2 screenPosition => Camera.main.WorldToScreenPoint( new Vector3( container.transform.position.x - ( width * 0.5f ) , container.transform.position.z - ( height * 0.5f ) , Camera.main.transform.position.z ) );
     public Vector3 localPosition => container.transform.localPosition;
+    public Vector3 position => container.transform.position;
+
+    public Color color => quad.material.color;
 
     protected bool Contains( Vector3 position ) => rect.Contains( new Vector2( position.x , position.z ) );
     protected MeshRenderer quad { get; set; }
@@ -246,31 +251,31 @@ public class Layout : Panel
 {
     public override void Update()
     {
-        for ( int i = 0 ; contents.Count > i ; i++ )
-            contents[ i ].Update();
+        for ( int i = 0 ; elements.Count > i ; i++ )
+            elements[ i ].Update();
     }
 
     public override void Destroy()
     {
-        for ( int i = 0 ; contents.Count > i ; i++ )
-            contents[ i ].Destroy();
+        for ( int i = 0 ; elements.Count > i ; i++ )
+            elements[ i ].Destroy();
 
-        contents.Clear();
+        elements.Clear();
         base.Destroy();
     }
 
     public void Refresh()
     {
-        int count = contents.Count;
+        int count = elements.Count;
         int perRow = Mathf.CeilToInt( count / rows );
         int remainder = count - ( perRow * rows );
         perRow += remainder;
         int x = 0;
         int y = 0;
 
-        Vector2 size = new Vector2( ( width - ( padding * 2 ) - ( spacing * ( perRow - 1 ) ) ) / perRow , ( height - ( padding ) - ( spacing * ( rows - 1 ) ) ) / rows );
+        Vector2 size = new Vector2( ( width - ( padding * 2 ) - ( spacing * ( perRow - 1 ) ) ) / perRow , ( height - ( padding * 2 ) - ( spacing * ( rows - 1 ) ) ) / rows );
 
-        for ( int i = 0 ; contents.Count > i ; i++ )
+        for ( int i = 0 ; elements.Count > i ; i++ )
         {
             if ( x > perRow - 1 )
             {
@@ -280,10 +285,10 @@ public class Layout : Panel
 
             Vector3 localPosition = new Vector3( ( -width * 0.5f ) + ( size.x * x ) + ( size.x * 0.5f ) + ( spacing * x ) + padding , 1 , ( height * 0.5f ) - ( size.y * y ) - ( size.y * 0.5f ) - ( spacing * y ) - padding );
 
-            if ( !( contents[ i ] is Label ) )
-                contents[ i ].SetLocalScale( new Vector3( size.x , size.y , 1 ) );
+            if ( !( elements[ i ] is Label ) )
+                elements[ i ].SetLocalScale( new Vector3( size.x , size.y , 1 ) );
 
-            contents[ i ].SetLocalPosition( localPosition );
+            elements[ i ].SetLocalPosition( localPosition );
             x++;
         }
     }
@@ -294,7 +299,7 @@ public class Layout : Panel
     public void Add( Element element , bool refresh = false )
     {
         element.SetParent( container );
-        contents.Add( element );
+        elements.Add( element );
 
         if ( refresh )
             Refresh();
@@ -302,7 +307,7 @@ public class Layout : Panel
 
     public void Remove( Element element , bool refresh = false )
     {
-        contents.Remove( element );
+        elements.Remove( element );
 
         if ( refresh )
             Refresh();
@@ -331,11 +336,11 @@ public class Layout : Panel
     public float spacing { get; protected set; }
     public int rows { get; protected set; }
 
-    protected List<Element> contents { get; set; }
+    protected List<Element> elements { get; set; }
 
     public Layout( string name , float width , float height , float padding , float spacing , int rows , GameObject parent = null ) : base( name , width , height )
     {
-        contents = new List<Element>();
+        elements = new List<Element>();
         this.padding = padding;
         this.spacing = spacing;
         this.rows = rows;
@@ -370,6 +375,7 @@ public abstract class Element
     public void SetViewportPosition( Vector2 viewportPosition ) => SetLocalPosition( Camera.main.ViewportToWorldPoint( new Vector3( viewportPosition.x , viewportPosition.y , Camera.main.transform.position.y ) ) + ( Vector3.right * width * 0.5f ) + ( Vector3.back * height * 0.5f ) );
     public void SetLocalPosition( Vector3 localPosition ) => container.transform.localPosition = localPosition;
     public void SetParent( GameObject parent ) => container.transform.SetParent( parent.transform );
+    public void SetPosition( Vector3 position ) => container.transform.position = position;
 
     public virtual void Update() { }
 
@@ -378,7 +384,7 @@ public abstract class Element
 
     protected GameObject container { get; set; }
     public float width { get; protected set; }
-    public float height { get; protected set; }
+    public float height { get;protected  set; }
 
     public Element( string name , float width , float height )
     {
