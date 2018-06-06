@@ -38,7 +38,6 @@ public class Editor
             Exit: ( Button button ) => button.SetColor( !waveEditor.showingWaveSets ? Color.white : button.color ) );
 
         waveEditorButton.SetViewportPosition( new Vector2( 0 , 1 ) );
-
         waveEditor = new WaveEditor( this , container );
     }
 }
