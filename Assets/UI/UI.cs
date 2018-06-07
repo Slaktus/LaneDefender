@@ -7,31 +7,32 @@ public class Dropdown : Button
 {
     public override void Update()
     {
+        base.Update();
+
         if ( Input.GetMouseButtonDown( 0 ) )
         {
             bool contains = containsMouse;
 
-            if ( layout != null )
-                contains = contains ? contains : layout.containsMouse;
+            for ( int i = 0 ; layouts.Count > i && !contains ; i++ )
+                contains = layouts[ i ].containsMouse;
 
             if ( !contains )
                 Close?.Invoke( this );
         }
-
-        base.Update();
     }
 
-    public void SetLayout( Layout layout ) => this.layout = layout;
+    public void AddLayout( Layout layout ) => layouts.Add( layout );
+    public void RemoveLayout( Layout layout ) => layouts.Remove( layout );
     public void SetClose( Action<Button> Close ) => this.Close = Close;
 
     private Action<Button> Close { get; set; }
 
-    private Layout layout { get; set; }
+    private List<Layout> layouts { get; }
 
-    public Dropdown( string name , string label , float width , float height , Layout layout , GameObject parent = null , Action<Button> Enter = null , Action<Button> Stay = null , Action<Button> Exit = null , Action<Button> Close = null , bool hideQuad = false , int fontSize = 35 , float characterSize = 0.15f ) : base( name , label , width , height , parent , Enter , Stay , Exit , hideQuad , fontSize , characterSize )
+    public Dropdown( string name , string label , float width , float height , GameObject parent = null , Action<Button> Enter = null , Action<Button> Stay = null , Action<Button> Exit = null , Action<Button> Close = null , bool hideQuad = false , int fontSize = 35 , float characterSize = 0.15f ) : base( name , label , width , height , parent , Enter , Stay , Exit , hideQuad , fontSize , characterSize )
     {
         SetClose( Close );
-        this.layout = layout;
+        layouts = new List<Layout>();
     }
 }
 

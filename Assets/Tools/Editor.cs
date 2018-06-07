@@ -23,7 +23,7 @@ public class Editor
         _container = new GameObject( "Editor" );
         _waveEditor = new WaveEditor( this , _container );
 
-        waveEditorDropdown = new Dropdown( "WaveEditor" , "Wave Editor" , buttonWidth , buttonHeight , _waveEditor.waveSetLayout , _container ,
+        waveEditorDropdown = new Dropdown( "WaveEditor" , "Wave Editor" , buttonWidth , buttonHeight , _container ,
             fontSize: fontSize ,
             Enter: ( Button button ) => button.SetColor( !_waveEditor.showingWaveSets ? Color.green : button.color ) ,
             Stay: ( Button button ) =>
@@ -32,13 +32,17 @@ public class Editor
                 {
                     button.SetColor( Color.yellow );
                     _waveEditor.Show( waveEditorDropdown.localPosition + ( Vector3.back * waveEditorDropdown.height ) );
-                    ( button as Dropdown ).SetLayout( _waveEditor.waveSetLayout );
+                    ( button as Dropdown ).AddLayout( _waveEditor.waveSetLayout );
                 }
             } ,
             Exit: ( Button button ) => button.SetColor( !_waveEditor.showingWaveSets ? Color.white : button.color ) ,
             Close: ( Button button ) => 
             {
+                ( button as Dropdown ).RemoveLayout( _waveEditor.waveSetLayout );
+                ( button as Dropdown ).RemoveLayout( _waveEditor.waveDefinitionLayout );
+                _waveEditor.HideWaveDefinitions();
                 _waveEditor.HideWaveSets();
+
                 button.SetColor( Color.white );
             } );
 
