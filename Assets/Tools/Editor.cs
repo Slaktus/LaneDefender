@@ -38,12 +38,15 @@ public class Editor
             Exit: ( Button button ) => button.SetColor( !_waveEditor.showingWaveSets ? Color.white : button.color ) ,
             Close: ( Button button ) => 
             {
-                ( button as Dropdown ).RemoveLayout( _waveEditor.waveSetLayout );
-                ( button as Dropdown ).RemoveLayout( _waveEditor.waveDefinitionLayout );
-                _waveEditor.HideWaveDefinitions();
-                _waveEditor.HideWaveSets();
+                if ( Input.GetMouseButtonDown( 0 ) )
+                {
+                    ( button as Dropdown ).RemoveLayout( _waveEditor.waveSetLayout );
+                    ( button as Dropdown ).RemoveLayout( _waveEditor.waveDefinitionLayout );
+                    _waveEditor.HideWaveDefinitions();
+                    _waveEditor.HideWaveSets();
 
-                button.SetColor( Color.white );
+                    button.SetColor( Color.white );
+                }
             } );
 
         waveEditorDropdown.SetViewportPosition( new Vector2( 0 , 1 ) );

@@ -8,21 +8,18 @@ public class Dropdown : Button
     public override void Update()
     {
         base.Update();
+        bool contains = containsMouse;
 
-        if ( Input.GetMouseButtonDown( 0 ) )
-        {
-            bool contains = containsMouse;
+        for ( int i = 0 ; layouts.Count > i && !contains ; i++ )
+            contains = layouts[ i ].containsMouse;
 
-            for ( int i = 0 ; layouts.Count > i && !contains ; i++ )
-                contains = layouts[ i ].containsMouse;
-
-            if ( !contains )
-                Close?.Invoke( this );
-        }
+        if ( !contains )
+            Close?.Invoke( this );
     }
 
     public void AddLayout( Layout layout ) => layouts.Add( layout );
     public void RemoveLayout( Layout layout ) => layouts.Remove( layout );
+    public bool HasLayout( Layout layout ) => layouts.Contains( layout );
     public void SetClose( Action<Button> Close ) => this.Close = Close;
 
     private Action<Button> Close { get; set; }

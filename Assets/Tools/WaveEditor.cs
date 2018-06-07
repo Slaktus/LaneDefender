@@ -221,14 +221,12 @@ public class WaveEditor
         for ( int i = 0 ; selectedWaveDefinition.waveEvents.Count > i ; i++ )
         {
             int index = i;
-            waveEventButtons[ selectedWaveDefinition.waveEvents[ index ].lane ].Add( new Button( "WaveEvent" + index.ToString() , index.ToString() , 1 , 1 , container ,
+            waveEventButtons[ selectedWaveDefinition.waveEvents[ index ].lane ].Add( new Dropdown( "WaveEvent" + index.ToString() , index.ToString() , 1 , 1 , container ,
                 Enter: ( Button butt ) => butt.SetColor( Color.red ) ,
                 Stay: ( Button butt ) =>
                 {
-                    if ( Input.GetMouseButtonUp( 0 ) )
+                    if ( Input.GetMouseButtonDown( 0 ) )
                     {
-                        waveEventEditor?.Destroy();
-
                         List<Element> waveEventEditorButtons = new List<Element>()
                         {
                             new Label("Type:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleRight ) ,
@@ -248,6 +246,7 @@ public class WaveEditor
                         waveEventEditor = new Layout( "WaveEventEditor" , 3.5f , 3 , 0.25f , 0.1f , waveEventEditorButtons.Count / 2 , container );
                         waveEventEditor.Add( waveEventEditorButtons , true );
                         waveEventEditor.SetPosition( butt.position + ( Vector3.left * waveEventEditor.width * 0.5f ) );
+                        ( butt as Dropdown ).AddLayout( waveEventEditor );
                     }
                 } ,
                 Exit: ( Button butt ) =>
@@ -259,6 +258,15 @@ public class WaveEditor
                     }
 
                     butt.SetColor( Color.white );
+                } , 
+                Close: ( Button butt ) => 
+                {
+                    if ( Input.GetMouseButtonDown( 0 ) && ( butt as Dropdown ).HasLayout( waveEventEditor ) )
+                    {
+                        waveEventEditor?.Destroy();
+                        ( butt as Dropdown ).RemoveLayout( waveEventEditor );
+                        HideWaveDefinitions();
+                    }
                 } ) );
         }
 
