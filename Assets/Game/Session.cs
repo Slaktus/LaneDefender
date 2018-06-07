@@ -181,7 +181,7 @@ public class Session
             speed: 5 ,
             width: width ,
             height: height ,
-            spacing: spacing ,
+            laneSpacing: spacing ,
             laneCount: lanes ,
             conveyor: conveyor ,
             player: player );

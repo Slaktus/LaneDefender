@@ -156,12 +156,12 @@ public class Stage
     /// </summary>
     public GameObject ground { get; }
 
-    public Stage( float speed , float width , float height , float spacing , int laneCount , Conveyor conveyor , Player player )
+    public Stage( float speed , float width , float height , float laneSpacing , int laneCount , Conveyor conveyor , Player player )
     {
         _player = player;
         this.speed = speed;
         this.conveyor = conveyor;
-        this.laneSpacing = spacing;
+        this.laneSpacing = laneSpacing;
         float laneHeight = height / laneCount;
         _lanes = new List<Lane>( laneCount );
 
@@ -169,7 +169,7 @@ public class Stage
         {
             Lane lane = new Lane(
                    stage: this ,
-                   depth: ( i * ( laneHeight + spacing ) ) + ( laneHeight * 0.5f ) ,
+                   depth: ( i * ( laneHeight + laneSpacing ) ) + ( laneHeight * 0.5f ) ,
                    width: width ,
                    height: laneHeight ,
                    name: "Lane" + i );
@@ -187,7 +187,7 @@ public class Stage
 
         //Transforms give GameObjects' positions, rotations and scales
         ground.transform.localScale = new Vector3( topRight.x - bottomLeft.x , 1 , topRight.z - bottomLeft.z );
-        ground.transform.position = new Vector3( width * 0.5f , -1 , ( -height * 0.5f ) - spacing * 0.5f );
+        ground.transform.position = new Vector3( width * 0.5f , -1 , ( -height * 0.5f ) - laneSpacing * 0.5f );
         ground.name = "Ground";
 
         //Disable the ground mesh renderer -- we don't want to see the cube

@@ -9,51 +9,6 @@ public class WaveEditor
 {
     public void Update()
     {
-        Ray mouseRay = camera.ScreenPointToRay( Input.mousePosition );
-        RaycastHit[] hits = Physics.RaycastAll( mouseRay.origin , mouseRay.direction , float.PositiveInfinity );
-        Lane hoveredLane = null;
-
-        if ( stage != null && hits.Length > 0 )
-        {
-            Vector3 mousePosition = hits[ 0 ].point;
-            hoveredLane = stage.GetHoveredLane( mousePosition );
-            stage.SetLaneColor( Color.black );
-
-            if ( hoveredLane != null )
-            {
-                hoveredLane.color = Color.yellow;
-
-                if ( Input.GetMouseButtonDown( 0 ) )
-                {
-                    int index = stage.IndexOf( hoveredLane );
-                    WaveEventDefinition waveEventDefinition = ScriptableObject.CreateInstance<WaveEventDefinition>();
-                    waveEventDefinition.Initialize( 0 , index , WaveEvent.Type.SpawnEnemy );
-                    ScriptableObjects.Add( waveEventDefinition , selectedWaveDefinition );
-                    HideWaveEventButtons();
-                    ShowWaveEventButtons();
-                }
-            }
-
-            if ( heldWaveEvent != null )
-            {
-                heldWaveEvent.SetPosition( mousePosition );
-
-                if ( Input.GetMouseButtonUp( 0 ) )
-                {
-                    if ( hoveredLane != null )
-                    {
-                        heldWaveEvent.waveEventDefinition.SetLane( stage.IndexOf( hoveredLane ) );
-                        HideWaveEventButtons();
-                        ShowWaveEventButtons();
-                    }
-
-                    heldWaveEvent.Destroy();
-                    heldWaveEvent = null;
-                }
-            }
-        }
-
-        stage?.Update();
         waveSetLayout?.Update();
         waveEventEditor?.Update();
         waveDefinitionLayout?.Update();
@@ -75,7 +30,6 @@ public class WaveEditor
     public void Show( Vector3 localPosition ) => ShowWaveSets( localPosition );
     public void Hide()
     {
-        stage?.Destroy();
         HideWaveEventButtons();
         HideWaveDefinitions();
         HideWaveSets();
@@ -166,22 +120,9 @@ public class WaveEditor
                         if ( selectedWaveSet != null && Input.GetMouseButtonDown( 0 ) )
                         {
                             if ( selectedWaveDefinition != null )
-                            {
-                                Debug.Log( "hey" );
                                 buttons[ selectedWaveSet.waveDefinitions.IndexOf( selectedWaveDefinition ) + 1 ].SetColor( Color.white );
-                            }
 
                             selectedWaveDefinition = selectedWaveSet.waveDefinitions[ index ];
-                            stage?.Destroy();
-
-                            stage = new Stage(
-                                speed: 5 ,
-                                width: 25 ,
-                                height: 15 ,
-                                spacing: 1 ,
-                                laneCount: 5 ,
-                                conveyor: null ,
-                                player: new Player() );
 
                             HideWaveSets();
                             HideWaveDefinitions();
@@ -200,11 +141,11 @@ public class WaveEditor
         showingWaveDefinitions = true;
     }
 
-    private void ShowWaveEventButtons()
+    public void ShowWaveEventButtons()
     {
         List<List<Button>> waveEventButtons = new List<List<Button>>();
 
-        for ( int i = 0 ; stage.lanes > i ; i++ )
+        for ( int i = 0 ; editor.stage.lanes > i ; i++ )
             waveEventButtons.Add( new List<Button>() );
 
         for ( int i = 0 ; selectedWaveDefinition.waveEvents.Count > i ; i++ )
@@ -273,14 +214,14 @@ public class WaveEditor
         for ( int i = 0 ; waveEventButtons.Count > i ; i++ )
         {
             Layout layout = new Layout( "WaveEventLayout" , waveEventButtons[ i ].Count , 1 , 0 , 0.1f , 1 );
-            layout.SetLocalPosition( stage.LaneBy( i ).start );
+            layout.SetLocalPosition( editor.stage.LaneBy( i ).start );
             layout.Add( waveEventButtons[ i ] , true );
             waveEventLayouts.Add( layout );
         }
     }
 
 
-    private void HideWaveEventButtons()
+    public void HideWaveEventButtons()
     {
         for ( int i = 0 ; waveEventLayouts.Count > i ; i++ )
             waveEventLayouts[ i ].Destroy();
@@ -295,9 +236,7 @@ public class WaveEditor
         waveDefinitionLayout?.Destroy();
     }
 
-    public Camera camera { get; }
     public GameObject container { get; }
-    public Stage stage { get; private set; }
     public WaveData waveData { get; private set; }
     public Layout waveSetLayout { get; private set; }
     public Layout waveDefinitionLayout { get; private set; }
@@ -313,14 +252,13 @@ public class WaveEditor
 
     private const string waveDataPath = "Assets/Data/Waves/";
     private List<Layout> waveEventLayouts { get; }
-    private HeldEvent heldWaveEvent { get; set; }
+    public HeldEvent heldWaveEvent { get; set; }
     private Layout waveEventEditor { get; set; }
     private Editor editor { get; }
 
     public WaveEditor( Editor editor , GameObject parent = null )
     {
         this.editor = editor;
-        camera = Camera.main;
         container = new GameObject( "WaveEditor" );
         waveSetContainer = new GameObject( "WaveSetContainer" );
         waveDefinitionContainer = new GameObject( "WaveDefinitionContainer" );
