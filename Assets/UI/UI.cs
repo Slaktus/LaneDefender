@@ -3,6 +3,38 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
+public class Dropdown : Button
+{
+    public override void Update()
+    {
+        if ( Input.GetMouseButtonDown( 0 ) )
+        {
+            bool contains = containsMouse;
+
+            if ( layout != null )
+                contains = contains ? contains : layout.containsMouse;
+
+            if ( !contains )
+                Close?.Invoke( this );
+        }
+
+        base.Update();
+    }
+
+    public void SetLayout( Layout layout ) => this.layout = layout;
+    public void SetClose( Action<Button> Close ) => this.Close = Close;
+
+    private Action<Button> Close { get; set; }
+
+    private Layout layout { get; set; }
+
+    public Dropdown( string name , string label , float width , float height , Layout layout , GameObject parent = null , Action<Button> Enter = null , Action<Button> Stay = null , Action<Button> Exit = null , Action<Button> Close = null , bool hideQuad = false , int fontSize = 35 , float characterSize = 0.15f ) : base( name , label , width , height , parent , Enter , Stay , Exit , hideQuad , fontSize , characterSize )
+    {
+        SetClose( Close );
+        this.layout = layout;
+    }
+}
+
 public class Field : Button
 {
     public override void Update()
@@ -131,23 +163,21 @@ public class Button : Element
 
     public override void Update()
     {
-        Vector3 mousePos = Camera.main.ScreenToWorldPoint( new Vector3( Input.mousePosition.x , Input.mousePosition.y , Camera.main.transform.position.y ) );
-
-        if ( Contains( mousePos ) )
+        if ( containsMouse )
         {
-            if ( !_hovering )
+            if ( !hovering )
             {
                 Enter( this );
-                _hovering = true;
+                hovering = true;
             }
             else
                 Stay( this );
 
         }
-        else if ( _hovering )
+        else if ( hovering )
         {
             Exit( this );
-            _hovering = false;
+            hovering = false;
         }
     }
 
@@ -175,21 +205,18 @@ public class Button : Element
     public void SetStay( Action<Button> Stay ) => this.Stay = Stay == null ? ( Button button ) => { } : Stay;
     public void SetExit( Action<Button> Exit ) => this.Exit = Exit == null ? ( Button button ) => { } : Exit;
 
-    public Rect rect => new Rect( container.transform.position.x - ( width * 0.5f ) , container.transform.position.z - ( height * 0.5f ) , width , height );
     public Vector2 screenPosition => Camera.main.WorldToScreenPoint( new Vector3( container.transform.position.x - ( width * 0.5f ) , container.transform.position.z - ( height * 0.5f ) , Camera.main.transform.position.z ) );
     public Vector3 localPosition => container.transform.localPosition;
     public Vector3 position => container.transform.position;
 
     public Color color => quad.material.color;
-
-    protected bool Contains( Vector3 position ) => rect.Contains( new Vector2( position.x , position.z ) );
     protected MeshRenderer quad { get; set; }
+    protected bool hovering { get; set; }
     protected Label label { get; set; }
 
     private Action<Button> Enter { get; set; }
     private Action<Button> Stay { get; set; }
     private Action<Button> Exit { get; set; }
-    private bool _hovering { get; set; }
 
     public Button( string name , string label , float width , float height , GameObject parent , Action<Button> Enter = null , Action<Button> Stay = null , Action<Button> Exit = null , bool hideQuad = false , int fontSize = 35 , float characterSize = 0.15f ) : base( name + typeof( Button ).Name , width , height )
     {
@@ -249,6 +276,20 @@ public class Label : Element
 
 public class Layout : Panel
 {
+    public override bool containsMouse => Contains( mousePos );
+
+    public override bool Contains( Vector3 position ) => Contains( new Vector2( position.x , position.z ) );
+
+    public override bool Contains( Vector2 position )
+    {
+        bool contains = false;
+
+        for ( int i = 0 ; elements.Count > i && !contains ; i++ )
+            contains = elements[ i ].Contains( position );
+
+        return contains && base.Contains( position );
+    }
+
     public override void Update()
     {
         for ( int i = 0 ; elements.Count > i ; i++ )
@@ -382,6 +423,12 @@ public abstract class Element
     public abstract void SetLocalScale( Vector3 localScale );
     public abstract void Destroy();
 
+    public Rect rect => new Rect( container.transform.position.x - ( width * 0.5f ) , container.transform.position.z - ( height * 0.5f ) , width , height );
+    public virtual bool Contains( Vector3 position ) => Contains( new Vector2( position.x , position.z ) );
+    public virtual bool Contains( Vector2 position ) => rect.Contains( position );
+    public virtual bool containsMouse => Contains( mousePos );
+
+    protected Vector3 mousePos => Camera.main.ScreenToWorldPoint( new Vector3( Input.mousePosition.x , Input.mousePosition.y , Camera.main.transform.position.y ) );
     protected GameObject container { get; set; }
     public float width { get; protected set; }
     public float height { get;protected  set; }

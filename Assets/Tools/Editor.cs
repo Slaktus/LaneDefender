@@ -6,38 +6,42 @@ public class Editor
 {
     public void Update()
     {
-        waveEditor?.Update();
-        waveEditorButton?.Update();
+        _waveEditor?.Update();
+        waveEditorDropdown?.Update();
     }
 
-    public Button waveEditorButton { get; }
-    GameObject container { get; }
-    WaveEditor waveEditor { get; }
+    public Dropdown waveEditorDropdown { get; }
+
+    private GameObject _container { get; }
+    private WaveEditor _waveEditor { get; }
 
     public Editor()
     {
         int fontSize = 20;
         float buttonWidth = 3;
         float buttonHeight = 1;
-        container = new GameObject( "Editor" );
+        _container = new GameObject( "Editor" );
+        _waveEditor = new WaveEditor( this , _container );
 
-        waveEditorButton = new Button( "WaveEditor" , "Wave Editor" , buttonWidth , buttonHeight , container ,
+        waveEditorDropdown = new Dropdown( "WaveEditor" , "Wave Editor" , buttonWidth , buttonHeight , _waveEditor.waveSetLayout , _container ,
             fontSize: fontSize ,
-            Enter: ( Button button ) => button.SetColor( !waveEditor.showingWaveSets ? Color.green : button.color ) ,
+            Enter: ( Button button ) => button.SetColor( !_waveEditor.showingWaveSets ? Color.green : button.color ) ,
             Stay: ( Button button ) =>
             {
-                if ( Input.GetMouseButtonDown( 0 ) )
+                if ( Input.GetMouseButtonDown( 0 ) && !_waveEditor.showingWaveSets )
                 {
-                    if ( !waveEditor.showingWaveSets )
-                    {
-                        button.SetColor( Color.yellow );
-                        waveEditor.Show( waveEditorButton.localPosition + ( Vector3.back * waveEditorButton.height ) );
-                    }
+                    button.SetColor( Color.yellow );
+                    _waveEditor.Show( waveEditorDropdown.localPosition + ( Vector3.back * waveEditorDropdown.height ) );
+                    ( button as Dropdown ).SetLayout( _waveEditor.waveSetLayout );
                 }
             } ,
-            Exit: ( Button button ) => button.SetColor( !waveEditor.showingWaveSets ? Color.white : button.color ) );
+            Exit: ( Button button ) => button.SetColor( !_waveEditor.showingWaveSets ? Color.white : button.color ) ,
+            Close: ( Button button ) => 
+            {
+                _waveEditor.HideWaveSets();
+                button.SetColor( Color.white );
+            } );
 
-        waveEditorButton.SetViewportPosition( new Vector2( 0 , 1 ) );
-        waveEditor = new WaveEditor( this , container );
+        waveEditorDropdown.SetViewportPosition( new Vector2( 0 , 1 ) );
     }
 }

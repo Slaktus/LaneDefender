@@ -103,7 +103,7 @@ public class WaveEditor
             for ( int i = 0 ; waveData.waveSets.Count > i ; i++ )
             {
                 int index = i;
-                buttons.Add( new Button( "WaveSet" , "Wave Set" , width , height , waveSetContainer ,
+                buttons.Add( new Dropdown( "WaveSet" , "Wave Set" , width , height , waveDefinitionLayout , waveSetContainer ,
                     fontSize: 20 ,
                     Enter: ( Button button ) => button.SetColor( selectedWaveSet == waveData.waveSets[ index ] ? button.color : Color.green ) ,
                     Stay: ( Button button ) =>
@@ -117,9 +117,17 @@ public class WaveEditor
                             selectedWaveSet = waveData.waveSets[ index ];
                             HideWaveDefinitions();
                             ShowWaveDefinitions( button.position , selectedWaveSet.waveDefinitions );
+                            ( button as Dropdown ).SetLayout( waveDefinitionLayout );
                         }
                     } ,
-                    Exit: ( Button button ) => button.SetColor( selectedWaveSet == waveData.waveSets[ index ] ? button.color : Color.white ) ) );
+                    Exit: ( Button button ) => button.SetColor( selectedWaveSet == waveData.waveSets[ index ] ? button.color : Color.white ) ,
+                    Close: ( Button button ) => 
+                    {
+                        HideWaveSets();
+                        HideWaveDefinitions();
+                        button.SetColor( Color.white );
+
+                    } ) );
             }
 
         waveSetLayout = new Layout( "WaveSetButtons" , width , height * buttons.Count , padding , spacing , buttons.Count , waveSetContainer );
@@ -186,7 +194,7 @@ public class WaveEditor
                             HideWaveDefinitions();
                             HideWaveEventButtons();
                             ShowWaveEventButtons();
-                            editor.waveEditorButton.SetColor( Color.white );
+                            editor.waveEditorDropdown.SetColor( Color.white );
                         }
                     } ,
                     Exit: ( Button button ) => button.SetColor( Color.white ) ) );
