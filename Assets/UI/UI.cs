@@ -33,7 +33,7 @@ public class Dropdown : Button
     }
 }
 
-public class Field : Dropdown
+public class Field : Button
 {
     public override void Update()
     {
