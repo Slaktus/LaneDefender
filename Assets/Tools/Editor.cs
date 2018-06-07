@@ -32,7 +32,7 @@ public class Editor
                 {
                     button.SetColor( Color.yellow );
                     _waveEditor.Show( waveEditorDropdown.localPosition + ( Vector3.back * waveEditorDropdown.height ) );
-                    ( button as Dropdown ).AddLayout( _waveEditor.waveSetLayout );
+                    waveEditorDropdown.AddLayout( _waveEditor.waveSetLayout );
                 }
             } ,
             Exit: ( Button button ) => button.SetColor( !_waveEditor.showingWaveSets ? Color.white : button.color ) ,
@@ -40,8 +40,8 @@ public class Editor
             {
                 if ( Input.GetMouseButtonDown( 0 ) )
                 {
-                    ( button as Dropdown ).RemoveLayout( _waveEditor.waveSetLayout );
-                    ( button as Dropdown ).RemoveLayout( _waveEditor.waveDefinitionLayout );
+                    waveEditorDropdown.RemoveLayout( _waveEditor.waveDefinitionLayout );
+                    waveEditorDropdown.RemoveLayout( _waveEditor.waveSetLayout );
                     _waveEditor.HideWaveDefinitions();
                     _waveEditor.HideWaveSets();
 

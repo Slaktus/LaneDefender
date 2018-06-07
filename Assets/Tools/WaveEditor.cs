@@ -120,18 +120,7 @@ public class WaveEditor
                             editor.waveEditorDropdown.AddLayout( waveDefinitionLayout );
                         }
                     } ,
-                    Exit: ( Button button ) => button.SetColor( selectedWaveSet == waveData.waveSets[ index ] ? button.color : Color.white ) /*,
-                    Close: ( Button button ) => 
-                    {
-                        
-                        Debug.Log( "hello" );
-                        ( button as Dropdown ).RemoveLayout( waveDefinitionLayout );
-                        ( button as Dropdown ).RemoveLayout( waveSetLayout );
-                        HideWaveSets();
-                        HideWaveDefinitions();
-                        button.SetColor( Color.white );
-                        
-                    }*/ ) );
+                    Exit: ( Button button ) => button.SetColor( selectedWaveSet == waveData.waveSets[ index ] ? button.color : Color.white ) ) );
             }
 
         waveSetLayout = new Layout( "WaveSetButtons" , width , height * buttons.Count , padding , spacing , buttons.Count , waveSetContainer );
@@ -227,6 +216,18 @@ public class WaveEditor
                 {
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
+                        if ( waveEventEditor != null )
+                        {
+                            for ( int j = 0 ; waveEventButtons.Count > j ; j++ )
+                                for ( int k = 0 ; waveEventButtons[ j ].Count > k ; k++ )
+
+                                if ( ( waveEventButtons[ j ][ k ] as Dropdown ).HasLayout( waveEventEditor ) )
+                                {
+                                    ( waveEventButtons[ j ][ k ] as Dropdown ).RemoveLayout( waveEventEditor );
+                                    waveEventEditor.Destroy();
+                                }
+                        }
+
                         List<Element> waveEventEditorButtons = new List<Element>()
                         {
                             new Label("Type:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleRight ) ,
@@ -263,9 +264,8 @@ public class WaveEditor
                 {
                     if ( Input.GetMouseButtonDown( 0 ) && ( butt as Dropdown ).HasLayout( waveEventEditor ) )
                     {
-                        waveEventEditor?.Destroy();
                         ( butt as Dropdown ).RemoveLayout( waveEventEditor );
-                        HideWaveDefinitions();
+                        waveEventEditor?.Destroy();
                     }
                 } ) );
         }
