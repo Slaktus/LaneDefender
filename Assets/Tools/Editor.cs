@@ -10,7 +10,7 @@ public class Editor
         RaycastHit[] hits = Physics.RaycastAll( mouseRay.origin , mouseRay.direction , float.PositiveInfinity );
         Lane hoveredLane = null;
 
-        if ( stage != null && !_waveEditor.showingWaveSets && !_waveEditor.showingWaveDefinitions && _waveEditor.selectedWaveDefinition != null && hits.Length > 0 )
+        if ( stage != null && _waveEditor.waveEventEditor == null && !_waveEditor.showingWaveSets && !_waveEditor.showingWaveDefinitions && _waveEditor.selectedWaveDefinition != null && hits.Length > 0 )
         {
             Vector3 mousePosition = hits[ 0 ].point;
             hoveredLane = stage.GetHoveredLane( mousePosition );

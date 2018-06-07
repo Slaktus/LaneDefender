@@ -166,23 +166,24 @@ public class WaveEditor
                                 {
                                     ( waveEventButtons[ j ][ k ] as Dropdown ).RemoveLayout( waveEventEditor );
                                     waveEventEditor.Destroy();
+                                    waveEventEditor = null;
                                 }
                         }
 
                         List<Element> waveEventEditorButtons = new List<Element>()
                         {
                             new Label("Type:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleRight ) ,
-                            new Button( "Type" , "Type" , 1.25f , 0.5f , container ,
-                            fontSize: 20 ,
-                            Enter: ( Button b ) => b.SetColor( Color.green ) ,
-                            Stay: ( Button b ) => { } ,
-                            Exit: ( Button b ) => b.SetColor( Color.white ) ) ,
+                            new Dropdown( "Type" , WaveEvent.Type.SpawnEnemy.ToString() , 2 , 0.5f , container ,
+                                fontSize: 20 ,
+                                Enter: ( Button b ) => b.SetColor( Color.green ) ,
+                                Stay: ( Button b ) => { } ,
+                                Exit: ( Button b ) => b.SetColor( Color.white ) ) ,
 
                             new Label( "Delay:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleRight ) ,
-                            new Field( "Delay" , selectedWaveDefinition.waveEvents[ index ].delay.ToString() , 3 , 1 , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) => float.TryParse( field.label.text , out selectedWaveDefinition.waveEvents[ index ].delay ) ) ,
+                            new Field( "Delay" , selectedWaveDefinition.waveEvents[ index ].delay.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) => float.TryParse( field.label.text , out selectedWaveDefinition.waveEvents[ index ].delay ) ) ,
 
                             new Label("Entry:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleRight ) ,
-                            new Field( "Entry" , selectedWaveDefinition.waveEvents[ index ].entryPoint.ToString() , 1.25f , 0.5f , 20 , container , Field.ContentMode.Numbers , EndInput: ( Field field ) => float.TryParse( field.label.text , out selectedWaveDefinition.waveEvents[ index ].entryPoint ) )
+                            new Field( "Entry" , selectedWaveDefinition.waveEvents[ index ].entryPoint.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers , EndInput: ( Field field ) => float.TryParse( field.label.text , out selectedWaveDefinition.waveEvents[ index ].entryPoint ) )
                         };
 
                         waveEventEditor = new Layout( "WaveEventEditor" , 3.5f , 3 , 0.25f , 0.1f , waveEventEditorButtons.Count / 2 , container );
@@ -207,6 +208,7 @@ public class WaveEditor
                     {
                         ( butt as Dropdown ).RemoveLayout( waveEventEditor );
                         waveEventEditor?.Destroy();
+                        waveEventEditor = null;
                     }
                 } ) );
         }
@@ -239,6 +241,7 @@ public class WaveEditor
     public GameObject container { get; }
     public WaveData waveData { get; private set; }
     public Layout waveSetLayout { get; private set; }
+    public Layout waveEventEditor { get; private set; }
     public Layout waveDefinitionLayout { get; private set; }
     public Layout waveEventEditorLayout { get; private set; }
     public bool showingWaveDefinitions { get; private set; }
@@ -253,7 +256,6 @@ public class WaveEditor
     private const string waveDataPath = "Assets/Data/Waves/";
     private List<Layout> waveEventLayouts { get; }
     public HeldEvent heldWaveEvent { get; set; }
-    private Layout waveEventEditor { get; set; }
     private Editor editor { get; }
 
     public WaveEditor( Editor editor , GameObject parent = null )
