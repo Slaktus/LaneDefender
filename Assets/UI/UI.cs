@@ -33,7 +33,7 @@ public class Dropdown : Button
     }
 }
 
-public class Field : Button
+public class Field : Dropdown
 {
     public override void Update()
     {
@@ -63,7 +63,7 @@ public class Field : Button
         {
             string current = Input.inputString;
 
-            if ( Input.GetMouseButton( 1 ) || Input.GetKeyDown( KeyCode.Return ) || Input.GetKeyDown( KeyCode.KeypadEnter ) )
+            if ( Input.GetMouseButton( 0 ) || Input.GetMouseButton( 1 ) || Input.GetKeyDown( KeyCode.Return ) || Input.GetKeyDown( KeyCode.KeypadEnter ) )
             {
                 done = true;
             }
@@ -84,7 +84,7 @@ public class Field : Button
                         isPunctuation = true;
 
                 bool isNumber = int.TryParse( current , out parsedInt );
-                bool valid =  mode == Mode.TextAndNumbers || ( mode == Mode.Text && !isNumber ) || ( mode == Mode.Numbers && ( isNumber || isPunctuation ) );
+                bool valid =  _contentMode == ContentMode.TextAndNumbers || ( _contentMode == ContentMode.Text && !isNumber ) || ( _contentMode == ContentMode.Numbers && ( isNumber || isPunctuation ) );
 
                 if ( valid )
                 {
@@ -123,32 +123,49 @@ public class Field : Button
     private Action<Field> EndInput { get; set; }
     private float _doubleClickTime { get; set; }
     private IEnumerator _handler { get; set; }
-    private Mode mode { get; set; } 
+    private ContentMode _contentMode { get; }
+    private EditMode _editMode { get; }
     private bool _click;
 
-    public Field( string name , string label , float width , float height , int fontSize = 35 , GameObject parent = null , Mode mode = Mode.TextAndNumbers , Action<Field> StartInput = null , Action<Field> EndInput = null ) : base( name , label , width , height , parent , hideQuad: true , fontSize: fontSize )
+    public Field( string name , string label , float width , float height , int fontSize = 35 , GameObject parent = null , ContentMode contentMode = ContentMode.TextAndNumbers , EditMode editMode = EditMode.SingleClick , Action<Field> StartInput = null , Action<Field> EndInput = null ) : base( name , label , width , height , parent , hideQuad: true , fontSize: fontSize )
     {
         this.StartInput = StartInput;
         this.EndInput = EndInput;
-        this.mode = mode;
+        _contentMode = contentMode;
+        _editMode = editMode;
 
         SetStay( ( Button button ) =>
         {
             if ( Input.GetMouseButtonDown( 0 ) )
             {
-                if ( _doubleClick )
-                    _handler = Handler();
-                else
-                    _doubleClick = true;
+                switch ( _editMode )
+                {
+                    case EditMode.DoubleClick:
+                        if ( _doubleClick )
+                            _handler = Handler();
+                        else
+                            _doubleClick = true;
+                        break;
+
+                    case EditMode.SingleClick:
+                        _handler = Handler();
+                        break;
+                }
             }
         } );
     }
 
-    public enum Mode
+    public enum ContentMode
     {
         Text,
         Numbers,
         TextAndNumbers,
+    }
+
+    public enum EditMode
+    {
+        SingleClick,
+        DoubleClick
     }
 }
 
@@ -275,7 +292,6 @@ public class Label : Element
 public class Layout : Panel
 {
     public override bool containsMouse => Contains( mousePos );
-
     public override bool Contains( Vector3 position ) => Contains( new Vector2( position.x , position.z ) );
 
     public override bool Contains( Vector2 position )

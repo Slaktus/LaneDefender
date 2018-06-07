@@ -238,10 +238,10 @@ public class WaveEditor
                             Exit: ( Button b ) => b.SetColor( Color.white ) ) ,
 
                             new Label( "Delay:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleRight ) ,
-                            new Field( "Delay" , selectedWaveDefinition.waveEvents[ index ].delay.ToString() , 3 , 1 , 20 , container , Field.Mode.Numbers  , EndInput: ( Field field ) => float.TryParse( field.label.text , out selectedWaveDefinition.waveEvents[ index ].delay ) ) ,
+                            new Field( "Delay" , selectedWaveDefinition.waveEvents[ index ].delay.ToString() , 3 , 1 , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) => float.TryParse( field.label.text , out selectedWaveDefinition.waveEvents[ index ].delay ) ) ,
 
                             new Label("Entry:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleRight ) ,
-                            new Field( "Entry" , selectedWaveDefinition.waveEvents[ index ].entryPoint.ToString() , 1.25f , 0.5f , 20 , container , Field.Mode.Numbers , EndInput: ( Field field ) => float.TryParse( field.label.text , out selectedWaveDefinition.waveEvents[ index ].entryPoint ) )
+                            new Field( "Entry" , selectedWaveDefinition.waveEvents[ index ].entryPoint.ToString() , 1.25f , 0.5f , 20 , container , Field.ContentMode.Numbers , EndInput: ( Field field ) => float.TryParse( field.label.text , out selectedWaveDefinition.waveEvents[ index ].entryPoint ) )
                         };
 
                         waveEventEditor = new Layout( "WaveEventEditor" , 3.5f , 3 , 0.25f , 0.1f , waveEventEditorButtons.Count / 2 , container );
