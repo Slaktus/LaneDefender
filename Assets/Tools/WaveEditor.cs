@@ -41,10 +41,10 @@ public class WaveEditor
     {
         testButton = new Button( "TestButton" , "Test" , 1.5f , 0.5f , null ,
             fontSize: 20 ,
-            Enter: ( Button button ) => button.SetColor( Color.green ) ,
+            Enter: ( Button button ) => button.SetColor( selectedWaveDefinition != null ? Color.green : button.color ) ,
             Stay: ( Button button ) =>
             {
-                if ( Input.GetMouseButtonDown( 0 ) )
+                if ( selectedWaveDefinition != null && Input.GetMouseButtonDown( 0 ) )
                 {
                     if ( level == null )
                     {
@@ -67,6 +67,7 @@ public class WaveEditor
                     else
                     {
                         button.SetLabel( "Test" );
+                        editor.stage.ClearLanes();
                         level.DestroyProgress();
                         level = null;
                     }
