@@ -215,6 +215,7 @@ public class Button : Element
 
     public override void SetLocalScale( Vector3 localScale ) => quad.transform.localScale = localScale;
 
+    public void SetLabel( string text ) => label.SetText( text );
     public void SetColor( Color color ) => quad.material.color = color;
     public void SetEnter( Action<Button> Enter ) => this.Enter = Enter == null ? ( Button button ) => { } : Enter;
     public void SetStay( Action<Button> Stay ) => this.Stay = Stay == null ? ( Button button ) => { } : Stay;

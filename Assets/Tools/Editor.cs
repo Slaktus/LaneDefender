@@ -57,6 +57,7 @@ public class Editor
 
     public Dropdown waveEditorDropdown { get; }
     public Stage stage { get; private set; }
+    public Level level { get; private set; }
 
     private Camera _camera { get; }
     private GameObject _container { get; }

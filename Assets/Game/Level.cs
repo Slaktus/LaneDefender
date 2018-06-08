@@ -52,7 +52,7 @@ public class Level
     private Queue<Wave> _waves { get; }
     private event Func<bool> Updater;
 
-    public Level( float duration )
+    public Level( float duration , bool showProgress = true )
     {
         Updater += () => false;
         this.duration = duration;
@@ -60,5 +60,8 @@ public class Level
         _currentWaves = new List<Wave>();
         _currentHandlers = new List<IEnumerator>();
         _progress = new LevelProgress( ( Vector3.forward * 2 ) + ( Vector3.right * 31.175f ) , 5 , 1 , duration );
+
+        if ( !showProgress )
+            HideProgress();
     }
 }

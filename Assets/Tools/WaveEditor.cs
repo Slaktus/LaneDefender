@@ -9,6 +9,8 @@ public class WaveEditor
 {
     public void Update()
     {
+        level?.Update();
+        testButton?.Update();
         waveSetLayout?.Update();
         waveEventEditor?.Update();
         waveDefinitionLayout?.Update();
@@ -34,6 +36,50 @@ public class WaveEditor
         HideWaveDefinitions();
         HideWaveSets();
     }
+
+    public void ShowTestButton()
+    {
+        testButton = new Button( "TestButton" , "Test" , 1.5f , 0.5f , null ,
+            fontSize: 20 ,
+            Enter: ( Button button ) => button.SetColor( Color.green ) ,
+            Stay: ( Button button ) =>
+            {
+                if ( Input.GetMouseButtonDown( 0 ) )
+                {
+                    if ( level == null )
+                    {
+                        level = new Level( 10 , showProgress: false );
+                        Wave wave = new Wave( 1 , editor.stage );
+
+                        for ( int i = 0 ; selectedWaveDefinition.waveEvents.Count > i ; i++ )
+                        {
+                            switch ( ( WaveEvent.Type ) selectedWaveDefinition.waveEvents[ i ].type )
+                            {
+                                case WaveEvent.Type.SpawnEnemy:
+                                    wave.Add( new SpawnEnemyEvent( Definitions.Enemy( Definitions.Enemies.Default ) , selectedWaveDefinition.waveEvents[ i ] ) );
+                                    break;
+                            }
+                        }
+
+                        level.Add( wave );
+                        button.SetLabel( "Stop" );
+                    }
+                    else
+                    {
+                        button.SetLabel( "Test" );
+                        level.DestroyProgress();
+                        level = null;
+                    }
+                }
+            } ,
+            Exit: ( Button button ) => button.SetColor( Color.white ) );
+
+        testButton.SetViewportPosition( new Vector2( 1 , 1 ) );
+        testButton.SetPosition( testButton.position + Vector3.left * testButton.width );
+    }
+
+    Level level;
+    Button testButton;
 
     private void ShowWaveSets( Vector3 localPosition , float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
     {
@@ -222,7 +268,6 @@ public class WaveEditor
         }
     }
 
-
     public void HideWaveEventButtons()
     {
         for ( int i = 0 ; waveEventLayouts.Count > i ; i++ )
@@ -230,7 +275,6 @@ public class WaveEditor
 
         waveEventLayouts.Clear();
     }
-
 
     public void HideWaveDefinitions()
     {
@@ -250,16 +294,17 @@ public class WaveEditor
     public WaveSet selectedWaveSet { get; private set; }
     public WaveDefinition selectedWaveDefinition { get; private set; }
 
+    public HeldEvent heldWaveEvent { get; set; }
     public GameObject waveSetContainer { get; private set; }
     public GameObject waveDefinitionContainer { get; private set; }
 
     private const string waveDataPath = "Assets/Data/Waves/";
     private List<Layout> waveEventLayouts { get; }
-    public HeldEvent heldWaveEvent { get; set; }
     private Editor editor { get; }
 
     public WaveEditor( Editor editor , GameObject parent = null )
     {
+        ShowTestButton();
         this.editor = editor;
         container = new GameObject( "WaveEditor" );
         waveSetContainer = new GameObject( "WaveSetContainer" );
