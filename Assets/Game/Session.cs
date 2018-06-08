@@ -54,9 +54,6 @@ public class Session
                 }
             }
 
-            if ( Input.GetMouseButtonDown( 1 ) )
-                hoveredLane?.Add( new Enemy( Definitions.Enemy( Definitions.Enemies.Default ) , new EnemySettings( Color.white , 3 , 8 ) , hoveredLane ) );
-
             //Reset lane colors
             stage.SetLaneColor( Color.black );
 

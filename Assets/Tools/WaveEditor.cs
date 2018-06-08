@@ -39,7 +39,7 @@ public class WaveEditor
 
     public void ShowTestButton()
     {
-        testButton = new Button( "TestButton" , "Test" , 1.5f , 0.5f , null ,
+        testButton = new Button( "Test" , "Test" , 1.5f , 0.5f , container ,
             fontSize: 20 ,
             Enter: ( Button button ) => button.SetColor( selectedWaveDefinition != null ? Color.green : button.color ) ,
             Stay: ( Button button ) =>
@@ -235,8 +235,11 @@ public class WaveEditor
 
                         waveEventEditor = new Layout( "WaveEventEditor" , 3.5f , 3 , 0.25f , 0.1f , waveEventEditorButtons.Count / 2 , container );
                         waveEventEditor.Add( waveEventEditorButtons , true );
-                        waveEventEditor.SetPosition( butt.position + ( Vector3.left * waveEventEditor.width * 0.5f ) );
+                        waveEventEditor.SetPosition( editor.stage.LaneBy( selectedWaveDefinition.waveEvents[ index ].lane ).start + ( Vector3.left * waveEventEditor.width * 0.5f ) );
                         ( butt as Dropdown ).AddLayout( waveEventEditor );
+
+                        for ( int j = 0 ; waveEventButtons[ selectedWaveDefinition.waveEvents[ index ].lane ].Count > j ; j++ )
+                            waveEventButtons[ selectedWaveDefinition.waveEvents[ index ].lane ][ j ].Hide();
                     }
                 } ,
                 Exit: ( Button butt ) =>
@@ -256,16 +259,20 @@ public class WaveEditor
                         ( butt as Dropdown ).RemoveLayout( waveEventEditor );
                         waveEventEditor?.Destroy();
                         waveEventEditor = null;
+
+                        for ( int j = 0 ; waveEventButtons[ selectedWaveDefinition.waveEvents[ index ].lane ].Count > j ; j++ )
+                            waveEventButtons[ selectedWaveDefinition.waveEvents[ index ].lane ][ j ].Show();
                     }
                 } ) );
         }
 
         for ( int i = 0 ; waveEventButtons.Count > i ; i++ )
         {
-            Layout layout = new Layout( "WaveEventLayout" , waveEventButtons[ i ].Count , 1 , 0 , 0.1f , 1 );
-            layout.SetLocalPosition( editor.stage.LaneBy( i ).start );
+            Layout layout = new Layout( "WaveEventLayout" , waveEventButtons[ i ].Count , 1 , 0.25f , 0.1f , 1 , container );
+            layout.SetLocalPosition( editor.stage.LaneBy( i ).start + ( Vector3.left * layout.width * 0.5f ) );
             layout.Add( waveEventButtons[ i ] , true );
             waveEventLayouts.Add( layout );
+            layout.Refresh();
         }
     }
 
@@ -305,7 +312,6 @@ public class WaveEditor
 
     public WaveEditor( Editor editor , GameObject parent = null )
     {
-        ShowTestButton();
         this.editor = editor;
         container = new GameObject( "WaveEditor" );
         waveSetContainer = new GameObject( "WaveSetContainer" );
@@ -317,6 +323,7 @@ public class WaveEditor
             container.transform.SetParent( parent.transform );
 
         waveEventLayouts = new List<Layout>();
+        ShowTestButton();
         Load();
 
         if ( waveData == null )

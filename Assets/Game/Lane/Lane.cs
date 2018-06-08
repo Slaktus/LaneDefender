@@ -92,7 +92,7 @@ public class Lane
     private MeshRenderer _meshRenderer { get; }
     private event Func<bool> Updater;
 
-    public Lane( Stage stage , float depth , float width , float height , string name )
+    public Lane( Stage stage , float depth , float width , float height , string name , GameObject parent )
     {
         Updater += () => false;
 
@@ -109,5 +109,7 @@ public class Lane
         _quad.GetComponent<MeshCollider>().enabled = false;
         _meshRenderer = _quad.GetComponent<MeshRenderer>();
         _meshRenderer.material = Entry.instance.unlitColor;
+
+        _quad.transform.SetParent( parent.transform );
     }
 }

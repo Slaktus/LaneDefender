@@ -22,7 +22,7 @@ public class Stage
                         handled = false;
 
                 if ( handled )
-                    lane.Add( new Enemy( ( waveEvent as SpawnEnemyEvent ).enemyDefinition , new EnemySettings( Color.white , 3 , 8 ) , lane , waveEvent.entryPoint ) );
+                    lane.Add( new Enemy( ( waveEvent as SpawnEnemyEvent ).enemyDefinition , new EnemySettings( Color.white , 3 , 8 ) , lane , waveEvent.entryPoint , _container ) );
 
                 return handled;
 
@@ -156,6 +156,8 @@ public class Stage
     /// </summary>
     public GameObject ground { get; }
 
+    private GameObject _container { get; }
+
     public Stage( float speed , float width , float height , float laneSpacing , int laneCount , Conveyor conveyor , Player player )
     {
         _player = player;
@@ -164,6 +166,7 @@ public class Stage
         this.laneSpacing = laneSpacing;
         float laneHeight = height / laneCount;
         _lanes = new List<Lane>( laneCount );
+        _container = new GameObject( "Stage" );
 
         for ( int i = 0 ; laneCount > i ; i++ )
         {
@@ -172,7 +175,8 @@ public class Stage
                    depth: ( i * ( laneHeight + laneSpacing ) ) + ( laneHeight * 0.5f ) ,
                    width: width ,
                    height: laneHeight ,
-                   name: "Lane" + i );
+                   name: "Lane" + i , 
+                   parent: _container );
 
             _lanes.Add( lane );
             Updater += lane.Update;
@@ -193,5 +197,6 @@ public class Stage
         //Disable the ground mesh renderer -- we don't want to see the cube
         //GetComponent lets us fetch references to components attached to GameObjects in a scene
         ground.GetComponent<MeshRenderer>().enabled = false;
+        ground.transform.SetParent( _container.transform );
     }
 }

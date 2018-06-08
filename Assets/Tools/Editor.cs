@@ -52,22 +52,26 @@ public class Editor
 
         stage?.Update();
         _waveEditor?.Update();
+        _stageEditor?.Update();
         waveEditorDropdown?.Update();
     }
 
     public Dropdown waveEditorDropdown { get; }
-    public Stage stage { get; private set; }
+    public Dropdown stageEditorDropdown { get; }
+    public Stage stage => _stageEditor.stage;
     public Level level { get; private set; }
 
     private Camera _camera { get; }
     private GameObject _container { get; }
     private WaveEditor _waveEditor { get; }
+    private StageEditor _stageEditor { get; }
 
     public Editor()
     {
         _camera = Camera.main;
         _container = new GameObject( "Editor" );
         _waveEditor = new WaveEditor( this , _container );
+        _stageEditor = new StageEditor( this , _container );
 
         int fontSize = 20;
         float buttonWidth = 3;
@@ -100,14 +104,5 @@ public class Editor
             } );
 
         waveEditorDropdown.SetViewportPosition( new Vector2( 0 , 1 ) );
-
-        stage = new Stage(
-            speed: 5 ,
-            width: 25 ,
-            height: 15 ,
-            laneSpacing: 1 ,
-            laneCount: 5 ,
-            conveyor: null ,
-            player: new Player() );
     }
 }
