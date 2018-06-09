@@ -74,12 +74,13 @@ public class Stage
         DestroyLanes();
         conveyor?.Destroy();
         GameObject.Destroy( ground );
+        GameObject.Destroy( _container );
     }
 
     /// <summary>
     /// Updates all lanes
     /// </summary>
-    public void Update() => Updater();
+    public void Update() => Updater?.Invoke();
 
     /// <summary>
     /// Set color of all lanes except optional

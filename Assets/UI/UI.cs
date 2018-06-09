@@ -182,16 +182,16 @@ public class Button : Element
         {
             if ( !hovering )
             {
-                Enter( this );
+                Enter?.Invoke( this );
                 hovering = true;
             }
             else
-                Stay( this );
+                Stay?.Invoke( this );
 
         }
         else if ( hovering )
         {
-            Exit( this );
+            Exit?.Invoke( this );
             hovering = false;
         }
     }
@@ -217,9 +217,9 @@ public class Button : Element
 
     public void SetLabel( string text ) => label.SetText( text );
     public void SetColor( Color color ) => quad.material.color = color;
-    public void SetEnter( Action<Button> Enter ) => this.Enter = Enter == null ? ( Button button ) => { } : Enter;
-    public void SetStay( Action<Button> Stay ) => this.Stay = Stay == null ? ( Button button ) => { } : Stay;
-    public void SetExit( Action<Button> Exit ) => this.Exit = Exit == null ? ( Button button ) => { } : Exit;
+    public void SetEnter( Action<Button> Enter ) => this.Enter = Enter;
+    public void SetStay( Action<Button> Stay ) => this.Stay = Stay;
+    public void SetExit( Action<Button> Exit ) => this.Exit = Exit;
 
     public Vector2 screenPosition => Camera.main.WorldToScreenPoint( new Vector3( container.transform.position.x - ( width * 0.5f ) , container.transform.position.z - ( height * 0.5f ) , Camera.main.transform.position.z ) );
     public Vector3 localPosition => container.transform.localPosition;

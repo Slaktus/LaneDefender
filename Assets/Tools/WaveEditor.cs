@@ -56,7 +56,7 @@ public class WaveEditor
                             button.SetColor( Color.yellow );
                             selectedWaveSet = waveData.waveSets[ index ];
                             HideWaveDefinitions();
-                            ShowWaveDefinitions( button.position , selectedWaveSet.waveDefinitions );
+                            ShowWaveDefinitions( button.position );
                         }
                     } ,
                     Exit: ( Button button ) => button.SetColor( selectedWaveSet == waveData.waveSets[ index ] ? button.color : Color.white ) ,
@@ -76,7 +76,7 @@ public class WaveEditor
         waveSetLayout.Add( buttons , true );
     }
 
-    private void ShowWaveDefinitions( Vector3 position , List<WaveDefinition> waveDefinitions , float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
+    private void ShowWaveDefinitions( Vector3 position , float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
     {
         List<Button> buttons = new List<Button>();
 
@@ -89,7 +89,7 @@ public class WaveEditor
                 {
                     ScriptableObjects.Add( ScriptableObject.CreateInstance<WaveDefinition>() , selectedWaveSet );
                     HideWaveDefinitions();
-                    ShowWaveDefinitions( position , selectedWaveSet.waveDefinitions );
+                    ShowWaveDefinitions( position );
                 }
             } ,
             Exit: ( Button button ) => button.SetColor( Color.white ) ) );
