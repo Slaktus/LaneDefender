@@ -50,18 +50,23 @@ public class Editor
             }
         }
 
+        level?.Update();
         stage?.Update();
+        _testButton?.Update();
+        _saveButton?.Update();
         _waveEditor?.Update();
         _stageEditor?.Update();
         waveEditorDropdown?.Update();
     }
-
+    
     public Dropdown waveEditorDropdown { get; }
     public Dropdown stageEditorDropdown { get; }
     public Stage stage => _stageEditor.stage;
     public Level level { get; private set; }
 
     private Camera _camera { get; }
+    private Button _testButton { get; }
+    private Button _saveButton { get; }
     private GameObject _container { get; }
     private WaveEditor _waveEditor { get; }
     private StageEditor _stageEditor { get; }
@@ -104,5 +109,56 @@ public class Editor
             } );
 
         waveEditorDropdown.SetViewportPosition( new Vector2( 0 , 1 ) );
+
+        _testButton = new Button( "Test" , "Test" , 1.5f , 0.5f , _container ,
+            fontSize: 20 ,
+            Enter: ( Button button ) => button.SetColor( _waveEditor.selectedWaveDefinition != null ? Color.green : button.color ) ,
+            Stay: ( Button button ) =>
+            {
+                if ( _waveEditor.selectedWaveDefinition != null && Input.GetMouseButtonDown( 0 ) )
+                {
+                    if ( level == null )
+                    {
+                        level = new Level( 10 , showProgress: false );
+                        Wave wave = new Wave( 1 , stage );
+
+                        for ( int i = 0 ; _waveEditor.selectedWaveDefinition.waveEvents.Count > i ; i++ )
+                        {
+                            switch ( ( WaveEvent.Type ) _waveEditor.selectedWaveDefinition.waveEvents[ i ].type )
+                            {
+                                case WaveEvent.Type.SpawnEnemy:
+                                    wave.Add( new SpawnEnemyEvent( Definitions.Enemy( Definitions.Enemies.Default ) , _waveEditor.selectedWaveDefinition.waveEvents[ i ] ) );
+                                    break;
+                            }
+                        }
+
+                        level.Add( wave );
+                        button.SetLabel( "Stop" );
+                    }
+                    else
+                    {
+                        button.SetLabel( "Test" );
+                        stage.ClearLanes();
+                        level.DestroyProgress();
+                        level = null;
+                    }
+                }
+            } ,
+            Exit: ( Button button ) => button.SetColor( Color.white ) );
+
+        _testButton.SetViewportPosition( new Vector2( 1 , 1 ) );
+        _testButton.SetPosition( _testButton.position + Vector3.left * _testButton.width );
+
+        _saveButton = new Button( "Save" , "Save" , 1.5f , 0.5f , _container ,
+            fontSize: 20 ,
+            Enter: ( Button button ) => button.SetColor( Color.green ) ,
+            Stay: ( Button button ) =>
+            {
+                if ( Input.GetMouseButtonDown( 0 ) )
+                    ScriptableObjects.Save();
+            } ,
+            Exit: ( Button button ) => button.SetColor( Color.white ) );
+
+        _saveButton.SetPosition( _testButton.position + Vector3.left * ( _saveButton.width ) );
     }
 }
