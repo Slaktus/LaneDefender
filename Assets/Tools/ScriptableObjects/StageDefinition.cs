@@ -9,9 +9,9 @@
         this.laneCount = laneCount;
     }
 
-    float speed;
-    float width;
-    float height;
-    float laneSpacing;
-    int laneCount;
+    public float speed;
+    public float width;
+    public float height;
+    public float laneSpacing;
+    public int laneCount;
 }

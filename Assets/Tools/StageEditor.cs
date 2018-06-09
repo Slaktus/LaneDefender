@@ -8,6 +8,7 @@ public class StageEditor
 {
     public void Update() { }
 
+    public void Load() => stageData = AssetDatabase.LoadAssetAtPath<StageData>( stageDataPath + "StageData.asset" );
     private void Create() => stageData = ScriptableObjects.Create<StageData>( stageDataPath + "StageData.asset" );
 
     public Stage stage { get; private set; }
@@ -22,6 +23,7 @@ public class StageEditor
         _editor = editor;
         _container = new GameObject( "StageEditor" );
         _container.transform.SetParent( parent.transform );
+        Load();
 
         stage = new Stage(
             speed: 5 ,

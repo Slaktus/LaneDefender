@@ -199,4 +199,6 @@ public class Stage
         ground.GetComponent<MeshRenderer>().enabled = false;
         ground.transform.SetParent( _container.transform );
     }
+
+    public Stage ( StageDefinition stageDefinition , Conveyor conveyor , Player player ) : this( stageDefinition.speed , stageDefinition.width , stageDefinition.height , stageDefinition.laneSpacing , stageDefinition.laneCount , conveyor , player ) { }
 }

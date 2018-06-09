@@ -17,17 +17,10 @@ public class WaveEditor
             waveEventLayouts[ i ].Update();
     }
 
-    private void Create() => waveData = ScriptableObjects.Create<WaveData>( waveDataPath + "WaveData.asset" );
     public void Load() => waveData = AssetDatabase.LoadAssetAtPath<WaveData>( waveDataPath + "WaveData.asset" );
-    public void Save() => AssetDatabase.SaveAssets();
+    private void Create() => waveData = ScriptableObjects.Create<WaveData>( waveDataPath + "WaveData.asset" );
 
     public void Show( Vector3 localPosition ) => ShowWaveSets( localPosition );
-    public void Hide()
-    {
-        HideWaveEventButtons();
-        HideWaveDefinitions();
-        HideWaveSets();
-    }
 
     private void ShowWaveSets( Vector3 localPosition , float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
     {
@@ -65,7 +58,6 @@ public class WaveEditor
                             selectedWaveSet = waveData.waveSets[ index ];
                             HideWaveDefinitions();
                             ShowWaveDefinitions( button.position , selectedWaveSet.waveDefinitions );
-                            editor.waveEditorDropdown.AddLayout( waveDefinitionLayout );
                         }
                     } ,
                     Exit: ( Button button ) => button.SetColor( selectedWaveSet == waveData.waveSets[ index ] ? button.color : Color.white ) ) );
@@ -75,13 +67,6 @@ public class WaveEditor
         waveSetLayout.SetLocalPosition( localPosition + ( Vector3.back * height * ( buttons.Count - 1 ) * 0.5f ) );
         waveSetLayout.Add( buttons , true );
         showingWaveSets = true;
-    }
-
-    public void HideWaveSets()
-    {
-        selectedWaveSet = null;
-        showingWaveSets = false;
-        waveSetLayout?.Destroy();
     }
 
     private void ShowWaveDefinitions( Vector3 position , List<WaveDefinition> waveDefinitions , float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
@@ -122,7 +107,6 @@ public class WaveEditor
                             HideWaveDefinitions();
                             HideWaveEventButtons();
                             ShowWaveEventButtons();
-                            editor.waveEditorDropdown.SetColor( Color.white );
                         }
                     } ,
                     Exit: ( Button button ) => button.SetColor( Color.white ) ) );
@@ -235,6 +219,20 @@ public class WaveEditor
     {
         showingWaveDefinitions = false;
         waveDefinitionLayout?.Destroy();
+    }
+
+    public void HideWaveSets()
+    {
+        selectedWaveSet = null;
+        showingWaveSets = false;
+        waveSetLayout?.Destroy();
+    }
+
+    public void Hide()
+    {
+        HideWaveEventButtons();
+        HideWaveDefinitions();
+        HideWaveSets();
     }
 
     public GameObject container { get; }

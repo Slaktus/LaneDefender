@@ -56,11 +56,8 @@ public class Editor
         _saveButton?.Update();
         _waveEditor?.Update();
         _stageEditor?.Update();
-        waveEditorDropdown?.Update();
     }
     
-    public Dropdown waveEditorDropdown { get; }
-    public Dropdown stageEditorDropdown { get; }
     public Stage stage => _stageEditor.stage;
     public Level level { get; private set; }
 
@@ -78,37 +75,7 @@ public class Editor
         _waveEditor = new WaveEditor( this , _container );
         _stageEditor = new StageEditor( this , _container );
 
-        int fontSize = 20;
-        float buttonWidth = 3;
-        float buttonHeight = 1;
-
-        waveEditorDropdown = new Dropdown( "WaveEditor" , "Wave Editor" , buttonWidth , buttonHeight , _container ,
-            fontSize: fontSize ,
-            Enter: ( Button button ) => button.SetColor( !_waveEditor.showingWaveSets ? Color.green : button.color ) ,
-            Stay: ( Button button ) =>
-            {
-                if ( Input.GetMouseButtonDown( 0 ) && !_waveEditor.showingWaveSets )
-                {
-                    button.SetColor( Color.yellow );
-                    _waveEditor.Show( waveEditorDropdown.localPosition + ( Vector3.back * waveEditorDropdown.height ) );
-                    waveEditorDropdown.AddLayout( _waveEditor.waveSetLayout );
-                }
-            } ,
-            Exit: ( Button button ) => button.SetColor( !_waveEditor.showingWaveSets ? Color.white : button.color ) ,
-            Close: ( Button button ) => 
-            {
-                if ( Input.GetMouseButtonDown( 0 ) )
-                {
-                    waveEditorDropdown.RemoveLayout( _waveEditor.waveDefinitionLayout );
-                    waveEditorDropdown.RemoveLayout( _waveEditor.waveSetLayout );
-                    _waveEditor.HideWaveDefinitions();
-                    _waveEditor.HideWaveSets();
-
-                    button.SetColor( Color.white );
-                }
-            } );
-
-        waveEditorDropdown.SetViewportPosition( new Vector2( 0 , 1 ) );
+        _waveEditor.Show( Camera.main.ViewportToWorldPoint( new Vector3( 0 , 1 , Camera.main.transform.position.y ) ) + ( Vector3.right * 3 * 0.5f ) + ( Vector3.back * 1 * 0.5f ) );
 
         _testButton = new Button( "Test" , "Test" , 1.5f , 0.5f , _container ,
             fontSize: 20 ,
