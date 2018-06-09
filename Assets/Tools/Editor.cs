@@ -57,7 +57,27 @@ public class Editor
         _waveEditor?.Update();
         _stageEditor?.Update();
     }
-    
+
+    public void Show()
+    {
+        _waveEditor.Show();
+        _stageEditor.Show();
+    }
+
+    public void Hide()
+    {
+        _waveEditor.Hide();
+        _stageEditor.Hide();
+    }
+
+    public void Refresh()
+    {
+        _waveEditor.Refresh();
+        _stageEditor.Refresh();
+    }
+
+    public float waveSetLayoutHeight => _waveEditor.waveSetLayout.height;
+    public Vector3 waveEditorPosition => _waveEditor.position;
     public Stage stage => _stageEditor.stage;
     public Level level { get; private set; }
 
@@ -76,6 +96,7 @@ public class Editor
         _stageEditor = new StageEditor( this , _container );
 
         _waveEditor.Show();
+        _stageEditor.Show();
 
         _testButton = new Button( "Test" , "Test" , 1.5f , 0.5f , _container ,
             fontSize: 20 ,
