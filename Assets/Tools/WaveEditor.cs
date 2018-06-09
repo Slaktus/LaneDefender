@@ -20,7 +20,8 @@ public class WaveEditor
     public void Load() => waveData = AssetDatabase.LoadAssetAtPath<WaveData>( waveDataPath + "WaveData.asset" );
     private void Create() => waveData = ScriptableObjects.Create<WaveData>( waveDataPath + "WaveData.asset" );
 
-    public void Show( Vector3 localPosition ) => ShowWaveSets( localPosition );
+    public void Show() => ShowWaveSets( localPosition );
+
 
     private void ShowWaveSets( Vector3 localPosition , float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
     {
@@ -60,7 +61,16 @@ public class WaveEditor
                             ShowWaveDefinitions( button.position , selectedWaveSet.waveDefinitions );
                         }
                     } ,
-                    Exit: ( Button button ) => button.SetColor( selectedWaveSet == waveData.waveSets[ index ] ? button.color : Color.white ) ) );
+                    Exit: ( Button button ) => button.SetColor( selectedWaveSet == waveData.waveSets[ index ] ? button.color : Color.white ) ,
+                    Close: ( Button button ) =>
+                    {
+                        if ( Input.GetMouseButtonDown( 0 ) && !waveDefinitionLayout.containsMouse && !waveSetLayout.containsMouse )
+                        {
+                            button.SetColor( Color.white );
+                            selectedWaveSet = null;
+                            HideWaveDefinitions();
+                        }
+                    } ) );
             }
 
         waveSetLayout = new Layout( "WaveSetButtons" , width , height * buttons.Count , padding , spacing , buttons.Count , waveSetContainer );
@@ -103,9 +113,8 @@ public class WaveEditor
 
                             selectedWaveDefinition = selectedWaveSet.waveDefinitions[ index ];
 
-                            HideWaveSets();
-                            HideWaveDefinitions();
-                            HideWaveEventButtons();
+                            Hide();
+                            Show();
                             ShowWaveEventButtons();
                         }
                     } ,
@@ -234,6 +243,8 @@ public class WaveEditor
         HideWaveDefinitions();
         HideWaveSets();
     }
+
+    private Vector3 localPosition = Camera.main.ViewportToWorldPoint( new Vector3( 0 , 1 , Camera.main.transform.position.y ) ) + ( Vector3.right * 3 * 0.5f ) + ( Vector3.back * 1 * 0.5f );
 
     public GameObject container { get; }
     public WaveData waveData { get; private set; }

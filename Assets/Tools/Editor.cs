@@ -75,7 +75,7 @@ public class Editor
         _waveEditor = new WaveEditor( this , _container );
         _stageEditor = new StageEditor( this , _container );
 
-        _waveEditor.Show( Camera.main.ViewportToWorldPoint( new Vector3( 0 , 1 , Camera.main.transform.position.y ) ) + ( Vector3.right * 3 * 0.5f ) + ( Vector3.back * 1 * 0.5f ) );
+        _waveEditor.Show();
 
         _testButton = new Button( "Test" , "Test" , 1.5f , 0.5f , _container ,
             fontSize: 20 ,
