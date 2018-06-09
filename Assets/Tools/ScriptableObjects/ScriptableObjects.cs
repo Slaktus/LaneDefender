@@ -4,6 +4,13 @@ using UnityEditor;
 
 public static class ScriptableObjects
 {
+    public static T Create<T>( string path ) where T : ScriptableObject
+    {
+        T asset = ScriptableObject.CreateInstance<T>();
+        AssetDatabase.CreateAsset( asset , path );
+        return asset;
+    }
+
     public static void Save() => AssetDatabase.SaveAssets();
 
     public static void Add<T,Y>( T toAdd , Y addTo ) where T : ScriptableObject where Y : DefinitionBase

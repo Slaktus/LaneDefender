@@ -19,15 +19,9 @@ public class WaveEditor
             waveEventLayouts[ i ].Update();
     }
 
+    private void Create() => waveData = ScriptableObjects.Create<WaveData>( waveDataPath + "WaveData.asset" );
     public void Load() => waveData = AssetDatabase.LoadAssetAtPath<WaveData>( waveDataPath + "WaveData.asset" );
     public void Save() => AssetDatabase.SaveAssets();
-
-    private void Create()
-    {
-        waveData = ScriptableObject.CreateInstance<WaveData>();
-        AssetDatabase.CreateAsset( waveData , waveDataPath + "WaveData.asset" );
-        AssetDatabase.SaveAssets();
-    }
 
     public void Show( Vector3 localPosition ) => ShowWaveSets( localPosition );
     public void Hide()
