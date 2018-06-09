@@ -64,7 +64,7 @@ public class WaveEditor
                     Exit: ( Button button ) => button.SetColor( selectedWaveSet == waveData.waveSets[ index ] ? button.color : Color.white ) ,
                     Close: ( Button button ) =>
                     {
-                        if ( Input.GetMouseButtonDown( 0 ) && !waveDefinitionLayout.containsMouse && !waveSetLayout.containsMouse )
+                        if ( Input.GetMouseButtonDown( 0 ) && !waveSetLayout.containsMouse && ( waveDefinitionLayout == null || !waveDefinitionLayout.containsMouse )  )
                         {
                             button.SetColor( Color.white );
                             selectedWaveSet = null;
@@ -76,7 +76,6 @@ public class WaveEditor
         waveSetLayout = new Layout( "WaveSetButtons" , width , height * buttons.Count , padding , spacing , buttons.Count , waveSetContainer );
         waveSetLayout.SetLocalPosition( localPosition + ( Vector3.back * height * ( buttons.Count - 1 ) * 0.5f ) );
         waveSetLayout.Add( buttons , true );
-        showingWaveSets = true;
     }
 
     private void ShowWaveDefinitions( Vector3 position , List<WaveDefinition> waveDefinitions , float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
@@ -233,7 +232,6 @@ public class WaveEditor
     public void HideWaveSets()
     {
         selectedWaveSet = null;
-        showingWaveSets = false;
         waveSetLayout?.Destroy();
     }
 
@@ -253,7 +251,6 @@ public class WaveEditor
     public Layout waveDefinitionLayout { get; private set; }
     public Layout waveEventEditorLayout { get; private set; }
     public bool showingWaveDefinitions { get; private set; }
-    public bool showingWaveSets { get; private set; }
 
     public WaveSet selectedWaveSet { get; private set; }
     public WaveDefinition selectedWaveDefinition { get; private set; }
