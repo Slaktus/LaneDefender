@@ -118,7 +118,6 @@ public class WaveEditor
 
                             Hide();
                             Show();
-                            ShowWaveEventButtons();
                         }
                     } ,
                     Exit: ( Button button ) => button.SetColor( Color.white ) ) );
