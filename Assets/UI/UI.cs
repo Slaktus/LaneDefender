@@ -287,6 +287,8 @@ public class Label : Element
 
         if ( parent != null )
             SetParent( parent );
+
+        container.transform.localPosition = Vector3.zero;
     }
 }
 

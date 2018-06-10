@@ -20,7 +20,13 @@ public class WaveEditor
     public void Load() => waveData = AssetDatabase.LoadAssetAtPath<WaveData>( _waveDataPath + "WaveData.asset" );
     private void Create() => waveData = ScriptableObjects.Create<WaveData>( _waveDataPath + "WaveData.asset" );
 
-    public void Show() => ShowWaveSets();
+    public void Show()
+    {
+        ShowWaveSets();
+
+        if ( selectedWaveDefinition != null )
+            ShowWaveEventButtons();
+    }
 
     private void ShowWaveSets( float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
     {
@@ -120,7 +126,7 @@ public class WaveEditor
 
         waveDefinitionLayout = new Layout( "WaveDefinitionButtons" , width , height * buttons.Count , padding , spacing , buttons.Count );
         waveDefinitionLayout.SetParent( _container );
-        waveDefinitionLayout.SetPosition( position + ( Vector3.right * width ) + ( Vector3.back * ( ( height * ( buttons.Count - 1 ) * 0.5f ) + ( padding * 0.5f ) ) ) );
+        waveDefinitionLayout.SetPosition( position + ( Vector3.left * width ) + ( Vector3.back * ( ( height * ( buttons.Count - 1 ) * 0.5f ) + ( padding * 0.5f ) ) ) );
         waveDefinitionLayout.Add( buttons , true );
         showingWaveDefinitions = true;
     }
@@ -156,17 +162,17 @@ public class WaveEditor
 
                         List<Element> waveEventEditorButtons = new List<Element>()
                         {
-                            new Label("Type:" , Color.black , 1.25f , 0.5f , _container , fontSize: 20 , anchor: TextAnchor.MiddleRight ) ,
+                            new Label("Type:" , Color.black , 1.25f , 0.5f , _container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
                             new Dropdown( "Type" , WaveEvent.Type.SpawnEnemy.ToString() , 2 , 0.5f , _container ,
                                 fontSize: 20 ,
                                 Enter: ( Button b ) => b.SetColor( Color.green ) ,
                                 Stay: ( Button b ) => { } ,
                                 Exit: ( Button b ) => b.SetColor( Color.white ) ) ,
 
-                            new Label( "Delay:" , Color.black , 1.25f , 0.5f , _container , fontSize: 20 , anchor: TextAnchor.MiddleRight ) ,
+                            new Label( "Delay:" , Color.black , 1.25f , 0.5f , _container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
                             new Field( "Delay" , selectedWaveDefinition.waveEvents[ index ].delay.ToString() , 2 , 0.5f , 20 , _container , Field.ContentMode.Numbers  , EndInput: ( Field field ) => float.TryParse( field.label.text , out selectedWaveDefinition.waveEvents[ index ].delay ) ) ,
 
-                            new Label("Entry:" , Color.black , 1.25f , 0.5f , _container , fontSize: 20 , anchor: TextAnchor.MiddleRight ) ,
+                            new Label("Entry:" , Color.black , 1.25f , 0.5f , _container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
                             new Field( "Entry" , selectedWaveDefinition.waveEvents[ index ].entryPoint.ToString() , 2 , 0.5f , 20 , _container , Field.ContentMode.Numbers , EndInput: ( Field field ) => float.TryParse( field.label.text , out selectedWaveDefinition.waveEvents[ index ].entryPoint ) )
                         };
 
@@ -246,7 +252,7 @@ public class WaveEditor
         Show();
     }
 
-    public Vector3 position = Camera.main.ViewportToWorldPoint( new Vector3( 0 , 1 , Camera.main.transform.position.y ) ) + ( Vector3.right * 3 * 0.5f ) + ( Vector3.back * 1 * 0.5f );
+    public Vector3 position => _editor.testButtonPosition + ( Vector3.left * waveSetLayout.width * 0.5f ) + ( Vector3.right * _editor.testButtonWidth * 0.5f ) + ( Vector3.back * ( ( _editor.testButtonWidth * 0.5f ) + 0.5f ) );
 
     public WaveData waveData { get; private set; }
     public Layout waveSetLayout { get; private set; }
@@ -266,7 +272,7 @@ public class WaveEditor
 
     public WaveEditor( Editor editor , GameObject parent = null )
     {
-        this._editor = editor;
+        _editor = editor;
         _container = new GameObject( "WaveEditor" );
 
         if ( parent != null )

@@ -76,8 +76,15 @@ public class Editor
         _stageEditor.Refresh();
     }
 
+    public float stageSetLayoutHeight => _stageEditor.stageSetLayout.height;
     public float waveSetLayoutHeight => _waveEditor.waveSetLayout.height;
+    public float testButtonHeight => _testButton.height;
+    public float testButtonWidth => _testButton.width;
+
     public Vector3 waveEditorPosition => _waveEditor.position;
+    public Vector3 stageEditorPosition => _stageEditor.position;
+    public Vector3 testButtonPosition => _testButton.position;
+
     public Stage stage => _stageEditor.stage;
     public Level level { get; private set; }
 
@@ -94,9 +101,6 @@ public class Editor
         _container = new GameObject( "Editor" );
         _waveEditor = new WaveEditor( this , _container );
         _stageEditor = new StageEditor( this , _container );
-
-        _waveEditor.Show();
-        _stageEditor.Show();
 
         _testButton = new Button( "Test" , "Test" , 1.5f , 0.5f , _container ,
             fontSize: 20 ,
@@ -148,5 +152,8 @@ public class Editor
             Exit: ( Button button ) => button.SetColor( Color.white ) );
 
         _saveButton.SetPosition( _testButton.position + Vector3.left * ( _saveButton.width ) );
+
+        _waveEditor.Show();
+        _stageEditor.Show();
     }
 }

@@ -8,7 +8,11 @@ public class StageEditor
 {
     public void Update()
     {
+        if ( selectedStageDefinition != null && stageEditorLayout == null )
+            ShowStageEditor();
+
         stageSetLayout?.Update();
+        stageEditorLayout?.Update();
         stageDefinitionLayout?.Update();
     }
 
@@ -50,7 +54,6 @@ public class StageEditor
 
                             button.SetColor( Color.yellow );
                             selectedStageSet = _stageData.stageSets[ index ];
-
 
                             HideStageDefinitions();
                             ShowStageDefinitions( button.position );
@@ -108,7 +111,7 @@ public class StageEditor
                             selectedStageDefinition = selectedStageSet.stageDefinitions[ index ];
                             stage?.Destroy();
                             stage = new Stage( selectedStageDefinition , null , new Player() );
-                            Refresh();
+                            Refresh( refreshAll: true );
                         }
                     } ,
                     Exit: ( Button button ) => button.SetColor( Color.white ) ) );
@@ -116,14 +119,60 @@ public class StageEditor
 
         stageDefinitionLayout = new Layout( "StageDefinitionButtons" , width , height * buttons.Count , padding , spacing , buttons.Count );
         stageDefinitionLayout.SetParent( _container );
-        stageDefinitionLayout.SetPosition( position + ( Vector3.right * width ) + ( Vector3.back * ( ( height * ( buttons.Count - 1 ) * 0.5f ) + ( padding * 0.5f ) ) ) );
+        stageDefinitionLayout.SetPosition( position + ( Vector3.left * width ) + ( Vector3.back * ( ( height * ( buttons.Count - 1 ) * 0.5f ) + ( padding * 0.5f ) ) ) );
         stageDefinitionLayout.Add( buttons , true );
         showingStageDefinitions = true;
     }
 
     public void ShowStageEditor()
     {
+        List<Element> stageEditorButtons = new List<Element>()
+        {
+            new Label( "Lanes:" , Color.black , 1.25f , 0.5f , _container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
+            new Field( "Lanes" , selectedStageDefinition.laneCount.ToString() , 2 , 0.5f , 20 , _container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
+            {
+                int.TryParse( field.label.text , out selectedStageDefinition.laneCount );
+                Refresh( refreshAll: true );
+            } ) ,
 
+            new Label( "Width:" , Color.black , 1.25f , 0.5f , _container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
+            new Field( "Width" , selectedStageDefinition.width.ToString() , 2 , 0.5f , 20 , _container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
+            {
+                float.TryParse( field.label.text , out selectedStageDefinition.width );
+                Refresh( refreshAll: true );
+            } ) ,
+
+            new Label( "Height:" , Color.black , 1.25f , 0.5f , _container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
+            new Field( "Height" , selectedStageDefinition.height.ToString() , 2 , 0.5f , 20 , _container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
+            {
+                float.TryParse( field.label.text , out selectedStageDefinition.height );
+                Refresh( refreshAll: true );
+            } ) ,
+
+            new Label( "Spacing:" , Color.black , 1.25f , 0.5f , _container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
+            new Field( "Spacing" , selectedStageDefinition.laneSpacing.ToString() , 2 , 0.5f , 20 , _container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
+            {
+                float.TryParse( field.label.text , out selectedStageDefinition.laneSpacing );
+                Refresh( refreshAll: true );
+            } ) ,
+
+            new Label( "Speed:" , Color.black , 1.25f , 0.5f , _container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
+            new Field( "Speed" , selectedStageDefinition.laneSpacing.ToString() , 2 , 0.5f , 20 , _container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
+            {
+                float.TryParse( field.label.text , out selectedStageDefinition.speed );
+                Refresh( refreshAll: true );
+            } )
+        };
+
+        stageEditorLayout = new Layout( "StageEditor" , 3 , 4 , 0.25f , 0.1f , stageEditorButtons.Count / 2 , _container );
+        stageEditorLayout.Add( stageEditorButtons , true );
+        stageEditorLayout.SetPosition( position + ( Vector3.back * ( stageSetLayout.height + ( stageEditorLayout.height * 0.5f ) ) ) );
+    }
+
+    public void HideStageEditor()
+    {
+        stageEditorLayout?.Destroy();
+        stageEditorLayout = null;
     }
 
     Layout stageEditorLayout { get; set; }
@@ -142,17 +191,29 @@ public class StageEditor
     public void Hide()
     {
         HideStageSets();
+        HideStageEditor();
         HideStageDefinitions();
         selectedStageSet = null;
     }
 
-    public void Refresh()
+    public void Refresh( bool refreshAll = false )
     {
-        Hide();
-        Show();
+        if ( refreshAll )
+            _editor.Refresh();
+        else
+        {
+            Hide();
+            Show();
+
+            if ( selectedStageDefinition != null )
+            {
+                stage.Destroy();
+                stage = new Stage( selectedStageDefinition , null , new Player() );
+            }
+        }
     }
 
-    public Vector3 position => _editor.waveEditorPosition + ( Vector3.back * _editor.waveSetLayoutHeight );
+    public Vector3 position => _editor.waveEditorPosition + ( Vector3.back * ( _editor.waveSetLayoutHeight + 0.5f ) );
 
     public Stage stage { get; private set; }
     public Layout stageSetLayout { get; private set; }
