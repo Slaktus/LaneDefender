@@ -14,15 +14,19 @@ public class Stage
         switch ( waveEvent.type )
         {
             case WaveEvent.Type.SpawnEnemy:
-                Lane lane = LaneBy( waveEvent.lane );
                 handled = true;
 
-                for ( int i = 0 ; lane.objects.Count > i && handled ; i++ )
-                    if ( lane.objects[ i ] is LaneEntity && 5 > lane.objects[ i ].back - lane.start.x )
-                        handled = false;
+                if ( lanes > waveEvent.lane )
+                {
+                    Lane lane = LaneBy( waveEvent.lane );
 
-                if ( handled )
-                    lane.Add( new Enemy( ( waveEvent as SpawnEnemyEvent ).enemyDefinition , new EnemySettings( Color.white , 3 , 8 ) , lane , waveEvent.entryPoint , _container ) );
+                    for ( int i = 0 ; lane.objects.Count > i && handled ; i++ )
+                        if ( lane.objects[ i ] is LaneEntity && 5 > lane.objects[ i ].back - lane.start.x )
+                            handled = false;
+
+                    if ( handled )
+                        lane.Add( new Enemy( ( waveEvent as SpawnEnemyEvent ).enemyDefinition , new EnemySettings( Color.white , 3 , 8 ) , lane , waveEvent.entryPoint , _container ) );
+                }
 
                 return handled;
 

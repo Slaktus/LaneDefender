@@ -60,20 +60,20 @@ public class Editor
 
     public void Show()
     {
-        _waveEditor.Show();
         _stageEditor.Show();
+        _waveEditor.Show();
     }
 
     public void Hide()
     {
-        _waveEditor.Hide();
         _stageEditor.Hide();
+        _waveEditor.Hide();
     }
 
     public void Refresh()
     {
-        _waveEditor.Refresh();
         _stageEditor.Refresh();
+        _waveEditor.Refresh();
     }
 
     public float stageSetLayoutHeight => _stageEditor.stageSetLayout.height;
@@ -153,7 +153,7 @@ public class Editor
 
         _saveButton.SetPosition( _testButton.position + Vector3.left * ( _saveButton.width ) );
 
-        _waveEditor.Show();
         _stageEditor.Show();
+        _waveEditor.Show();
     }
 }

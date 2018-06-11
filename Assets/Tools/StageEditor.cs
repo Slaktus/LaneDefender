@@ -157,7 +157,7 @@ public class StageEditor
             } ) ,
 
             new Label( "Speed:" , Color.black , 1.25f , 0.5f , _container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
-            new Field( "Speed" , selectedStageDefinition.laneSpacing.ToString() , 2 , 0.5f , 20 , _container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
+            new Field( "Speed" , selectedStageDefinition.speed.ToString() , 2 , 0.5f , 20 , _container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
             {
                 float.TryParse( field.label.text , out selectedStageDefinition.speed );
                 Refresh( refreshAll: true );
@@ -166,7 +166,7 @@ public class StageEditor
 
         stageEditorLayout = new Layout( "StageEditor" , 3 , 4 , 0.25f , 0.1f , stageEditorButtons.Count / 2 , _container );
         stageEditorLayout.Add( stageEditorButtons , true );
-        stageEditorLayout.SetPosition( position + ( Vector3.back * ( stageSetLayout.height + ( stageEditorLayout.height * 0.5f ) ) ) );
+        stageEditorLayout.SetPosition( _editor.waveEditorPosition + ( Vector3.back * ( _editor.waveSetLayoutHeight + ( stageEditorLayout.height * 0.5f ) ) ) );
     }
 
     public void HideStageEditor()
@@ -194,6 +194,12 @@ public class StageEditor
         HideStageEditor();
         HideStageDefinitions();
         selectedStageSet = null;
+
+        if ( selectedStageDefinition != null )
+        {
+            stage.Destroy();
+            stage = new Stage( selectedStageDefinition , null , new Player() );
+        }
     }
 
     public void Refresh( bool refreshAll = false )
@@ -204,16 +210,10 @@ public class StageEditor
         {
             Hide();
             Show();
-
-            if ( selectedStageDefinition != null )
-            {
-                stage.Destroy();
-                stage = new Stage( selectedStageDefinition , null , new Player() );
-            }
         }
     }
 
-    public Vector3 position => _editor.waveEditorPosition + ( Vector3.back * ( _editor.waveSetLayoutHeight + 0.5f ) );
+    public Vector3 position => _editor.testButtonPosition + ( Vector3.left * stageSetLayout.width * 0.5f ) + ( Vector3.right * _editor.testButtonWidth * 0.5f ) + ( Vector3.back * ( ( _editor.testButtonWidth * 0.5f ) + 0.5f ) );
 
     public Stage stage { get; private set; }
     public Layout stageSetLayout { get; private set; }
