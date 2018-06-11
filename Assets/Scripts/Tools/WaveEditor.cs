@@ -266,7 +266,7 @@ public class WaveEditor
     public WaveSet selectedWaveSet { get; private set; }
     public WaveDefinition selectedWaveDefinition { get; private set; }
 
-    private const string _waveDataPath = "Assets/Data/Waves/";
+    private const string _waveDataPath = "Assets/AssetBundleSource/Waves/";
     private List<Layout> _waveEventLayouts { get; }
     private GameObject _container { get; }
     private Editor _editor { get; }

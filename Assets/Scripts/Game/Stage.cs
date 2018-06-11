@@ -21,7 +21,7 @@ public class Stage
                     Lane lane = LaneBy( waveEvent.lane );
 
                     for ( int i = 0 ; lane.objects.Count > i && handled ; i++ )
-                        if ( lane.objects[ i ] is LaneEntity && 5 > lane.objects[ i ].back - lane.start.x )
+                        if ( lane.objects[ i ] is LaneEntity && lane.objects[ i ].rect.width > lane.objects[ i ].back - lane.start.x )
                             handled = false;
 
                     if ( handled )

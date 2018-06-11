@@ -225,7 +225,7 @@ public class StageEditor
     private Editor _editor { get; }
     private GameObject _container { get; }
     private StageData _stageData { get; set; }
-    private const string _stageDataPath = "Assets/Data/Stages/";
+    private const string _stageDataPath = "Assets/AssetBundleSource/Stages/";
 
     public StageEditor( Editor editor , GameObject parent )
     {

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿#if UNITY_EDITOR
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -157,3 +158,4 @@ public class Editor
         _waveEditor.Show();
     }
 }
+#endif
