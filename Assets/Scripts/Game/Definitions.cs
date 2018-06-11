@@ -17,12 +17,12 @@ public static class Definitions
     {
         enemyDefinitions = new List<EnemyDefinition>( ( int ) Enemies.Count )
         {
-            new EnemyDefinition( "Enemy" , 5 , 1 , 6 )
+            ScriptableObject.CreateInstance<EnemyDefinition>().Initialize( "Enemy" , 5 , 1 , 6 , Enemies.Default )
         };
 
         heroDefinitions = new List<HeroDefinition>( ( int ) Heroes.Count )
         {
-            new HeroDefinition( "Hero" , 5 , 1 )
+            ScriptableObject.CreateInstance<HeroDefinition>().Initialize( "Hero" , 5 , 1 , Heroes.Default )
         };
 
         itemDefinitions = new List<ItemDefinition>( ( int ) Items.Count )
@@ -69,41 +69,5 @@ public class ItemDefinition
     public ItemDefinition( Definitions.Items type )
     {
         this.type = type;
-    }
-}
-
-public class HeroDefinition : EntityDefinition
-{
-    public Definitions.Heroes type { get; }
-
-    public HeroDefinition( string name , float width , float laneHeightPadding  ) : base( name , width , laneHeightPadding , 0 )
-    {
-        type = Definitions.Heroes.Default;
-    }
-}
-
-public class EnemyDefinition : EntityDefinition
-{
-    public Definitions.Enemies type { get; }
-
-    public EnemyDefinition( string name , float width , float laneHeightPadding , int value ) : base( name , width , laneHeightPadding , value )
-    {
-        type = Definitions.Enemies.Default;
-    }
-}
-
-public abstract class EntityDefinition
-{
-    public int value { get; }
-    public string name { get; }
-    public float width { get; }
-    public float laneHeightPadding { get; }
-
-    public EntityDefinition( string name , float width , float laneHeightPadding , int value )
-    {
-        this.name = name;
-        this.width = width;
-        this.value = value;
-        this.laneHeightPadding = laneHeightPadding;
     }
 }

@@ -33,7 +33,7 @@ public class Hero : LaneEntity
     }
     public Color color { get { return meshRenderer.material.color; } set { meshRenderer.material.color = value; } }
 
-    public Hero( HeroDefinition definition , HeroSettings settings , Lane lane ) : base( definition.name , 0 , definition.width , definition.laneHeightPadding , settings.health , definition.value , lane )
+    public Hero( HeroDefinition definition , HeroSettings settings , Lane lane ) : base( definition.name , 0 , definition.width , definition.laneHeightPadding , settings.health , 0 , lane )
     {
         position = lane.end + ( Vector3.left * ( ( definition.width * 0.5f ) + 3 ) );
         color = settings.color;
