@@ -24,17 +24,17 @@ public class Entry : MonoBehaviour
         #if !UNITY_EDITOR
         StartSession( new Player() );
         #else
-        editor = new Editor();
+        campaignEditor = new CampaignEditor();
+        //editor = new Editor();
         //shop = new Shop( new Player() );
         #endif
     }
 
-    Shop shop;
-    Field field;
     #if UNITY_EDITOR
     Editor editor;
+    CampaignEditor campaignEditor;
 
-    private void Update() => editor?.Update();
+    private void Update() => campaignEditor?.Update();
     #endif
 
     void StartSession( Player player ) => StartCoroutine( SessionHandler( new Session( player , width: 25 , height: 15 , spacing: 1 , lanes: 5 ) ) );

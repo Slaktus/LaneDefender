@@ -156,6 +156,7 @@ public class Editor
 
         _stageEditor.Show();
         _waveEditor.Show();
+
     }
 }
 #endif
