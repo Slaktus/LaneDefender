@@ -1,4 +1,6 @@
-﻿public class EntityDefinition : DefinitionBase
+﻿using UnityEngine;
+
+public class EntityDefinition : ScriptableObject
 {
     protected void Initialize( string name , float width , float laneHeightPadding )
     {

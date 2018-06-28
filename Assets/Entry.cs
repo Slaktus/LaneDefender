@@ -21,10 +21,11 @@ public class Entry : MonoBehaviour
 	void Awake()
     {
         instance = this;
-        #if !UNITY_EDITOR
+#if !UNITY_EDITOR
         StartSession( new Player() );
-        #else
-        campaignEditor = new CampaignEditor();
+#else
+        missionEditor = new MissionEditor();
+        //campaignEditor = new CampaignEditor();
         //editor = new Editor();
         //shop = new Shop( new Player() );
         #endif
@@ -33,8 +34,9 @@ public class Entry : MonoBehaviour
     #if UNITY_EDITOR
     Editor editor;
     CampaignEditor campaignEditor;
+    MissionEditor missionEditor;
 
-    private void Update() => campaignEditor?.Update();
+    private void Update() => missionEditor?.Update();
     #endif
 
     void StartSession( Player player ) => StartCoroutine( SessionHandler( new Session( player , width: 25 , height: 15 , spacing: 1 , lanes: 5 ) ) );

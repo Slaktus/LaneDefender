@@ -1,4 +1,6 @@
-﻿public class StageDefinition : DefinitionBase
+﻿using UnityEngine;
+
+public class StageDefinition : ScriptableObject
 {
     public void Initialize( float speed , float width , float height , float laneSpacing , int laneCount )
     {

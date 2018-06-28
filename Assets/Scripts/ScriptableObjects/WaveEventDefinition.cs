@@ -1,4 +1,6 @@
-﻿public class WaveEventDefinition : DefinitionBase
+﻿using UnityEngine;
+
+public class WaveEventDefinition : ScriptableObject
 {
     public void SetLane( int lane ) => this.lane = lane;
 

@@ -26,8 +26,8 @@ public static class ScriptableObjects
 }
 #endif //UNITY_EDITOR
 
-public class DefinitionBase : ScriptableObject
+public abstract class DefinitionBase : ScriptableObject
 {
-    public virtual void Add( ScriptableObject toAdd ) { }
-    public virtual void Remove( ScriptableObject toRemove ) { }
+    public abstract void Add( ScriptableObject toAdd );
+    public abstract void Remove( ScriptableObject toRemove );
 }

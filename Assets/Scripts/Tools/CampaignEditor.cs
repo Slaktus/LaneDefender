@@ -114,6 +114,10 @@ public class CampaignEditor
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
                         _selectedMission = _selectedMissionSet.missionDefinitions[ capturedIndex ];
+                        //actually no, this should instead assign/associate the mission to the grid tile in question
+                        //should also change the label of the dropdown to indicate what mission is currently loaded
+                        //then we need to handle the layout that allows the player to hop into the stage/wave/mission editor
+                        //goal line is right around the bend!
                         HideMissionSets();
                         HideMissions();
                     }

@@ -148,9 +148,12 @@ public class Stage
     }
 
     public int lanes => _lanes.Count;
+    public float end => _lanes[ 0 ].end.x;
+    public float start => _lanes[ 0 ].start.x;
     public float laneSpacing { get; private set; }
     public Conveyor conveyor { get; private set; }
     public float speed { get; private set; }
+    public float width { get; private set; }
 
     private Player _player { get; }
     private List<Lane> _lanes { get; }
@@ -166,6 +169,7 @@ public class Stage
     public Stage( float speed , float width , float height , float laneSpacing , int laneCount , Conveyor conveyor , Player player )
     {
         _player = player;
+        this.width = width;
         this.speed = speed;
         this.conveyor = conveyor;
         this.laneSpacing = laneSpacing;
