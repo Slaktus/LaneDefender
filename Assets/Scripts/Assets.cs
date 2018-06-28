@@ -5,6 +5,7 @@ using UnityEngine;
 public static class Assets
 {
     public static void Initialize( MonoBehaviour client ) => client.StartCoroutine( LoadAssetBundles() );
+    public static CampaignData Get( CampaignDataSets data ) => _campaignData[ ( int ) data ];
     public static StageData Get( StageDataSets data ) => _stageData[ ( int ) data ];
     public static WaveData Get( WaveDataSets data ) => _waveData[ ( int ) data ];
 
@@ -41,19 +42,31 @@ public static class Assets
         for ( int i = 0 ; waveDataNames.Length > i ; i++ )
             _waveData.Add( waveData.assetBundle.LoadAsset<WaveData>( waveDataNames[ i ] ) );
 
+        //CAMPAIGN DATA
+        AssetBundleCreateRequest campaignData = AssetBundle.LoadFromFileAsync( System.IO.Path.Combine( platform , "campaigndata" ) );
+
+        yield return campaignData;
+
+        string[] campaignDataNames = campaignData.assetBundle.GetAllAssetNames();
+
+        for ( int i = 0 ; campaignDataNames.Length > i ; i++ )
+            _campaignData.Add( campaignData.assetBundle.LoadAsset<CampaignData>( campaignDataNames[ i ] ) );
+
         loaded = true;
     }
 
     public static bool loaded { get; private set; }
 
+    private static List<CampaignData> _campaignData { get; set; }
     private static List<StageData> _stageData { get; set; }
     private static List<WaveData> _waveData { get; set; }
 
     static Assets()
     {
-        loaded = false;
+        _campaignData = new List<CampaignData>();
         _stageData = new List<StageData>();
         _waveData = new List<WaveData>();
+        loaded = false;
     }
 
     public enum StageDataSets
@@ -63,6 +76,12 @@ public static class Assets
     }
 
     public enum WaveDataSets
+    {
+        Default = 0,
+        Count = 1
+    }
+
+    public enum CampaignDataSets
     {
         Default = 0,
         Count = 1

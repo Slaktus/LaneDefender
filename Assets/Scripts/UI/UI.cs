@@ -3,6 +3,51 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
+public abstract class Composite
+{
+    public virtual void Update() => Updater?.Invoke();
+    public virtual void Add<T>( T element ) where T : Element => elements.Add( Register( element ) );
+    public virtual void Remove<T>( T element ) where T : Element => elements.Remove( Deregister( element ) );
+    public virtual void Show() => Shower();
+    public virtual void Hide() => Hider();
+
+    public virtual void Refresh()
+    {
+        Show();
+        Hide();
+    }
+
+    private T Register<T>( T element ) where T : Element
+    {
+        element.SetParent( container );
+        Updater += element.Update;
+        Shower += element.Show;
+        Hider += element.Hide;
+        return element;
+    }
+
+    private T Deregister<T>( T element ) where T : Element
+    {
+        element.SetParent( container.transform.parent.gameObject );
+        Updater -= element.Update;
+        Shower -= element.Show;
+        Hider -= element.Hide;
+        return element;
+    }
+
+    protected GameObject container { get; }
+    protected List<Element> elements { get; }
+    protected event Action Updater;
+    protected event Action Shower;
+    protected event Action Hider;
+
+    public Composite( string name = "Composite" )
+    {
+        container = new GameObject( name );
+        elements = new List<Element>();
+    }
+}
+
 public class Dropdown : Button
 {
     public override void Update()
@@ -201,13 +246,13 @@ public class Button : Element
     public void ShowLabel() => label.Show();
     public void HideLabel() => label.Hide();
 
-    public void Show()
+    public override void Show()
     {
         ShowQuad();
         ShowLabel();
     }
 
-    public void Hide()
+    public override void Hide()
     {
         HideQuad();
         HideLabel();
@@ -261,8 +306,8 @@ public class Button : Element
 
 public class Label : Element
 {
-    public void Show() => textMesh.gameObject.SetActive( true );
-    public void Hide() => textMesh.gameObject.SetActive( false );
+    public override void Show() => textMesh.gameObject.SetActive( true );
+    public override void Hide() => textMesh.gameObject.SetActive( false );
     public void SetText( string text ) => textMesh.text = text;
     public void SetColor( Color color ) => textMesh.color = color;
     public void SetLocalRotation( Quaternion localRotation ) => textMesh.transform.localRotation = localRotation;
@@ -410,8 +455,10 @@ public class Layout : Panel
 
 public class Panel : Element
 {
-    public override void SetLocalScale( Vector3 localScale ) => quad.transform.localScale = localScale;
+    public override void Show() => quad.enabled = true;
+    public override void Hide() => quad.enabled = false;
     public override void Destroy() => GameObject.Destroy( container );
+    public override void SetLocalScale( Vector3 localScale ) => quad.transform.localScale = localScale;
 
     protected MeshRenderer quad { get; set; }
 
@@ -435,15 +482,16 @@ public abstract class Element
     public void SetParent( GameObject parent ) => container.transform.SetParent( parent.transform );
     public void SetPosition( Vector3 position ) => container.transform.position = position;
 
-    public virtual void Update() { }
-
     public abstract void SetLocalScale( Vector3 localScale );
     public abstract void Destroy();
+    public abstract void Show();
+    public abstract void Hide();
 
     public Rect rect => new Rect( container.transform.position.x - ( width * 0.5f ) , container.transform.position.z - ( height * 0.5f ) , width , height );
     public virtual bool Contains( Vector3 position ) => Contains( new Vector2( position.x , position.z ) );
     public virtual bool Contains( Vector2 position ) => rect.Contains( position );
     public virtual bool containsMouse => Contains( mousePos );
+    public virtual void Update() { }
 
     protected Vector3 mousePos => Camera.main.ScreenToWorldPoint( new Vector3( Input.mousePosition.x , Input.mousePosition.y , Camera.main.transform.position.y ) );
     protected GameObject container { get; set; }

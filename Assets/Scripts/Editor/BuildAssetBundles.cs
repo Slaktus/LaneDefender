@@ -7,8 +7,8 @@ public class CreateAssetBundles
     static void BuildAssetBundles()
     {
         string source = "Assets/AssetBundleSource";
-        string[] extensions = new string[] { "asset" , "asset" , };
-        string[] sourceDirectories = new string[] { "Stages" , "Waves" , };
+        string[] extensions = new string[] { "asset" , "asset" , "asset" };
+        string[] sourceDirectories = new string[] { "Stages" , "Waves" , "Campaigns" };
 
         string assetBundles = Path.Combine( UnityEngine.Application.streamingAssetsPath , "AssetBundles" );
         string pcAssets = Path.Combine( assetBundles , "PC" );
