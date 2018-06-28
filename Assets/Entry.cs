@@ -24,7 +24,8 @@ public class Entry : MonoBehaviour
 #if !UNITY_EDITOR
         StartSession( new Player() );
 #else
-        missionEditor = new MissionEditor();
+        neoEditor = new NeoEditor();
+        //missionEditor = new MissionEditor();
         //campaignEditor = new CampaignEditor();
         //editor = new Editor();
         //shop = new Shop( new Player() );
@@ -35,8 +36,9 @@ public class Entry : MonoBehaviour
     Editor editor;
     CampaignEditor campaignEditor;
     MissionEditor missionEditor;
+    NeoEditor neoEditor;
 
-    private void Update() => missionEditor?.Update();
+    private void Update() => neoEditor?.Update();
     #endif
 
     void StartSession( Player player ) => StartCoroutine( SessionHandler( new Session( player , width: 25 , height: 15 , spacing: 1 , lanes: 5 ) ) );

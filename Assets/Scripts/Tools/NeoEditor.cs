@@ -6,10 +6,7 @@ using UnityEditor;
 
 public class NeoEditor
 {
-    public void Update()
-    {
-        
-    }
+    public void Update() {}
 
     public T Load<T>( string path ) where T : ScriptableObject => AssetDatabase.LoadAssetAtPath<T>( path + typeof( T ) + ".asset" );
     private T Create<T>( string path ) where T : ScriptableObject => ScriptableObjects.Create<T>( path + typeof( T ) + ".asset" );
@@ -39,11 +36,9 @@ public class NeoEditor
 
         if ( campaignData == null )
             campaignData = Create<CampaignData>( _campaignDataPath );
+
+        campaignComposite = new CampaignLayout( this );
     }
 }
 
-public class CampaignComposite : Composite
-{
-
-}
 #endif //UNITY_EDITOR

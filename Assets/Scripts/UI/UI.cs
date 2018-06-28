@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-
+/*
 public abstract class Composite
 {
     public virtual void Update() => Updater?.Invoke();
@@ -47,7 +47,7 @@ public abstract class Composite
         elements = new List<Element>();
     }
 }
-
+*/
 public class Dropdown : Button
 {
     public override void Update()
@@ -64,6 +64,13 @@ public class Dropdown : Button
 
     public void AddLayout( Layout layout ) => layouts.Add( layout );
     public void RemoveLayout( Layout layout ) => layouts.Remove( layout );
+
+    public void RemoveLayouts()
+    {
+        while ( layouts.Count > 0 )
+            RemoveLayout( layouts[ layouts.Count - 1 ] );
+    }
+
     public bool HasLayout( Layout layout ) => layouts.Contains( layout );
     public void SetClose( Action<Button> Close ) => this.Close = Close;
 
@@ -369,30 +376,33 @@ public class Layout : Panel
 
     public void Refresh()
     {
-        int count = elements.Count;
-        int perRow = Mathf.CeilToInt( count / rows );
-        int remainder = count - ( perRow * rows );
-        perRow += remainder;
-        int x = 0;
-        int y = 0;
-
-        Vector2 size = new Vector2( ( width - ( padding * 2 ) - ( spacing * ( perRow - 1 ) ) ) / perRow , ( height - ( padding * 2 ) - ( spacing * ( rows - 1 ) ) ) / rows );
-
-        for ( int i = 0 ; elements.Count > i ; i++ )
+        if ( constrainElements )
         {
-            if ( x > perRow - 1 )
+            int count = elements.Count;
+            int perRow = Mathf.CeilToInt( count / rows );
+            int remainder = count - ( perRow * rows );
+            perRow += remainder;
+            int x = 0;
+            int y = 0;
+
+            Vector2 size = new Vector2( ( width - ( padding * 2 ) - ( spacing * ( perRow - 1 ) ) ) / perRow , ( height - ( padding * 2 ) - ( spacing * ( rows - 1 ) ) ) / rows );
+
+            for ( int i = 0 ; elements.Count > i ; i++ )
             {
-                x = 0;
-                y++;
+                if ( x > perRow - 1 )
+                {
+                    x = 0;
+                    y++;
+                }
+
+                Vector3 localPosition = new Vector3( ( -width * 0.5f ) + ( size.x * x ) + ( size.x * 0.5f ) + ( spacing * x ) + padding , 1 , ( height * 0.5f ) - ( size.y * y ) - ( size.y * 0.5f ) - ( spacing * y ) - padding );
+
+                if ( !( elements[ i ] is Label ) )
+                    elements[ i ].SetLocalScale( new Vector3( size.x , size.y , 1 ) );
+
+                elements[ i ].SetLocalPosition( localPosition );
+                x++;
             }
-
-            Vector3 localPosition = new Vector3( ( -width * 0.5f ) + ( size.x * x ) + ( size.x * 0.5f ) + ( spacing * x ) + padding , 1 , ( height * 0.5f ) - ( size.y * y ) - ( size.y * 0.5f ) - ( spacing * y ) - padding );
-
-            if ( !( elements[ i ] is Label ) )
-                elements[ i ].SetLocalScale( new Vector3( size.x , size.y , 1 ) );
-
-            elements[ i ].SetLocalPosition( localPosition );
-            x++;
         }
     }
 
@@ -438,11 +448,13 @@ public class Layout : Panel
     public float padding { get; protected set; }
     public float spacing { get; protected set; }
     public int rows { get; protected set; }
+    public bool constrainElements { get; private set; }
 
     protected List<Element> elements { get; set; }
 
-    public Layout( string name , float width , float height , float padding , float spacing , int rows , GameObject parent = null ) : base( name , width , height )
+    public Layout( string name , float width , float height , float padding , float spacing , int rows , GameObject parent = null , bool constrainElements = true ) : base( name , width , height )
     {
+        this.constrainElements = constrainElements;
         elements = new List<Element>();
         this.padding = padding;
         this.spacing = spacing;
@@ -451,6 +463,16 @@ public class Layout : Panel
         if ( parent != null )
             SetParent( parent );
     }
+
+    public Layout( string name , GameObject parent = null ) : base( name , 0 , 0 )
+    {
+        constrainElements = false;
+        elements = new List<Element>();
+
+        if ( parent != null )
+            SetParent( parent );
+    }
+
 }
 
 public class Panel : Element
