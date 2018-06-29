@@ -3,10 +3,14 @@ using UnityEngine;
 
 public class MissionDefinition : DefinitionBase
 {
-    public void Initialize( string name , float duration )
+    public static MissionDefinition Default() => CreateInstance<MissionDefinition>().Initialize( "MissionDefinition" , 120 , StageDefinition.Default() );
+
+    public MissionDefinition Initialize( string name , float duration , StageDefinition stageDefinition )
     {
         this.name = name;
         this.duration = duration;
+        this.stageDefinition = stageDefinition;
+        return this;
     }
 
     public void SetDuration( float duration ) => this.duration = duration;

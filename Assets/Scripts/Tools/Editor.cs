@@ -1,4 +1,5 @@
-﻿#if UNITY_EDITOR
+﻿/*
+#if UNITY_EDITOR
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -86,7 +87,6 @@ public class Editor
     public Vector3 stageEditorPosition => _stageEditor.position;
     public Vector3 testButtonPosition => _testButton.position;
 
-    public Stage stage => _stageEditor.stage;
     public Level level { get; private set; }
 
     private Camera _camera { get; }
@@ -160,3 +160,4 @@ public class Editor
     }
 }
 #endif
+*/

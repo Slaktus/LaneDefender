@@ -105,9 +105,7 @@ public class MissionEditor
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
                         HideMissions();
-                        MissionDefinition missionDefinition = ScriptableObject.CreateInstance<MissionDefinition>();
-                        missionDefinition.Initialize( "MissionDefinition" , 120 );
-                        ScriptableObjects.Add( missionDefinition , selectedMissionSet );
+                        ScriptableObjects.Add( MissionDefinition.Default() , selectedMissionSet );
                         ShowMissions( index , position );
                     }
                 } ,
@@ -141,6 +139,13 @@ public class MissionEditor
     {
         missions?.Destroy();
         missions = null;
+    }
+
+    public void Hide()
+    {
+        HideMissions();
+        HideMissionSets();
+        HideIndicator();
     }
 
     private void ShowIndicator() => _indicator.enabled = true;

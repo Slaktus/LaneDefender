@@ -80,7 +80,7 @@ public class CampaignEditor
                         HideCampaigns();
                         CampaignDefinition campaignDefinition = ScriptableObject.CreateInstance<CampaignDefinition>();
                         campaignDefinition.Initialize( 20 , 15 , 5 , 5 );
-                        ScriptableObjects.Add( campaignDefinition , selectedCampaignSet );
+                        ScriptableObjects.Add( CampaignDefinition.Default() , selectedCampaignSet );
                         ShowCampaigns( index , position );
                     }
                 } ,

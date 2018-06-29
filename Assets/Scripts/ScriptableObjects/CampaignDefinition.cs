@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class CampaignDefinition : DefinitionBase
 {
+    public static CampaignDefinition Default() => CreateInstance<CampaignDefinition>().Initialize( 20 , 15 , 5 , 5 );
+
     public CampaignDefinition Initialize( float width , float height , int columns , int rows )
     {
         this.rows = rows;

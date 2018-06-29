@@ -17,9 +17,6 @@ public class WaveEditor
             _waveEventLayouts[ i ].Update();
     }
 
-    public void Load() => waveData = AssetDatabase.LoadAssetAtPath<WaveData>( _waveDataPath + "WaveData.asset" );
-    private void Create() => waveData = ScriptableObjects.Create<WaveData>( _waveDataPath + "WaveData.asset" );
-
     public void Show()
     {
         ShowWaveSets();
@@ -39,33 +36,33 @@ public class WaveEditor
             {
                 if ( Input.GetMouseButtonDown( 0 ) )
                 {
-                    ScriptableObjects.Add( ScriptableObject.CreateInstance<WaveSet>() , waveData );
+                    ScriptableObjects.Add( ScriptableObject.CreateInstance<WaveSet>() , _editor.waveData );
                     _editor.Refresh();
                 }
             } ,
             Exit: ( Button button ) => button.SetColor( Color.white ) ) );
 
-        if ( waveData.waveSets != null )
-            for ( int i = 0 ; waveData.waveSets.Count > i ; i++ )
+        if ( _editor.waveData.waveSets != null )
+            for ( int i = 0 ; _editor.waveData.waveSets.Count > i ; i++ )
             {
                 int index = i;
                 buttons.Add( new Dropdown( "WaveSet" , "Wave Set" , width , height , _container ,
                     fontSize: 20 ,
-                    Enter: ( Button button ) => button.SetColor( selectedWaveSet == waveData.waveSets[ index ] ? button.color : Color.green ) ,
+                    Enter: ( Button button ) => button.SetColor( selectedWaveSet == _editor.waveData.waveSets[ index ] ? button.color : Color.green ) ,
                     Stay: ( Button button ) =>
                     {
                         if ( Input.GetMouseButtonDown( 0 ) )
                         {
                             if ( selectedWaveSet != null )
-                                buttons[ waveData.waveSets.IndexOf( selectedWaveSet ) + 1 ].SetColor( Color.white );
+                                buttons[ _editor.waveData.waveSets.IndexOf( selectedWaveSet ) + 1 ].SetColor( Color.white );
 
                             button.SetColor( Color.yellow );
-                            selectedWaveSet = waveData.waveSets[ index ];
+                            selectedWaveSet = _editor.waveData.waveSets[ index ];
                             HideWaveDefinitions();
                             ShowWaveDefinitions( button.position );
                         }
                     } ,
-                    Exit: ( Button button ) => button.SetColor( selectedWaveSet == waveData.waveSets[ index ] ? button.color : Color.white ) ,
+                    Exit: ( Button button ) => button.SetColor( selectedWaveSet == _editor.waveData.waveSets[ index ] ? button.color : Color.white ) ,
                     Close: ( Button button ) =>
                     {
                         if ( Input.GetMouseButtonDown( 0 ) && !waveSetLayout.containsMouse && ( waveDefinitionLayout == null || !waveDefinitionLayout.containsMouse )  )
@@ -253,9 +250,8 @@ public class WaveEditor
         Show();
     }
 
-    public Vector3 position => _editor.stageEditorPosition + ( Vector3.back * ( _editor.stageSetLayoutHeight + 0.5f ) );
+    public Vector3 position => Vector3.zero;
 
-    public WaveData waveData { get; private set; }
     public Layout waveSetLayout { get; private set; }
     public Layout waveEventEditor { get; private set; }
     public Layout waveDefinitionLayout { get; private set; }
@@ -266,12 +262,11 @@ public class WaveEditor
     public WaveSet selectedWaveSet { get; private set; }
     public WaveDefinition selectedWaveDefinition { get; private set; }
 
-    private const string _waveDataPath = "Assets/AssetBundleSource/Waves/";
     private List<Layout> _waveEventLayouts { get; }
     private GameObject _container { get; }
-    private Editor _editor { get; }
+    private NeoEditor _editor { get; }
 
-    public WaveEditor( Editor editor , GameObject parent = null )
+    public WaveEditor( NeoEditor editor , GameObject parent = null )
     {
         _editor = editor;
         _container = new GameObject( "WaveEditor" );
@@ -280,10 +275,6 @@ public class WaveEditor
             _container.transform.SetParent( parent.transform );
 
         _waveEventLayouts = new List<Layout>();
-        Load();
-
-        if ( waveData == null )
-            Create();
     }
 }
 #endif //UNITY_EDITOR

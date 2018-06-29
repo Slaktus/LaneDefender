@@ -16,9 +16,6 @@ public class StageEditor
         stageDefinitionLayout?.Update();
     }
 
-    public void Load() => _stageData = AssetDatabase.LoadAssetAtPath<StageData>( _stageDataPath + "StageData.asset" );
-    private void Create() => _stageData = ScriptableObjects.Create<StageData>( _stageDataPath + "StageData.asset" );
-
     public void Show() => ShowStageSets();
 
     private void ShowStageSets( float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
@@ -32,34 +29,34 @@ public class StageEditor
             {
                 if ( Input.GetMouseButtonDown( 0 ) )
                 {
-                    ScriptableObjects.Add( ScriptableObject.CreateInstance<StageSet>() , _stageData );
+                    ScriptableObjects.Add( ScriptableObject.CreateInstance<StageSet>() , _editor.stageData );
                     _editor.Refresh();
                 }
             } ,
             Exit: ( Button button ) => button.SetColor( Color.white ) ) );
 
-        if ( _stageData.stageSets != null )
-            for ( int i = 0 ; _stageData.stageSets.Count > i ; i++ )
+        if ( _editor.stageData.stageSets != null )
+            for ( int i = 0 ; _editor.stageData.stageSets.Count > i ; i++ )
             {
                 int index = i;
                 buttons.Add( new Dropdown( "StageSet" , "Stage Set" , width , height , _container ,
                     fontSize: 20 ,
-                    Enter: ( Button button ) => button.SetColor( selectedStageSet == _stageData.stageSets[ index ] ? button.color : Color.green ) ,
+                    Enter: ( Button button ) => button.SetColor( selectedStageSet == _editor.stageData.stageSets[ index ] ? button.color : Color.green ) ,
                     Stay: ( Button button ) =>
                     {
                         if ( Input.GetMouseButtonDown( 0 ) )
                         {
                             if ( selectedStageSet != null )
-                                buttons[ _stageData.stageSets.IndexOf( selectedStageSet ) + 1 ].SetColor( Color.white );
+                                buttons[ _editor.stageData.stageSets.IndexOf( selectedStageSet ) + 1 ].SetColor( Color.white );
 
                             button.SetColor( Color.yellow );
-                            selectedStageSet = _stageData.stageSets[ index ];
+                            selectedStageSet = _editor.stageData.stageSets[ index ];
 
                             HideStageDefinitions();
                             ShowStageDefinitions( button.position );
                         }
                     } ,
-                    Exit: ( Button button ) => button.SetColor( selectedStageSet == _stageData.stageSets[ index ] ? button.color : Color.white ) ,
+                    Exit: ( Button button ) => button.SetColor( selectedStageSet == _editor.stageData.stageSets[ index ] ? button.color : Color.white ) ,
                     Close: ( Button button ) =>
                     {
                         if ( Input.GetMouseButtonDown( 0 ) && !stageSetLayout.containsMouse &&( stageDefinitionLayout == null || !stageDefinitionLayout.containsMouse ) )
@@ -87,7 +84,7 @@ public class StageEditor
             {
                 if ( selectedStageSet != null && Input.GetMouseButtonDown( 0 ) )
                 {
-                    ScriptableObjects.Add( ScriptableObject.CreateInstance<StageDefinition>() , selectedStageSet );
+                    ScriptableObjects.Add( StageDefinition.Default() , selectedStageSet );
                     HideStageDefinitions();
                     ShowStageDefinitions( position );
                 }
@@ -109,8 +106,8 @@ public class StageEditor
                                 buttons[ selectedStageSet.stageDefinitions.IndexOf( selectedStageDefinition ) + 1 ].SetColor( Color.white );
 
                             selectedStageDefinition = selectedStageSet.stageDefinitions[ index ];
-                            stage?.Destroy();
-                            stage = new Stage( selectedStageDefinition , null , new Player() );
+                            _editor.HideStage();
+                            _editor.ShowStage( selectedStageDefinition );
                             Refresh( refreshAll: true );
                         }
                     } ,
@@ -166,7 +163,7 @@ public class StageEditor
 
         stageEditorLayout = new Layout( "StageEditor" , 3 , 4 , 0.25f , 0.1f , stageEditorButtons.Count / 2 , _container );
         stageEditorLayout.Add( stageEditorButtons , true );
-        stageEditorLayout.SetPosition( _editor.waveEditorPosition + ( Vector3.back * ( _editor.waveSetLayoutHeight + ( stageEditorLayout.height * 0.5f ) ) ) );
+        //stageEditorLayout.SetPosition( _editor.waveEditorPosition + ( Vector3.back * ( _editor.waveSetLayoutHeight + ( stageEditorLayout.height * 0.5f ) ) ) );
     }
 
     public void HideStageEditor()
@@ -197,8 +194,8 @@ public class StageEditor
 
         if ( selectedStageDefinition != null )
         {
-            stage.Destroy();
-            stage = new Stage( selectedStageDefinition , null , new Player() );
+            _editor.HideStage();
+            _editor.ShowStage( selectedStageDefinition );
         }
     }
 
@@ -213,38 +210,22 @@ public class StageEditor
         }
     }
 
-    public Vector3 position => _editor.testButtonPosition + ( Vector3.left * stageSetLayout.width * 0.5f ) + ( Vector3.right * _editor.testButtonWidth * 0.5f ) + ( Vector3.back * ( ( _editor.testButtonWidth * 0.5f ) + 0.5f ) );
+    public Vector3 position => Vector3.zero;
 
-    public Stage stage { get; private set; }
     public Layout stageSetLayout { get; private set; }
     public StageSet selectedStageSet { get; private set; }
     public Layout stageDefinitionLayout { get; private set; }
     public StageDefinition selectedStageDefinition { get; private set; }
     public bool showingStageDefinitions { get; private set; }
 
-    private Editor _editor { get; }
+    private NeoEditor _editor { get; }
     private GameObject _container { get; }
-    private StageData _stageData { get; set; }
-    private const string _stageDataPath = "Assets/AssetBundleSource/Stages/";
 
-    public StageEditor( Editor editor , GameObject parent )
+    public StageEditor( NeoEditor editor , GameObject parent )
     {
         _editor = editor;
         _container = new GameObject( "StageEditor" );
         _container.transform.SetParent( parent.transform );
-        Load();
-
-        stage = new Stage(
-            speed: 5 ,
-            width: 25 ,
-            height: 15 ,
-            laneSpacing: 1 ,
-            laneCount: 5 ,
-            conveyor: null ,
-            player: new Player() );
-
-        if ( _stageData == null )
-            Create();
     }
 }
 #endif //UNITY_EDITOR

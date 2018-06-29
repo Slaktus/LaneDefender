@@ -33,7 +33,7 @@ public class Entry : MonoBehaviour
     }
 
     #if UNITY_EDITOR
-    Editor editor;
+    //Editor editor;
     CampaignEditor campaignEditor;
     MissionEditor missionEditor;
     NeoEditor neoEditor;

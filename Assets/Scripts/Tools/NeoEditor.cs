@@ -15,8 +15,9 @@ public class NeoEditor
         missionEditor.Update();
     }
 
-    public void ShowStage() { }
-    public void HideStage() { }
+    public void ShowStage( StageDefinition stageDefinition ) => stage = new Stage( stageDefinition , null , null );
+
+    public void HideStage() => stage?.Destroy();
 
     public void ShowCampaignMap()
     {
@@ -32,8 +33,15 @@ public class NeoEditor
                 {
                     if ( Input.GetMouseButtonDown( 0 ) && button.containsMouse )
                     {
-                        if ( campaignEditor.selectedCampaign.Get( index ) == missionEditor.selectedMission )
-                            Debug.LogError( "strap it in" );
+                        if ( missionEditor.selectedMission != null && campaignEditor.selectedCampaign.Get( index ) == missionEditor.selectedMission )
+                        {
+                            //actually, we probably want to do something else here
+                            //we really want to be able to set the stage here, at least
+                            ShowStage( missionEditor.selectedMission.stageDefinition );
+                            campaignEditor.Hide();
+                            missionEditor.Hide();
+                            HideCampaignMap();
+                        }
                         else if ( !( button as Dropdown ).HasLayout( missionEditor.missions ) )
                             missionEditor.ShowMissionSets( index , button.position + new Vector3( button.width * 0.5f , 0 , button.height * 0.5f ) );
                     }
@@ -76,14 +84,17 @@ public class NeoEditor
 
     public Vector3 mousePosition => Camera.main.ScreenToWorldPoint( new Vector3( Input.mousePosition.x , Input.mousePosition.y , Camera.main.transform.position.y ) );
     public CampaignMap campaignMap { get; private set; }
-    public CampaignEditor campaignEditor { get; }
-    public MissionEditor missionEditor { get; }
     public Stage stage { get; private set; }
     public GameObject container { get; }
 
     public CampaignData campaignData { get; }
     public StageData stageData { get; }
     public WaveData waveData { get; }
+
+    public CampaignEditor campaignEditor { get; }
+    public MissionEditor missionEditor { get; }
+    public StageEditor stageEditor { get; }
+    public WaveEditor waveEditor { get; }
 
     private List<Dropdown> _campaignMapDropdowns { get; }
 
