@@ -9,6 +9,10 @@ public class NeoEditor
     public void Update()
     {
         campaignEditor.Update();
+        missionEditor.Update();
+
+        for ( int i = 0 ; _campaignMapDropdowns.Count > i ; i++ )
+            _campaignMapDropdowns[ i ].Update();
     }
 
     public void ShowStage() { }
@@ -26,17 +30,17 @@ public class NeoEditor
                 Enter: ( Button button ) => button.SetColor( Color.green ) ,
                 Stay: ( Button button ) =>
                 {
-                    /*if ( Input.GetMouseButtonDown( 0 ) && button.containsMouse && !( button as Dropdown ).HasLayout( _missions ) )
-                        ShowMissionSets( index , button.position + new Vector3( button.width * 0.5f , 0 , button.height * 0.5f ) );*/
+                    if ( Input.GetMouseButtonDown( 0 ) && button.containsMouse && !( button as Dropdown ).HasLayout( missionEditor.missions ) )
+                        missionEditor.ShowMissionSets( index , button.position + new Vector3( button.width * 0.5f , 0 , button.height * 0.5f ) );
                 } ,
                 Exit: ( Button button ) => button.SetColor( Color.white ) ,
                 Close: ( Button button ) =>
                 {
-                    /*if ( ( Input.GetMouseButtonDown( 0 ) || Input.GetMouseButtonDown( 1 ) ) && ( ( button as Dropdown ).HasLayout( _missions ) || ( button as Dropdown ).HasLayout( _missionSets ) ) && ( _missions == null || !_missions.containsMouse ) )
+                    if ( ( Input.GetMouseButtonDown( 0 ) || Input.GetMouseButtonDown( 1 ) ) && ( ( button as Dropdown ).HasLayout( missionEditor.missions ) || ( button as Dropdown ).HasLayout( missionEditor.missionSets ) ) && ( missionEditor.missions == null || !missionEditor.missions.containsMouse ) )
                     {
-                        HideMissions();
-                        HideMissionSets();
-                    }*/
+                        missionEditor.HideMissions();
+                        missionEditor.HideMissionSets();
+                    }
                 } );
 
             dropdown.SetPosition( campaignMap.tileMap.PositionOf( index ) );
@@ -54,6 +58,7 @@ public class NeoEditor
 
     public void Refresh()
     {
+        ShowCampaignMap();
     }
 
     public T Load<T>( string path ) where T : ScriptableObject => AssetDatabase.LoadAssetAtPath<T>( path + typeof( T ) + ".asset" );
@@ -62,6 +67,7 @@ public class NeoEditor
     public Vector3 mousePosition => Camera.main.ScreenToWorldPoint( new Vector3( Input.mousePosition.x , Input.mousePosition.y , Camera.main.transform.position.y ) );
     public CampaignMap campaignMap { get; private set; }
     public CampaignEditor campaignEditor { get; }
+    public MissionEditor missionEditor { get; }
     public Stage stage { get; private set; }
     public GameObject container { get; }
 
@@ -94,6 +100,7 @@ public class NeoEditor
         container = new GameObject( "Editor" );
 
         campaignEditor = new CampaignEditor( this , Vector3.zero );
+        missionEditor = new MissionEditor( this );
     }
 }
 

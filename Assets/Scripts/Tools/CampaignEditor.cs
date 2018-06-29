@@ -117,6 +117,7 @@ public class CampaignEditor
             new Field( "Width" , selectedCampaign.width.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
             {
                 float.TryParse( field.label.text , out selectedCampaign.width );
+                _editor.Refresh();
                 Refresh();
             } ) ,
 
@@ -124,6 +125,7 @@ public class CampaignEditor
             new Field( "Height" , selectedCampaign.height.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
             {
                 float.TryParse( field.label.text , out selectedCampaign.height );
+                _editor.Refresh();
                 Refresh();
             } ) ,
 
@@ -131,6 +133,7 @@ public class CampaignEditor
             new Field( "Rows" , selectedCampaign.rows.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
             {
                 int.TryParse( field.label.text , out selectedCampaign.rows );
+                _editor.Refresh();
                 Refresh();
             } ) ,
 
@@ -138,6 +141,7 @@ public class CampaignEditor
             new Field( "Columns" , selectedCampaign.columns.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
             {
                 int.TryParse( field.label.text , out selectedCampaign.columns );
+                _editor.Refresh();
                 Refresh();
             } )
         };
@@ -169,9 +173,9 @@ public class CampaignEditor
 
     public void Refresh()
     {
-        _campaigns.Refresh();
-        _campaignSets.Refresh();
-        _campaignEditor.Refresh();
+        _campaigns?.Refresh();
+        _campaignSets?.Refresh();
+        _campaignEditor?.Refresh();
     }
 
     public CampaignDefinition selectedCampaign { get; private set; }

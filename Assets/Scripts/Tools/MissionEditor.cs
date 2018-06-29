@@ -8,8 +8,8 @@ public class MissionEditor
 {
     public void Update()
     {
-        _missions?.Update();
-        _missionSets?.Update();
+        missions?.Update();
+        missionSets?.Update();
         missionTimeline?.Update();
         _indicator.transform.position = _editor.mousePosition;
     }
@@ -40,10 +40,10 @@ public class MissionEditor
 
     public void ShowMissionSets( int index , Vector3 position )
     {
-        _missionSets?.Destroy();
+        missionSets?.Destroy();
         int count = _editor.campaignData.missionSets.Count + 1;
-        _missionSets = new Layout( "MissionSets" , 4 , count , 0.25f , 0.1f , count , container );
-        _missionSets.SetPosition( position + ( Vector3.right * _missionSets.width * 0.5f ) + ( Vector3.back * _missionSets.height * 0.5f ) );
+        missionSets = new Layout( "MissionSets" , 4 , count , 0.25f , 0.1f , count , container );
+        missionSets.SetPosition( position + ( Vector3.right * missionSets.width * 0.5f ) + ( Vector3.back * missionSets.height * 0.5f ) );
 
         List<Button> buttons = new List<Button>( count )
         {
@@ -77,22 +77,22 @@ public class MissionEditor
                 Exit: ( Button button ) => button.SetColor( Color.white ) ) );
         }
 
-        _missionSets.Add( buttons );
-        _missionSets.Refresh();
+        missionSets.Add( buttons );
+        missionSets.Refresh();
     }
 
     public void HideMissionSets()
     {
-        _missionSets?.Destroy();
-        _missionSets = null;
+        missionSets?.Destroy();
+        missionSets = null;
     }
 
     public void ShowMissions( int index , Vector3 position )
     {
-        _missions?.Destroy();
+        missions?.Destroy();
         int count = _selectedMissionSet.missionDefinitions.Count + 1;
-        _missions = new Layout( "MissionLayout" , 4 , count , 0.25f , 0.1f , count , container );
-        _missions.SetPosition( position + ( Vector3.right * _missions.width * 0.5f ) + ( Vector3.back * _missions.height * 0.5f ) );
+        missions = new Layout( "MissionLayout" , 4 , count , 0.25f , 0.1f , count , container );
+        missions.SetPosition( position + ( Vector3.right * missions.width * 0.5f ) + ( Vector3.back * missions.height * 0.5f ) );
 
         List<Button> buttons = new List<Button>( count )
         {
@@ -123,10 +123,12 @@ public class MissionEditor
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
                         _selectedMission = _selectedMissionSet.missionDefinitions[ capturedIndex ];
+
                         //actually no, this should instead assign/associate the mission to the grid tile in question
                         //should also change the label of the dropdown to indicate what mission is currently loaded
                         //then we need to handle the layout that allows the player to hop into the stage/wave/mission editor
                         //goal line is right around the bend!
+
                         HideMissionSets();
                         HideMissions();
                     }
@@ -134,27 +136,27 @@ public class MissionEditor
                 Exit: ( Button button ) => button.SetColor( Color.white ) ) );
         }
 
-        _missions.Add( buttons );
-        _missions.Refresh();
+        missions.Add( buttons );
+        missions.Refresh();
     }
 
     public void HideMissions()
     {
-        _missions?.Destroy();
-        _missions = null;
+        missions?.Destroy();
+        missions = null;
     }
 
     private void ShowIndicator() => _indicator.enabled = true;
     private void HideIndicator() => _indicator.enabled = false;
 
     public Button missionTimeline { get; private set; }
+    public Layout missionSets { get; private set; }
+    public Layout missions { get; private set; }
     public Stage stage { get; private set; }
     public GameObject container { get; }
 
     private NeoEditor _editor { get; }
     private MeshRenderer _indicator { get; }
-    private Layout _missions { get; set; }
-    private Layout _missionSets { get; set; }
     private MissionSet _selectedMissionSet { get; set; }
     private MissionDefinition _selectedMission { get; set; }
 
@@ -163,7 +165,8 @@ public class MissionEditor
         _editor = editor;
         _indicator = GameObject.CreatePrimitive( PrimitiveType.Sphere ).GetComponent<MeshRenderer>();
         container = new GameObject( typeof( MissionEditor ).Name );
-        ShowMissionTimeline();
+        container.transform.SetParent( editor.container.transform );
+        _indicator.transform.SetParent( container.transform);
         HideIndicator();
     }
 }
