@@ -10,6 +10,8 @@ public class TileMap
     public int IndexOf( Tile tile ) => _tiles.IndexOf( tile );
     public Tile TileAt( int index ) => _tiles[ index ];
 
+    public float tileWidth => _tiles[ 0 ].width;
+    public float tileHeight => _tiles[ 0 ].height;
     public int count => _tiles.Count;
     public float height { get; }
     public float width { get; }

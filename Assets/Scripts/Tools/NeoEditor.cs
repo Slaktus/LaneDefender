@@ -8,11 +8,11 @@ public class NeoEditor
 {
     public void Update()
     {
-        campaignEditor.Update();
-        missionEditor.Update();
-
         for ( int i = 0 ; _campaignMapDropdowns.Count > i ; i++ )
             _campaignMapDropdowns[ i ].Update();
+
+        campaignEditor.Update();
+        missionEditor.Update();
     }
 
     public void ShowStage() { }
@@ -26,20 +26,28 @@ public class NeoEditor
         for ( int i = 0 ; campaignMap.tileMap.count > i ; i++ )
         {
             int index = i;
-            Dropdown dropdown = new Dropdown( "CampaignMap" + index , "" , 1 , 1 , campaignEditor.container ,
+            Dropdown dropdown = new Dropdown( "CampaignMap" + index , index.ToString() , campaignMap.tileMap.tileWidth - 1 , campaignMap.tileMap.tileHeight * 0.5f , campaignEditor.container ,
                 Enter: ( Button button ) => button.SetColor( Color.green ) ,
                 Stay: ( Button button ) =>
                 {
-                    if ( Input.GetMouseButtonDown( 0 ) && button.containsMouse && !( button as Dropdown ).HasLayout( missionEditor.missions ) )
-                        missionEditor.ShowMissionSets( index , button.position + new Vector3( button.width * 0.5f , 0 , button.height * 0.5f ) );
+                    if ( Input.GetMouseButtonDown( 0 ) && button.containsMouse )
+                    {
+                        if ( campaignEditor.selectedCampaign.Get( index ) == missionEditor.selectedMission )
+                            Debug.LogError( "strap it in" );
+                        else if ( !( button as Dropdown ).HasLayout( missionEditor.missions ) )
+                            missionEditor.ShowMissionSets( index , button.position + new Vector3( button.width * 0.5f , 0 , button.height * 0.5f ) );
+                    }
                 } ,
                 Exit: ( Button button ) => button.SetColor( Color.white ) ,
                 Close: ( Button button ) =>
                 {
-                    if ( ( Input.GetMouseButtonDown( 0 ) || Input.GetMouseButtonDown( 1 ) ) && ( ( button as Dropdown ).HasLayout( missionEditor.missions ) || ( button as Dropdown ).HasLayout( missionEditor.missionSets ) ) && ( missionEditor.missions == null || !missionEditor.missions.containsMouse ) )
+                    Dropdown d = button as Dropdown;
+
+                    if ( ( Input.GetMouseButtonDown( 0 ) || Input.GetMouseButtonDown( 1 ) ) && ( d.HasLayout( missionEditor.missions ) || d.HasLayout( missionEditor.missionSets ) ) )
                     {
                         missionEditor.HideMissions();
                         missionEditor.HideMissionSets();
+                        ( button as Dropdown ).RemoveLayouts();
                     }
                 } );
 
@@ -60,6 +68,8 @@ public class NeoEditor
     {
         ShowCampaignMap();
     }
+
+    public Dropdown GetDropdown( int index ) => _campaignMapDropdowns[ index ];
 
     public T Load<T>( string path ) where T : ScriptableObject => AssetDatabase.LoadAssetAtPath<T>( path + typeof( T ) + ".asset" );
     private T Create<T>( string path ) where T : ScriptableObject => ScriptableObjects.Create<T>( path + typeof( T ) + ".asset" );

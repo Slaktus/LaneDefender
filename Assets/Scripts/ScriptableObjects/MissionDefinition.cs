@@ -14,5 +14,6 @@ public class MissionDefinition : DefinitionBase
     public override void Remove( ScriptableObject toRemove ) => waveSets.Remove( toRemove as WaveSet );
 
     public float duration;
+    public StageDefinition stageDefinition;
     public List<WaveSet> waveSets = new List<WaveSet>();
 }

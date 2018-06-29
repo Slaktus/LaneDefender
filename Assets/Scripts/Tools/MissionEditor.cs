@@ -44,6 +44,7 @@ public class MissionEditor
         int count = _editor.campaignData.missionSets.Count + 1;
         missionSets = new Layout( "MissionSets" , 4 , count , 0.25f , 0.1f , count , container );
         missionSets.SetPosition( position + ( Vector3.right * missionSets.width * 0.5f ) + ( Vector3.back * missionSets.height * 0.5f ) );
+        _editor.GetDropdown( index ).AddLayout( missionSets );
 
         List<Button> buttons = new List<Button>( count )
         {
@@ -70,7 +71,7 @@ public class MissionEditor
                 {
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
-                        _selectedMissionSet = _editor.campaignData.missionSets[ capturedIndex ];
+                        selectedMissionSet = _editor.campaignData.missionSets[ capturedIndex ];
                         ShowMissions( index , button.position + new Vector3( button.width * 0.5f , 0 , button.height * 0.5f ) );
                     }
                 } ,
@@ -90,9 +91,10 @@ public class MissionEditor
     public void ShowMissions( int index , Vector3 position )
     {
         missions?.Destroy();
-        int count = _selectedMissionSet.missionDefinitions.Count + 1;
+        int count = selectedMissionSet.missionDefinitions.Count + 1;
         missions = new Layout( "MissionLayout" , 4 , count , 0.25f , 0.1f , count , container );
         missions.SetPosition( position + ( Vector3.right * missions.width * 0.5f ) + ( Vector3.back * missions.height * 0.5f ) );
+        _editor.GetDropdown( index ).AddLayout( missions );
 
         List<Button> buttons = new List<Button>( count )
         {
@@ -105,8 +107,7 @@ public class MissionEditor
                         HideMissions();
                         MissionDefinition missionDefinition = ScriptableObject.CreateInstance<MissionDefinition>();
                         missionDefinition.Initialize( "MissionDefinition" , 120 );
-                        ScriptableObjects.Add( missionDefinition , _selectedMissionSet );
-                        //_campaignMap.Add( index , missionDefinition );
+                        ScriptableObjects.Add( missionDefinition , selectedMissionSet );
                         ShowMissions( index , position );
                     }
                 } ,
@@ -122,13 +123,9 @@ public class MissionEditor
                 {
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
-                        _selectedMission = _selectedMissionSet.missionDefinitions[ capturedIndex ];
-
-                        //actually no, this should instead assign/associate the mission to the grid tile in question
-                        //should also change the label of the dropdown to indicate what mission is currently loaded
-                        //then we need to handle the layout that allows the player to hop into the stage/wave/mission editor
-                        //goal line is right around the bend!
-
+                        selectedMission = selectedMissionSet.missionDefinitions[ capturedIndex ];
+                        _editor.campaignEditor.selectedCampaign.Add( selectedMission , index );
+                        _editor.GetDropdown( index ).SetLabel( selectedMission.name );
                         HideMissionSets();
                         HideMissions();
                     }
@@ -149,6 +146,8 @@ public class MissionEditor
     private void ShowIndicator() => _indicator.enabled = true;
     private void HideIndicator() => _indicator.enabled = false;
 
+    public MissionDefinition selectedMission { get; private set; }
+    public MissionSet selectedMissionSet { get; private set; }
     public Button missionTimeline { get; private set; }
     public Layout missionSets { get; private set; }
     public Layout missions { get; private set; }
@@ -157,8 +156,6 @@ public class MissionEditor
 
     private NeoEditor _editor { get; }
     private MeshRenderer _indicator { get; }
-    private MissionSet _selectedMissionSet { get; set; }
-    private MissionDefinition _selectedMission { get; set; }
 
     public MissionEditor( NeoEditor editor )
     {
