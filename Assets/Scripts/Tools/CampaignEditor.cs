@@ -1,47 +1,35 @@
 ﻿#if UNITY_EDITOR
-using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
 public class CampaignEditor
 {
-    public void Load() => _campaignData = AssetDatabase.LoadAssetAtPath<CampaignData>( _campaignDataPath + "CampaignData.asset" );
-    private void Create() => _campaignData = ScriptableObjects.Create<CampaignData>( _campaignDataPath + "CampaignData.asset" );
-
-    CampaignData _campaignData;
-    MissionSet _selectedMissionSet;
-    MissionDefinition _selectedMission;
-    private const string _campaignDataPath = "Assets/AssetBundleSource/Campaigns/";
-
     public void Update()
     {
-        for ( int i = 0 ; _dropdowns.Count > i ; i++ )
-            _dropdowns[ i ].Update();
-
-        _missions?.Update();
-        _missionSets?.Update();
+        dropdown.Update();
+        _campaigns?.Update();
+        _campaignSets?.Update();
+        _campaignEditor?.Update();
     }
 
-    public void ShowMissionSets( int index , Vector3 position )
+    public void ShowCampaignSets( Vector3 position )
     {
-        _missionSets?.Destroy();
-        int count = _campaignData.missionSets.Count + 1;
-        _missionSets = new Layout( "MissionSets" , 4 , count , 0.25f , 0.1f , count , _container );
-        _missionSets.SetPosition( position + ( Vector3.right * _missionSets.width * 0.5f ) + ( Vector3.back * _missionSets.height * 0.5f ) );
-        _dropdowns[ index ].AddLayout( _missionSets );
+        _campaignSets?.Destroy();
+        int count = _editor.campaignData.campaignSets.Count + 1;
+        _campaignSets = new Layout( "CampaignSets" , 4 , count , 0.25f , 0.1f , count , container );
+        dropdown.AddLayout( _campaignSets );
 
         List<Button> buttons = new List<Button>( count )
         {
-            new Button( "NewMissionSet" , "New Set" , 4 , 1 , _container ,
+            new Button( "NewCampaignSet" , "New Set" , 4 , 1 , container ,
                 Enter: ( Button button ) => button.SetColor( Color.green ) ,
                 Stay: ( Button button ) =>
                 {
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
-                        HideMissionSets();
-                        ScriptableObjects.Add( ScriptableObject.CreateInstance<MissionSet>() , _campaignData );
-                        ShowMissionSets( index , position );
+                        HideCampaignSets();
+                        ScriptableObjects.Add( ScriptableObject.CreateInstance<CampaignSet>() , _editor.campaignData );
+                        ShowCampaignSets( position );
                     }
                 } ,
                 Exit: ( Button button ) => button.SetColor( Color.white ) )
@@ -50,55 +38,50 @@ public class CampaignEditor
         for ( int i = 0 ; buttons.Capacity - 1 > i ; i++ )
         {
             int capturedIndex = i;
-            buttons.Add( new Button( "MissionSet" , "Mission Set" , 4 , 1 , _container ,
+            buttons.Add( new Button( "CampaignSet" , "Campaign Set" , 4 , 1 , container ,
                 Enter: ( Button button ) => button.SetColor( Color.green ) ,
                 Stay: ( Button button ) =>
                 {
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
-                        _selectedMissionSet = _campaignData.missionSets[ capturedIndex ];
-                        ShowMissions( index , button.position + new Vector3( button.width * 0.5f , 0 , button.height * 0.5f ) );
-                        _dropdowns[ index ].AddLayout( _missionSets );
+                        selectedCampaignSet = _editor.campaignData.campaignSets[ capturedIndex ];
+                        ShowCampaigns( capturedIndex , button.position + new Vector3( button.width * 0.5f , 0 , button.height * 0.5f ) );
                     }
                 } ,
                 Exit: ( Button button ) => button.SetColor( Color.white ) ) );
         }
 
-        _missionSets.Add( buttons );
-        _missionSets.Refresh();
+        _campaignSets.Add( buttons , true );
+        _campaignSets.SetPosition( position + ( Vector3.back * ( _campaignSets.height + dropdown.height ) * 0.5f ) );
     }
 
-    public void HideMissionSets()
+    public void HideCampaignSets()
     {
-        for ( int i = 0 ; _dropdowns.Count > i ; i++ )
-            _dropdowns[ i ].RemoveLayout( _missionSets );
-
-        _missionSets?.Destroy();
-        _missionSets = null;
+        _campaignSets?.Destroy();
+        _campaignSets = null;
     }
 
-    public void ShowMissions( int index , Vector3 position )
+    public void ShowCampaigns( int index , Vector3 position )
     {
-        _missions?.Destroy();
-        int count = _selectedMissionSet.missionDefinitions.Count + 1;
-        _missions = new Layout( "MissionLayout" , 4 , count , 0.25f , 0.1f , count , _container );
-        _missions.SetPosition( position + ( Vector3.right * _missions.width * 0.5f ) + ( Vector3.back * _missions.height * 0.5f ) );
-        _dropdowns[ index ].AddLayout( _missions );
+        _campaigns?.Destroy();
+        int count = selectedCampaignSet.campaignDefinitions.Count + 1;
+        _campaigns = new Layout( "CampaignLayout" , 4 , count , 0.25f , 0.1f , count , container );
+        _campaigns.SetPosition( position + ( Vector3.right * _campaigns.width * 0.5f ) + ( Vector3.back * _campaigns.height * 0.5f ) );
+        dropdown.AddLayout( _campaigns );
 
         List<Button> buttons = new List<Button>( count )
         {
-            new Button( "NewMission" , "New Mission" , 4 , 1 , _container ,
+            new Button( "NewCampaign" , "New Campaign" , 4 , 1 , container ,
                 Enter: ( Button button ) => button.SetColor( Color.green ) ,
-                Stay: ( Button button ) => 
+                Stay: ( Button button ) =>
                 {
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
-                        HideMissions();
-                        MissionDefinition missionDefinition = ScriptableObject.CreateInstance<MissionDefinition>();
-                        missionDefinition.Initialize( "MissionDefinition" , 120 );
-                        ScriptableObjects.Add( missionDefinition , _selectedMissionSet );
-                        //_campaignMap.Add( index , missionDefinition );
-                        ShowMissions( index , position );
+                        HideCampaigns();
+                        CampaignDefinition campaignDefinition = ScriptableObject.CreateInstance<CampaignDefinition>();
+                        campaignDefinition.Initialize( 20 , 15 , 5 , 5 );
+                        ScriptableObjects.Add( campaignDefinition , selectedCampaignSet );
+                        ShowCampaigns( index , position );
                     }
                 } ,
                 Exit: ( Button button ) => button.SetColor( Color.white ) )
@@ -107,100 +90,123 @@ public class CampaignEditor
         for ( int i = 0 ; buttons.Capacity - 1 > i ; i++ )
         {
             int capturedIndex = i;
-            buttons.Add( new Button( "Mission" , "Mission" , 4 , 1 , _container ,
+            buttons.Add( new Button( "Campaign" , "Campaign" , 4 , 1 , container ,
                 Enter: ( Button button ) => button.SetColor( Color.green ) ,
                 Stay: ( Button button ) =>
                 {
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
-                        _selectedMission = _selectedMissionSet.missionDefinitions[ capturedIndex ];
-                        //actually no, this should instead assign/associate the mission to the grid tile in question
-                        //should also change the label of the dropdown to indicate what mission is currently loaded
-                        //then we need to handle the layout that allows the player to hop into the stage/wave/mission editor
-                        //goal line is right around the bend!
-                        HideMissionSets();
-                        HideMissions();
+                        selectedCampaign = selectedCampaignSet.campaignDefinitions[ capturedIndex ];
+
+                        Hide();
+                        ShowCampaignEditor();
+                        _editor.ShowCampaignMap();
                     }
                 } ,
                 Exit: ( Button button ) => button.SetColor( Color.white ) ) );
         }
 
-        _missions.Add( buttons );
-        _missions.Refresh();
+        _campaigns.Add( buttons , true );
     }
 
-    public void HideMissions()
+    public void ShowCampaignEditor()
     {
-        for ( int i = 0 ; _dropdowns.Count > i ; i++ )
-            _dropdowns[ i ].RemoveLayout( _missions );
-
-        _missions?.Destroy();
-        _missions = null;
-    }
-
-    public void ShowCampaignMap()
-    {
-        for ( int i = 0 ; _campaignMap.tileMap.count > i ; i++ )
+        List<Element> campaignEditorButtons = new List<Element>()
         {
-            int index = i;
-            Dropdown dropdown = new Dropdown( "CampaignMap" + index , "" , 1 , 1 , _container ,
-                Enter: ( Button button ) => button.SetColor( Color.green ) ,
-                Stay: ( Button button ) =>
-                {
-                    if ( Input.GetMouseButtonDown( 0 ) && button.containsMouse && !( button as Dropdown ).HasLayout( _missions ) )
-                        ShowMissionSets( index , button.position + new Vector3( button.width * 0.5f , 0 , button.height * 0.5f ) );
-                } ,
-                Exit: ( Button button ) => button.SetColor( Color.white ) ,
-                Close: ( Button button ) =>
-                {
-                    if ( ( Input.GetMouseButtonDown( 0 ) || Input.GetMouseButtonDown( 1 ) ) && ( ( button as Dropdown ).HasLayout( _missions ) || ( button as Dropdown ).HasLayout( _missionSets ) ) && ( _missions == null || !_missions.containsMouse ) )
-                    {
-                        HideMissions();
-                        HideMissionSets();
-                    }
-                } );
+            new Label( "Width:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
+            new Field( "Width" , selectedCampaign.width.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
+            {
+                float.TryParse( field.label.text , out selectedCampaign.width );
+                Refresh();
+            } ) ,
 
-            dropdown.SetPosition( _campaignMap.tileMap.PositionOf( index ) );
-            _dropdowns.Add( dropdown );
-        }
+            new Label( "Height:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
+            new Field( "Height" , selectedCampaign.height.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
+            {
+                float.TryParse( field.label.text , out selectedCampaign.height );
+                Refresh();
+            } ) ,
+
+            new Label( "Rows:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
+            new Field( "Rows" , selectedCampaign.rows.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
+            {
+                int.TryParse( field.label.text , out selectedCampaign.rows );
+                Refresh();
+            } ) ,
+
+            new Label( "Columns:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
+            new Field( "Columns" , selectedCampaign.columns.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
+            {
+                int.TryParse( field.label.text , out selectedCampaign.columns );
+                Refresh();
+            } )
+        };
+
+        _campaignEditor = new Layout( "CampaignEditor" , 3 , 4 , 0.25f , 0.1f , campaignEditorButtons.Count / 2 , container );
+        _campaignEditor.Add( campaignEditorButtons , true );
+        _campaignEditor.SetParent( container );
     }
 
-    public void HideCampaignMap()
+    public void HideCampaignEditor()
     {
-        for ( int i = 0 ; _dropdowns.Count > i ; i++ )
-            _dropdowns[ i ].Destroy();
+        _campaignEditor?.Destroy();
+        _campaignEditor = null;
+    }
 
-        _dropdowns.Clear();
+    public void HideCampaigns()
+    {
+        _campaigns?.Destroy();
+        _campaigns = null;
     }
 
     public void Hide()
     {
-        HideCampaignMap();
-        HideMissionSets();
-        HideMissions();
+        HideCampaigns();
+        HideCampaignSets();
+        HideCampaignEditor();
+        dropdown.RemoveLayouts();
     }
 
-    public void Add( Mission mission ) => _campaignMap.Add( mission );
-    public void Add( int index , MissionDefinition missionDefinition ) => _campaignMap.Add( index , missionDefinition );
-    public void Replace( int index , Mission mission ) => _campaignMap.Replace( index , mission );
-
-    private List<Dropdown> _dropdowns { get; }
-    private Layout _missions { get; set; }
-    private CampaignMap _campaignMap { get; }
-    private Layout _missionSets { get; set; }
-    private GameObject _container { get; }
-
-    public CampaignEditor()
+    public void Refresh()
     {
-        Load();
+        _campaigns.Refresh();
+        _campaignSets.Refresh();
+        _campaignEditor.Refresh();
+    }
 
-        if ( _campaignData == null )
-            Create();
+    public CampaignDefinition selectedCampaign { get; private set; }
+    public CampaignSet selectedCampaignSet { get; private set; }
+    public GameObject container { get; }
+    public Dropdown dropdown { get; }
 
-        _campaignMap = new CampaignMap( 20 , 15 , 5 , 5 );
-        _container = new GameObject( "CampaignEditor" );
-        _dropdowns = new List<Dropdown>();
-        ShowCampaignMap();
+    private NeoEditor _editor { get; }
+    private Layout _campaigns { get; set; }
+    private Layout _campaignSets { get; set; }
+    private Layout _campaignEditor { get; set; }
+
+    public CampaignEditor( NeoEditor editor , Vector3 position )
+    {
+        _editor = editor;
+        container = new GameObject( typeof( CampaignEditor ).Name );
+        container.transform.SetParent( editor.container.transform );
+        dropdown = new Dropdown( "Campaigns" , "Campaigns" , 4 , 1 , container ,
+            Enter: ( Button button ) => button.SetColor( Color.green ) ,
+            Stay: ( Button button ) => 
+            {
+                if ( Input.GetMouseButtonDown( 0 ) )
+                    ShowCampaignSets( position );
+            } ,
+            Exit: ( Button button ) => button.SetColor( Color.white ) , 
+            Close: ( Button button ) => 
+            {
+                if ( Input.GetMouseButtonDown( 0 ) || Input.GetMouseButtonDown( 1 ) )
+                {
+                    HideCampaigns();
+                    HideCampaignSets();
+                }
+            } );
+
+        dropdown.SetPosition( position );
     }
 }
 #endif //UNITY_EDITOR
