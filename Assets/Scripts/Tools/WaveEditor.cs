@@ -58,7 +58,6 @@ public class WaveEditor
 
                             button.SetColor( Color.yellow );
                             selectedWaveSet = _editor.waveData.waveSets[ index ];
-                            _editor.missionEditor.AddMissionToTimeline( selectedWaveSet );
 
                             HideWaveDefinitions();
                             ShowWaveDefinitions( button.position );
@@ -114,9 +113,10 @@ public class WaveEditor
                                 buttons[ selectedWaveSet.waveDefinitions.IndexOf( selectedWaveDefinition ) + 1 ].SetColor( Color.white );
 
                             selectedWaveDefinition = selectedWaveSet.waveDefinitions[ index ];
+                            _editor.missionEditor.AddMissionToTimeline( selectedWaveSet );
+                            ShowWaveEventButtons();
                             HideWaveDefinitions();
                             HideWaveSets();
-                            ShowWaveEventButtons();
                         }
                     } ,
                     Exit: ( Button button ) => button.SetColor( Color.white ) ) );
