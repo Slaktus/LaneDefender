@@ -12,6 +12,23 @@ public class MissionEditor
         missionSets?.Update();
         _missionTimeline?.Update();
         _indicator.transform.position = _editor.mousePosition;
+
+        //should be replaced with a proper layout
+        //layouts can ignore constraints now after all
+        for ( int i = 0 ; _dropdowns.Count > i ; i++ )
+            _dropdowns[ i ].Update();
+    }
+
+    public void AddMissionToTimeline( WaveSet waveSet )
+    {
+        selectedMission.Add( waveSet , timelinePosition );
+
+        Dropdown dropdown = new Dropdown( "Wave" , "Wave" , 2 , 1 , container ,
+            Enter: ( Button button ) => button.SetColor( Color.green ) ,
+            Exit: ( Button button ) => button.SetColor( Color.white ) );
+
+        dropdown.SetPosition( new Vector3( _missionTimeline.rect.xMin + ( timelinePosition * _missionTimeline.rect.xMax ) , 0 , _missionTimeline.rect.yMin + 0.5f ) );
+        _dropdowns.Add( dropdown );
     }
 
     public void ShowMissionTimeline()
@@ -23,7 +40,10 @@ public class MissionEditor
             Stay: ( Button button ) => 
             {
                 if ( Input.GetMouseButtonDown( 0 ) )
+                {
                     _editor.waveEditor.Show( new Vector3( _indicator.transform.position.x , 0 , button.rect.yMin ) );
+                    timelinePosition = Helpers.Normalize( _indicator.transform.position.x , button.rect.xMax , button.rect.xMin );
+                }
             } ,
             Exit: ( Button button ) => HideIndicator() );
 
@@ -144,6 +164,7 @@ public class MissionEditor
     private void HideIndicator() => _indicator.enabled = false;
 
     public MissionDefinition selectedMission { get; private set; }
+    public float timelinePosition { get; private set; }
     public Layout missionSets { get; private set; }
     public Layout missions { get; private set; }
     public GameObject container { get; }
@@ -151,11 +172,13 @@ public class MissionEditor
     private NeoEditor _editor { get; }
     private MeshRenderer _indicator { get; }
     private Button _missionTimeline { get; set; }
+    private List<Dropdown> _dropdowns { get; set; }
     private MissionSet _selectedMissionSet { get; set; }
 
     public MissionEditor( NeoEditor editor )
     {
         _editor = editor;
+        _dropdowns = new List<Dropdown>();
         _indicator = GameObject.CreatePrimitive( PrimitiveType.Sphere ).GetComponent<MeshRenderer>();
         container = new GameObject( typeof( MissionEditor ).Name );
         container.transform.SetParent( editor.container.transform );

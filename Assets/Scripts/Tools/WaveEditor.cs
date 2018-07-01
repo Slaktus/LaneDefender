@@ -58,6 +58,8 @@ public class WaveEditor
 
                             button.SetColor( Color.yellow );
                             selectedWaveSet = _editor.waveData.waveSets[ index ];
+                            _editor.missionEditor.AddMissionToTimeline( selectedWaveSet );
+
                             HideWaveDefinitions();
                             ShowWaveDefinitions( button.position );
                         }

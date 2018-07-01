@@ -2,7 +2,7 @@
 
 public class Mission
 {
-    public WaveSet Next( float time ) => waveSets.Count > 0 && wavetimes[ 0 ] > time ? waveSets[ 0 ] : null;
+    public WaveSet Next( float time ) => waveSets.Count > 0 && wavetimes[ 0 ] * duration > time ? waveSets[ 0 ] : null;
     public void SetDuration( float duration ) => _missionDefinition.SetDuration( duration );
     public void AddWaveSet( WaveSet waveSet ) => waveSets.Add( waveSet );
     public void SetIndex( int index ) => this.index = index;
