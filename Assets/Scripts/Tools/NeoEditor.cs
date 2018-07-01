@@ -8,14 +8,61 @@ public class NeoEditor
 {
     public void Update()
     {
+        HandleLaneHover();
+
         for ( int i = 0 ; _campaignMapDropdowns.Count > i ; i++ )
             _campaignMapDropdowns[ i ].Update();
 
         campaignEditor.Update();
         missionEditor.Update();
+        stageEditor.Update();
+        waveEditor.Update();
+        stage?.Update();
     }
 
-    public void ShowStage( StageDefinition stageDefinition ) => stage = new Stage( stageDefinition , null , null );
+    private void HandleLaneHover()
+    {
+        if ( stage != null && waveEditor.selectedWaveDefinition != null )
+        {
+            Lane hoveredLane = stage.GetHoveredLane( mousePosition );
+            stage.SetLaneColor( Color.black );
+
+            if ( hoveredLane != null )
+            {
+                hoveredLane.color = Color.yellow;
+
+                if ( Input.GetMouseButtonDown( 0 ) )
+                {
+                    int index = stage.IndexOf( hoveredLane );
+                    WaveEventDefinition waveEventDefinition = ScriptableObject.CreateInstance<WaveEventDefinition>();
+                    waveEventDefinition.Initialize( 0 , index , WaveEvent.Type.SpawnEnemy );
+                    ScriptableObjects.Add( waveEventDefinition , waveEditor.selectedWaveDefinition );
+                    waveEditor.HideWaveEventButtons();
+                    waveEditor.ShowWaveEventButtons();
+                }
+            }
+
+            if ( waveEditor.heldWaveEvent != null )
+            {
+                waveEditor.heldWaveEvent.SetPosition( mousePosition );
+
+                if ( Input.GetMouseButtonUp( 0 ) )
+                {
+                    if ( hoveredLane != null )
+                    {
+                        waveEditor.heldWaveEvent.waveEventDefinition.SetLane( stage.IndexOf( hoveredLane ) );
+                        waveEditor.HideWaveEventButtons();
+                        waveEditor.ShowWaveEventButtons();
+                    }
+
+                    waveEditor.heldWaveEvent.Destroy();
+                    waveEditor.heldWaveEvent = null;
+                }
+            }
+        }
+    }
+
+    public void ShowStage( StageDefinition stageDefinition ) => stage = new Stage( stageDefinition , null , new Player() );
 
     public void HideStage() => stage?.Destroy();
 
@@ -38,6 +85,10 @@ public class NeoEditor
                             //actually, we probably want to do something else here
                             //we really want to be able to set the stage here, at least
                             ShowStage( missionEditor.selectedMission.stageDefinition );
+                            missionEditor.ShowMissionTimeline();
+                            stageEditor.Show();
+                            waveEditor.Show();
+
                             campaignEditor.Hide();
                             missionEditor.Hide();
                             HideCampaignMap();
@@ -122,6 +173,8 @@ public class NeoEditor
 
         campaignEditor = new CampaignEditor( this , Vector3.zero );
         missionEditor = new MissionEditor( this );
+        stageEditor = new StageEditor( this );
+        waveEditor = new WaveEditor( this );
     }
 }
 
