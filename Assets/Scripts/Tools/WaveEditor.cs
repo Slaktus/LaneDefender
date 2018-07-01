@@ -17,15 +17,15 @@ public class WaveEditor
             _waveEventLayouts[ i ].Update();
     }
 
-    public void Show()
+    public void Show( Vector3 position )
     {
-        ShowWaveSets();
+        ShowWaveSets( position );
 
         if ( selectedWaveDefinition != null )
             ShowWaveEventButtons();
     }
 
-    private void ShowWaveSets( float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
+    private void ShowWaveSets( Vector3 position , float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
     {
         List<Button> buttons = new List<Button>();
 
@@ -75,7 +75,7 @@ public class WaveEditor
             }
 
         _waveSetLayout = new Layout( "WaveSetButtons" , width , height * buttons.Count , padding , spacing , buttons.Count , _container );
-        _waveSetLayout.SetLocalPosition( position + ( Vector3.back * height * ( buttons.Count - 1 ) * 0.5f ) );
+        _waveSetLayout.SetLocalPosition( position + ( Vector3.back * ( ( height * ( buttons.Count - 1 ) * 0.5f ) ) ) );
         _waveSetLayout.Add( buttons , true );
     }
 
@@ -112,7 +112,9 @@ public class WaveEditor
                                 buttons[ selectedWaveSet.waveDefinitions.IndexOf( selectedWaveDefinition ) + 1 ].SetColor( Color.white );
 
                             selectedWaveDefinition = selectedWaveSet.waveDefinitions[ index ];
-                            Refresh();
+                            HideWaveDefinitions();
+                            HideWaveSets();
+                            ShowWaveEventButtons();
                         }
                     } ,
                     Exit: ( Button button ) => button.SetColor( Color.white ) ) );
@@ -244,10 +246,10 @@ public class WaveEditor
     public void Refresh()
     {
         Hide();
-        Show();
+        Show( position );
     }
 
-    public Vector3 position => Vector3.zero;
+    public Vector3 position => _waveSetLayout.position;
 
     public HeldEvent heldWaveEvent { get; set; }
     public WaveSet selectedWaveSet { get; private set; }

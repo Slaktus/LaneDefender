@@ -87,7 +87,6 @@ public class NeoEditor
                             ShowStage( missionEditor.selectedMission.stageDefinition );
                             missionEditor.ShowMissionTimeline();
                             stageEditor.Show();
-                            waveEditor.Show();
 
                             campaignEditor.Hide();
                             missionEditor.Hide();

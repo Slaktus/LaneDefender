@@ -22,16 +22,8 @@ public class MissionEditor
             Enter: ( Button button ) => ShowIndicator() ,
             Stay: ( Button button ) => 
             {
-                if ( Input.GetMouseButton( 0 ) )
-                {
-                    //ok, so now we pretty much just need to insert wave sets here ...
-                    //we don't have anything to do that do we
-                    //don't think so no
-
-                    //probably time to do the whole dataflow thing now ...
-                    //lists of items in dropdowns is pretty solved
-                    Debug.Log( Helpers.Normalize( _indicator.transform.position.x , button.rect.xMax , button.rect.xMin ) );
-                }
+                if ( Input.GetMouseButtonDown( 0 ) )
+                    _editor.waveEditor.Show( new Vector3( _indicator.transform.position.x , 0 , button.rect.yMin ) );
             } ,
             Exit: ( Button button ) => HideIndicator() );
 
