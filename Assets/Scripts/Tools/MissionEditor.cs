@@ -169,13 +169,13 @@ public class MissionEditor
     public Layout missions { get; private set; }
     public GameObject container { get; }
 
-    private NeoEditor _editor { get; }
+    private Editor _editor { get; }
     private MeshRenderer _indicator { get; }
     private Button _missionTimeline { get; set; }
     private List<Dropdown> _dropdowns { get; set; }
     private MissionSet _selectedMissionSet { get; set; }
 
-    public MissionEditor( NeoEditor editor )
+    public MissionEditor( Editor editor )
     {
         _editor = editor;
         _dropdowns = new List<Dropdown>();

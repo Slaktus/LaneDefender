@@ -208,14 +208,14 @@ public class StageEditor
     public Vector3 position => Vector3.zero;
     public StageDefinition selectedStageDefinition { get; private set; }
 
-    private NeoEditor _editor { get; }
+    private Editor _editor { get; }
     private GameObject _container { get; }
     private Layout _stageSetLayout { get; set; }
     private StageSet _selectedStageSet { get; set; }
     private Layout _stageDefinitionLayout { get; set; }
     private bool _showingStageDefinitions { get; set; }
 
-    public StageEditor( NeoEditor editor )
+    public StageEditor( Editor editor )
     {
         _editor = editor;
         _container = new GameObject( "StageEditor" );

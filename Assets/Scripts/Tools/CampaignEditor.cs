@@ -183,12 +183,12 @@ public class CampaignEditor
     public GameObject container { get; }
     public Dropdown dropdown { get; }
 
-    private NeoEditor _editor { get; }
+    private Editor _editor { get; }
     private Layout _campaigns { get; set; }
     private Layout _campaignSets { get; set; }
     private Layout _campaignEditor { get; set; }
 
-    public CampaignEditor( NeoEditor editor , Vector3 position )
+    public CampaignEditor( Editor editor , Vector3 position )
     {
         _editor = editor;
         container = new GameObject( typeof( CampaignEditor ).Name );

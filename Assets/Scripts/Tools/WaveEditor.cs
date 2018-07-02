@@ -264,9 +264,9 @@ public class WaveEditor
     private bool _showingWaveDefinitions { get; set; }
     private List<Layout> _waveEventLayouts { get; }
     private GameObject _container { get; }
-    private NeoEditor _editor { get; }
+    private Editor _editor { get; }
 
-    public WaveEditor( NeoEditor editor )
+    public WaveEditor( Editor editor )
     {
         _editor = editor;
         _waveEventLayouts = new List<Layout>();
