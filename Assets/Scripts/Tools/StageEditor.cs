@@ -113,10 +113,11 @@ public class StageEditor
 
                             selectedStageDefinition = _selectedStageSet.stageDefinitions[ index ];
 
-                            _editor.HideStage();
                             HideStageSets();
                             HideStageDefinitions();
+                            _editor.HideStage();
 
+                            _editor.missionEditor.selectedMission.stageDefinition = selectedStageDefinition;
                             _editor.ShowStage( selectedStageDefinition );
                             _editor.missionEditor.ShowMissionTimeline();
                             ShowStageSets();
