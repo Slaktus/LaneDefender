@@ -2,88 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-/*
-public abstract class Composite
-{
-    public virtual void Update() => Updater?.Invoke();
-    public virtual void Add<T>( T element ) where T : Element => elements.Add( Register( element ) );
-    public virtual void Remove<T>( T element ) where T : Element => elements.Remove( Deregister( element ) );
-    public virtual void Show() => Shower();
-    public virtual void Hide() => Hider();
-
-    public virtual void Refresh()
-    {
-        Show();
-        Hide();
-    }
-
-    private T Register<T>( T element ) where T : Element
-    {
-        element.SetParent( container );
-        Updater += element.Update;
-        Shower += element.Show;
-        Hider += element.Hide;
-        return element;
-    }
-
-    private T Deregister<T>( T element ) where T : Element
-    {
-        element.SetParent( container.transform.parent.gameObject );
-        Updater -= element.Update;
-        Shower -= element.Show;
-        Hider -= element.Hide;
-        return element;
-    }
-
-    protected GameObject container { get; }
-    protected List<Element> elements { get; }
-    protected event Action Updater;
-    protected event Action Shower;
-    protected event Action Hider;
-
-    public Composite( string name = "Composite" )
-    {
-        container = new GameObject( name );
-        elements = new List<Element>();
-    }
-}
-*/
-public class Dropdown : Button
-{
-    public override void Update()
-    {
-        base.Update();
-        bool contains = containsMouse;
-
-        for ( int i = 0 ; layouts.Count > i && !contains ; i++ )
-            contains = layouts[ i ].containsMouse;
-
-        if ( !contains )
-            Close?.Invoke( this );
-    }
-
-    public void AddLayout( Layout layout ) => layouts.Add( layout );
-    public void RemoveLayout( Layout layout ) => layouts.Remove( layout );
-
-    public void RemoveLayouts()
-    {
-        while ( layouts.Count > 0 )
-            RemoveLayout( layouts[ layouts.Count - 1 ] );
-    }
-
-    public bool HasLayout( Layout layout ) => layouts.Contains( layout );
-    public void SetClose( Action<Button> Close ) => this.Close = Close;
-
-    private Action<Button> Close { get; set; }
-
-    private List<Layout> layouts { get; }
-
-    public Dropdown( string name , string label , float width , float height , GameObject parent = null , Action<Button> Enter = null , Action<Button> Stay = null , Action<Button> Exit = null , Action<Button> Close = null , bool hideQuad = false , int fontSize = 35 , float characterSize = 0.15f ) : base( name , label , width , height , parent , Enter , Stay , Exit , hideQuad , fontSize , characterSize )
-    {
-        SetClose( Close );
-        layouts = new List<Layout>();
-    }
-}
 
 public class Field : Button
 {
@@ -230,7 +148,9 @@ public class Button : Element
 
     public override void Update()
     {
-        if ( containsMouse )
+        bool contains = containsMouse;
+
+        if ( contains )
         {
             if ( !hovering )
             {
@@ -246,6 +166,9 @@ public class Button : Element
             Exit?.Invoke( this );
             hovering = false;
         }
+
+        if ( !contains )
+            Close?.Invoke( this );
     }
 
     public void ShowQuad() => quad.enabled = true;
@@ -265,10 +188,14 @@ public class Button : Element
         HideLabel();
     }
 
+    public void Select() => selected = true;
+    public void Deselect() => selected = false;
+
     public override void SetLocalScale( Vector3 localScale ) => quad.transform.localScale = localScale;
 
     public void SetLabel( string text ) => label.SetText( text );
     public void SetColor( Color color ) => quad.material.color = color;
+    public void SetClose( Action<Button> Close ) => this.Close = Close;
     public void SetEnter( Action<Button> Enter ) => this.Enter = Enter;
     public void SetStay( Action<Button> Stay ) => this.Stay = Stay;
     public void SetExit( Action<Button> Exit ) => this.Exit = Exit;
@@ -276,18 +203,22 @@ public class Button : Element
     public Vector2 screenPosition => Camera.main.WorldToScreenPoint( new Vector3( container.transform.position.x - ( width * 0.5f ) , container.transform.position.z - ( height * 0.5f ) , Camera.main.transform.position.z ) );
     public Vector3 localPosition => container.transform.localPosition;
     public Vector3 position => container.transform.position;
-
     public Color color => quad.material.color;
+
+    public bool selected { get; private set; }
+
     protected MeshRenderer quad { get; set; }
     protected bool hovering { get; set; }
     protected Label label { get; set; }
 
+    private Action<Button> Close { get; set; }
     private Action<Button> Enter { get; set; }
     private Action<Button> Stay { get; set; }
     private Action<Button> Exit { get; set; }
 
-    public Button( string name , string label , float width , float height , GameObject parent , Action<Button> Enter = null , Action<Button> Stay = null , Action<Button> Exit = null , bool hideQuad = false , int fontSize = 35 , float characterSize = 0.15f ) : base( name + typeof( Button ).Name , width , height )
+    public Button( string name , string label , float width , float height , GameObject parent , Action<Button> Enter = null , Action<Button> Stay = null , Action<Button> Exit = null , Action<Button> Close = null , bool hideQuad = false , int fontSize = 35 , float characterSize = 0.15f ) : base( name + typeof( Button ).Name , width , height )
     {
+        SetClose( Close );
         SetEnter( Enter );
         SetStay( Stay );
         SetExit( Exit );

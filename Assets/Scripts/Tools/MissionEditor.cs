@@ -15,20 +15,20 @@ public class MissionEditor
 
         //should be replaced with a proper layout
         //layouts can ignore constraints now after all
-        for ( int i = 0 ; _dropdowns.Count > i ; i++ )
-            _dropdowns[ i ].Update();
+        for ( int i = 0 ; _buttons.Count > i ; i++ )
+            _buttons[ i ].Update();
     }
 
     public void AddMissionToTimeline( WaveSet waveSet )
     {
         selectedMission.Add( waveSet , timelinePosition );
 
-        Dropdown dropdown = new Dropdown( "Wave" , "Wave" , 2 , 1 , container ,
+        Button dropdown = new Button( "Wave" , "Wave" , 2 , 1 , container ,
             Enter: ( Button button ) => button.SetColor( Color.green ) ,
             Exit: ( Button button ) => button.SetColor( Color.white ) );
 
         dropdown.SetPosition( new Vector3( _missionTimeline.rect.xMin + ( timelinePosition * _missionTimeline.rect.xMax ) , 0 , _missionTimeline.rect.yMin + 0.5f ) );
-        _dropdowns.Add( dropdown );
+        _buttons.Add( dropdown );
     }
 
     public void ShowMissionTimeline()
@@ -65,7 +65,6 @@ public class MissionEditor
         int count = _editor.campaignData.missionSets.Count + 1;
         missionSets = new Layout( "MissionSets" , 4 , count , 0.25f , 0.1f , count , container );
         missionSets.SetPosition( position + ( Vector3.right * missionSets.width * 0.5f ) + ( Vector3.back * missionSets.height * 0.5f ) );
-        _editor.GetDropdown( index ).AddLayout( missionSets );
 
         List<Button> buttons = new List<Button>( count )
         {
@@ -86,7 +85,7 @@ public class MissionEditor
         for ( int i = 0 ; buttons.Capacity - 1 > i ; i++ )
         {
             int capturedIndex = i;
-            buttons.Add( new Dropdown( "MissionSet" , "Mission Set" , 4 , 1 , container ,
+            buttons.Add( new Button( "MissionSet" , "Mission Set" , 4 , 1 , container ,
                 Enter: ( Button button ) => button.SetColor( selectedMissionSet == _editor.campaignData.missionSets[ capturedIndex ] ? button.color : Color.green ) ,
                 Stay: ( Button button ) =>
                 {
@@ -100,12 +99,10 @@ public class MissionEditor
                 Exit: ( Button button ) => button.SetColor( selectedMissionSet == _editor.campaignData.missionSets[ capturedIndex ] ? button.color : Color.white ) ,
                 Close: ( Button button ) =>
                 {
-                    Dropdown d = button as Dropdown;
-
                     if ( Input.GetMouseButtonDown( 0 ) && selectedMissionSet == _editor.campaignData.missionSets[ capturedIndex ] && missions != null && !missions.containsMouse )
                     {
                         HideMissions();
-                        d.SetColor( Color.white );
+                        button.SetColor( Color.white );
                     }
                 } ) );
         }
@@ -126,7 +123,6 @@ public class MissionEditor
         int count = selectedMissionSet.missionDefinitions.Count + 1;
         missions = new Layout( "MissionLayout" , 4 , count , 0.25f , 0.1f , count , container );
         missions.SetPosition( position + ( Vector3.right * missions.width * 0.5f ) + ( Vector3.back * missions.height * 0.5f ) );
-        _editor.GetDropdown( index ).AddLayout( missions );
 
         List<Button> buttons = new List<Button>( count )
         {
@@ -154,7 +150,10 @@ public class MissionEditor
                     {
                         selectedMission = selectedMissionSet.missionDefinitions[ capturedIndex ];
                         _editor.campaignEditor.selectedCampaign.Add( selectedMission , index );
-                        _editor.GetDropdown( index ).SetLabel( selectedMission.name );
+                        Button mapButton = _editor.GetMapButton( index );
+                        mapButton.SetLabel( selectedMission.name );
+                        mapButton.SetColor( Color.white );
+                        mapButton.Deselect();
                         HideMissionSets();
                         HideMissions();
                     }
@@ -192,12 +191,12 @@ public class MissionEditor
     private Editor _editor { get; }
     private MeshRenderer _indicator { get; }
     private Button _missionTimeline { get; set; }
-    private List<Dropdown> _dropdowns { get; set; }
+    private List<Button> _buttons { get; set; }
 
     public MissionEditor( Editor editor )
     {
         _editor = editor;
-        _dropdowns = new List<Dropdown>();
+        _buttons = new List<Button>();
         _indicator = GameObject.CreatePrimitive( PrimitiveType.Sphere ).GetComponent<MeshRenderer>();
         container = new GameObject( typeof( MissionEditor ).Name );
         container.transform.SetParent( editor.container.transform );

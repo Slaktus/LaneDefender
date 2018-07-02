@@ -46,7 +46,7 @@ public class WaveEditor
             for ( int i = 0 ; _editor.waveData.waveSets.Count > i ; i++ )
             {
                 int index = i;
-                buttons.Add( new Dropdown( "WaveSet" , "Wave Set" , width , height , _container ,
+                buttons.Add( new Button( "WaveSet" , "Wave Set" , width , height , _container ,
                     fontSize: 20 ,
                     Enter: ( Button button ) => button.SetColor( selectedWaveSet == _editor.waveData.waveSets[ index ] ? button.color : Color.green ) ,
                     Stay: ( Button button ) =>
@@ -141,28 +141,16 @@ public class WaveEditor
             int index = i;
 
             if ( waveEventButtons.Count > selectedWaveDefinition.waveEvents[ index ].lane )
-                waveEventButtons[ selectedWaveDefinition.waveEvents[ index ].lane ].Add( new Dropdown( "WaveEvent" + index.ToString() , index.ToString() , 1 , 1 , _container ,
+                waveEventButtons[ selectedWaveDefinition.waveEvents[ index ].lane ].Add( new Button( "WaveEvent" + index.ToString() , index.ToString() , 1 , 1 , _container ,
                     Enter: ( Button butt ) => butt.SetColor( Color.red ) ,
                     Stay: ( Button butt ) =>
                     {
                         if ( Input.GetMouseButtonDown( 0 ) )
                         {
-                            if ( _waveEventEditor != null )
-                            {
-                                for ( int j = 0 ; waveEventButtons.Count > j ; j++ )
-                                    for ( int k = 0 ; waveEventButtons[ j ].Count > k ; k++ )
-                                        if ( ( waveEventButtons[ j ][ k ] as Dropdown ).HasLayout( _waveEventEditor ) )
-                                        {
-                                            ( waveEventButtons[ j ][ k ] as Dropdown ).RemoveLayout( _waveEventEditor );
-                                            _waveEventEditor.Destroy();
-                                            _waveEventEditor = null;
-                                        }
-                            }
-
                             List<Element> waveEventEditorButtons = new List<Element>()
                             {
                                 new Label("Type:" , Color.black , 1.25f , 0.5f , _container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
-                                new Dropdown( "Type" , WaveEvent.Type.SpawnEnemy.ToString() , 2 , 0.5f , _container ,
+                                new Button( "Type" , WaveEvent.Type.SpawnEnemy.ToString() , 2 , 0.5f , _container ,
                                     fontSize: 20 ,
                                     Enter: ( Button b ) => b.SetColor( Color.green ) ,
                                     Stay: ( Button b ) => { } ,
@@ -178,7 +166,6 @@ public class WaveEditor
                             _waveEventEditor = new Layout( "WaveEventEditor" , 3.5f , 3 , 0.25f , 0.1f , waveEventEditorButtons.Count / 2 , _container );
                             _waveEventEditor.Add( waveEventEditorButtons , true );
                             _waveEventEditor.SetPosition( _editor.stage.LaneBy( selectedWaveDefinition.waveEvents[ index ].lane ).start + ( Vector3.left * _waveEventEditor.width * 0.5f ) );
-                            ( butt as Dropdown ).AddLayout( _waveEventEditor );
 
                             for ( int j = 0 ; waveEventButtons[ selectedWaveDefinition.waveEvents[ index ].lane ].Count > j ; j++ )
                                 waveEventButtons[ selectedWaveDefinition.waveEvents[ index ].lane ][ j ].Hide();
@@ -196,9 +183,8 @@ public class WaveEditor
                     } , 
                     Close: ( Button butt ) => 
                     {
-                        if ( Input.GetMouseButtonDown( 0 ) && ( butt as Dropdown ).HasLayout( _waveEventEditor ) )
+                        if ( Input.GetMouseButtonDown( 0 ) )
                         {
-                            ( butt as Dropdown ).RemoveLayout( _waveEventEditor );
                             _waveEventEditor?.Destroy();
                             _waveEventEditor = null;
 

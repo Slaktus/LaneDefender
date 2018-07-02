@@ -10,8 +10,8 @@ public class Editor
     {
         HandleLaneHover();
 
-        for ( int i = 0 ; _campaignMapDropdowns.Count > i ; i++ )
-            _campaignMapDropdowns[ i ].Update();
+        for ( int i = 0 ; _campaignMapButtons.Count > i ; i++ )
+            _campaignMapButtons[ i ].Update();
 
         _level?.Update();
         _saveButton.Update();
@@ -77,18 +77,17 @@ public class Editor
         for ( int i = 0 ; campaignMap.tileMap.count > i ; i++ )
         {
             int index = i;
-            Dropdown dropdown = new Dropdown( "CampaignMap" + index , index.ToString() , campaignMap.tileMap.tileWidth - 1 , campaignMap.tileMap.tileHeight * 0.5f , campaignEditor.container ,
-                Enter: ( Button button ) => button.SetColor( /*missionEditor.missionSets != null && missionEditor.selectedMissionSet == campaignData.missionSets[ index ] ? button.color :*/ Color.green ) ,
-                Stay: ( Button button ) =>
+            Button button = new Button( "CampaignMap" + index , index.ToString() , campaignMap.tileMap.tileWidth - 1 , campaignMap.tileMap.tileHeight * 0.5f , campaignEditor.container ,
+                Enter: ( Button b ) => b.SetColor( b.selected ? b.color : Color.green ) ,
+                Stay: ( Button b ) =>
                 {
-                    if ( Input.GetMouseButtonDown( 0 ) && button.containsMouse )
+                    if ( Input.GetMouseButtonDown( 0 ) && b.containsMouse )
                     {
                         if ( missionEditor.selectedMission != null && campaignEditor.selectedCampaign.Get( index ) == missionEditor.selectedMission )
                         {
                             if ( missionEditor.selectedMission.stageDefinition != null )
                                 ShowStage( missionEditor.selectedMission.stageDefinition );
 
-                            button.SetColor( Color.yellow );
                             missionEditor.ShowMissionTimeline();
                             stageEditor.Show();
 
@@ -96,35 +95,37 @@ public class Editor
                             missionEditor.Hide();
                             HideCampaignMap();
                         }
-                        else if ( !( button as Dropdown ).HasLayout( missionEditor.missions ) )
-                            missionEditor.ShowMissionSets( index , button.position + new Vector3( button.width * 0.5f , 0 , button.height * 0.5f ) );
+                        else
+                        {
+                            missionEditor.ShowMissionSets( index , b.position + new Vector3( b.width * 0.5f , 0 , b.height * 0.5f ) );
+                            b.SetColor( Color.yellow );
+                            b.Select();
+                        }
                     }
                 } ,
-                Exit: ( Button button ) => button.SetColor( /*missionEditor.missionSets != null && missionEditor.selectedMissionSet == campaignData.missionSets[ index ] ? button.color :*/ Color.white ) ,
-                Close: ( Button button ) =>
+                Exit: ( Button b ) => b.SetColor( b.selected ? b.color : Color.white ) ,
+                Close: ( Button b ) =>
                 {
-                    Dropdown d = button as Dropdown;
-
-                    if ( ( Input.GetMouseButtonDown( 0 ) || Input.GetMouseButtonDown( 1 ) ) && ( d.HasLayout( missionEditor.missions ) || d.HasLayout( missionEditor.missionSets ) ) )
+                    if ( b.selected && ( Input.GetMouseButtonDown( 0 ) || Input.GetMouseButtonDown( 1 ) ) && !b.containsMouse && ( missionEditor.missionSets == null || !missionEditor.missionSets.containsMouse ) && ( missionEditor.missions == null || !missionEditor.missions.containsMouse ) )
                     {
                         missionEditor.HideMissions();
                         missionEditor.HideMissionSets();
-                        button.SetColor( Color.white );
-                        d.RemoveLayouts();
+                        b.SetColor( Color.white );
+                        b.Deselect();
                     }
                 } );
 
-            dropdown.SetPosition( campaignMap.tileMap.PositionOf( index ) );
-            _campaignMapDropdowns.Add( dropdown );
+            button.SetPosition( campaignMap.tileMap.PositionOf( index ) );
+            _campaignMapButtons.Add( button );
         }
     }
 
     public void HideCampaignMap()
     {
-        for ( int i = 0 ; _campaignMapDropdowns.Count > i ; i++ )
-            _campaignMapDropdowns[ i ].Destroy();
+        for ( int i = 0 ; _campaignMapButtons.Count > i ; i++ )
+            _campaignMapButtons[ i ].Destroy();
 
-        _campaignMapDropdowns.Clear();
+        _campaignMapButtons.Clear();
     }
 
     public void Refresh()
@@ -132,7 +133,7 @@ public class Editor
         ShowCampaignMap();
     }
 
-    public Dropdown GetDropdown( int index ) => _campaignMapDropdowns[ index ];
+    public Button GetMapButton( int index ) => _campaignMapButtons[ index ];
 
     public T Load<T>( string path ) where T : ScriptableObject => AssetDatabase.LoadAssetAtPath<T>( path + typeof( T ) + ".asset" );
     private T Create<T>( string path ) where T : ScriptableObject => ScriptableObjects.Create<T>( path + typeof( T ) + ".asset" );
@@ -151,7 +152,7 @@ public class Editor
     public StageEditor stageEditor { get; }
     public WaveEditor waveEditor { get; }
 
-    private List<Dropdown> _campaignMapDropdowns { get; }
+    private List<Button> _campaignMapButtons { get; }
     private Button _testButton { get; }
     private Button _saveButton { get; }
     private Level _level { get; set; }
@@ -175,7 +176,7 @@ public class Editor
         if ( campaignData == null )
             campaignData = Create<CampaignData>( _campaignDataPath );
 
-        _campaignMapDropdowns = new List<Dropdown>();
+        _campaignMapButtons = new List<Button>();
         container = new GameObject( "Editor" );
 
         _testButton = new Button( "Test" , "Test" , 1.5f , 0.5f , container ,
@@ -228,7 +229,6 @@ public class Editor
             Exit: ( Button button ) => button.SetColor( Color.white ) );
 
         _saveButton.SetPosition( _testButton.position + Vector3.left * ( _saveButton.width ) );
-
 
         campaignEditor = new CampaignEditor( this , Vector3.zero );
         missionEditor = new MissionEditor( this );

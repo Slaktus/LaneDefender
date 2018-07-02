@@ -38,7 +38,7 @@ public class StageEditor
         for ( int i = 0 ; buttons.Capacity - 1 > i ; i++ )
         {
             int index = i;
-            buttons.Add( new Dropdown( "StageSet" , "Stage Set" , width , height , _container ,
+            buttons.Add( new Button( "StageSet" , "Stage Set" , width , height , _container ,
                 fontSize: 20 ,
                 Enter: ( Button button ) => button.SetColor( _stages != null && _selectedStageSet == _editor.stageData.stageSets[ index ] ? button.color : Color.green ) ,
                 Stay: ( Button button ) =>
@@ -48,23 +48,20 @@ public class StageEditor
                         if ( _selectedStageSet != null )
                             buttons[ _editor.stageData.stageSets.IndexOf( _selectedStageSet ) + 1 ].SetColor( Color.white );
 
+                        button.Select();
                         button.SetColor( Color.yellow );
                         _selectedStageSet = _editor.stageData.stageSets[ index ];
 
                         HideStageDefinitions();
                         ShowStageDefinitions( button.position );
-                        ( button as Dropdown ).AddLayout( _stages );
-
                     }
                 } ,
                 Exit: ( Button button ) => button.SetColor( _stages != null && _selectedStageSet == _editor.stageData.stageSets[ index ] ? button.color : Color.white ) ,
                 Close: ( Button button ) =>
                 {
-                    Dropdown d = button as Dropdown;
-
-                    if ( Input.GetMouseButtonDown( 0 ) && !d.containsMouse )
+                    if ( Input.GetMouseButtonDown( 0 ) && ( _stageSets == null || !_stageSets.containsMouse ) && ( _stages == null || !_stages.containsMouse ) )
                     {
-                        d.RemoveLayouts();
+                        button.Deselect();
                         button.SetColor( Color.white );
                         _selectedStageSet = null;
                         HideStageDefinitions();

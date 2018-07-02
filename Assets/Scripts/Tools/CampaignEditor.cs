@@ -39,29 +39,26 @@ public class CampaignEditor
         for ( int i = 0 ; buttons.Capacity - 1 > i ; i++ )
         {
             int index = i;
-            buttons.Add( new Dropdown( "CampaignSet" , "Campaign Set" , 4 , 1 , container ,
+            buttons.Add( new Button( "CampaignSet" , "Campaign Set" , 4 , 1 , container ,
                 Enter: ( Button button ) => button.SetColor( _campaigns != null && selectedCampaignSet == _editor.campaignData.campaignSets[ index ] ? button.color : Color.green ) ,
                 Stay: ( Button button ) =>
                 {
-                    Dropdown d = button as Dropdown;
-
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
                         selectedCampaignSet = _editor.campaignData.campaignSets[ index ];
                         ShowCampaigns( index , button.position + new Vector3( button.width * 0.5f , 0 , button.height * 0.5f ) );
-                        d.SetColor( Color.yellow );
-                        d.AddLayout( _campaigns );
+                        button.SetColor( Color.yellow );
+                        button.Select();
                     }
                 } ,
                 Exit: ( Button button ) => button.SetColor( _campaigns != null && selectedCampaignSet == _editor.campaignData.campaignSets[ index ] ? button.color : Color.white ) ,
                 Close: ( Button button ) =>
                 {
-                    Dropdown d = button as Dropdown;
-                    
-                    if ( Input.GetMouseButtonDown( 0 ) && selectedCampaignSet == _editor.campaignData.campaignSets[ index ] && _campaigns != null && !_campaigns.containsMouse )
+                    if ( button.selected && Input.GetMouseButtonDown( 0 ) && ( _campaigns == null || !_campaigns.containsMouse ) )
                     {
                         HideCampaigns();
-                        d.SetColor( Color.white );
+                        button.Deselect();
+                        button.SetColor( Color.white );
                     }
 
                 } ) );
@@ -94,7 +91,6 @@ public class CampaignEditor
                     {
                         ScriptableObjects.Add( CampaignDefinition.Default() , selectedCampaignSet );
                         ShowCampaigns( index , position );
-                        ShowCampaignSets();
                     }
                 } ,
                 Exit: ( Button button ) => button.SetColor( Color.white ) )
