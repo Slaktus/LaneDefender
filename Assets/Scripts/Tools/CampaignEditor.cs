@@ -6,18 +6,16 @@ public class CampaignEditor
 {
     public void Update()
     {
-        dropdown.Update();
         _campaigns?.Update();
-        _campaignSets?.Update();
+        campaignSets?.Update();
         _campaignEditor?.Update();
     }
 
-    public void ShowCampaignSets( Vector3 position )
+    public void ShowCampaignSets()
     {
-        _campaignSets?.Destroy();
+        campaignSets?.Destroy();
         int count = _editor.campaignData.campaignSets.Count + 1;
-        _campaignSets = new Layout( "CampaignSets" , 4 , count , 0.25f , 0.1f , count , container );
-        dropdown.AddLayout( _campaignSets );
+        campaignSets = new Layout( "CampaignSets" , 4 , count , 0.25f , 0.1f , count , container );
 
         List<Button> buttons = new List<Button>( count )
         {
@@ -28,8 +26,13 @@ public class CampaignEditor
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
                         HideCampaignSets();
+                        HideCampaignEditor();
                         ScriptableObjects.Add( ScriptableObject.CreateInstance<CampaignSet>() , _editor.campaignData );
-                        ShowCampaignSets( position );
+
+                        ShowCampaignSets();
+
+                        if ( selectedCampaign != null )
+                            ShowCampaignEditor();
                     }
                 } ,
                 Exit: ( Button button ) => button.SetColor( Color.white ) )
@@ -51,14 +54,14 @@ public class CampaignEditor
                 Exit: ( Button button ) => button.SetColor( Color.white ) ) );
         }
 
-        _campaignSets.Add( buttons , true );
-        _campaignSets.SetPosition( position + ( Vector3.back * ( _campaignSets.height + dropdown.height ) * 0.5f ) );
+        campaignSets.Add( buttons , true );
+        campaignSets.SetViewportPosition( new Vector2( 0 , 1 ) );
     }
 
     public void HideCampaignSets()
     {
-        _campaignSets?.Destroy();
-        _campaignSets = null;
+        campaignSets?.Destroy();
+        campaignSets = null;
     }
 
     public void ShowCampaigns( int index , Vector3 position )
@@ -67,7 +70,6 @@ public class CampaignEditor
         int count = selectedCampaignSet.campaignDefinitions.Count + 1;
         _campaigns = new Layout( "CampaignLayout" , 4 , count , 0.25f , 0.1f , count , container );
         _campaigns.SetPosition( position + ( Vector3.right * _campaigns.width * 0.5f ) + ( Vector3.back * _campaigns.height * 0.5f ) );
-        dropdown.AddLayout( _campaigns );
 
         List<Button> buttons = new List<Button>( count )
         {
@@ -98,7 +100,7 @@ public class CampaignEditor
                     {
                         selectedCampaign = selectedCampaignSet.campaignDefinitions[ capturedIndex ];
 
-                        Hide();
+                        HideCampaigns();
                         ShowCampaignEditor();
                         _editor.ShowCampaignMap();
                     }
@@ -111,44 +113,50 @@ public class CampaignEditor
 
     public void ShowCampaignEditor()
     {
-        List<Element> campaignEditorButtons = new List<Element>()
+        _campaignEditor?.Destroy();
+
+        if ( selectedCampaign != null )
         {
-            new Label( "Width:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
-            new Field( "Width" , selectedCampaign.width.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
+            List<Element> campaignEditorButtons = new List<Element>()
             {
-                float.TryParse( field.label.text , out selectedCampaign.width );
-                _editor.Refresh();
-                Refresh();
-            } ) ,
+                new Label( "Width:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
+                new Field( "Width" , selectedCampaign.width.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
+                {
+                    float.TryParse( field.label.text , out selectedCampaign.width );
+                    _editor.Refresh();
+                    Refresh();
+                } ) ,
 
-            new Label( "Height:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
-            new Field( "Height" , selectedCampaign.height.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
-            {
-                float.TryParse( field.label.text , out selectedCampaign.height );
-                _editor.Refresh();
-                Refresh();
-            } ) ,
+                new Label( "Height:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
+                new Field( "Height" , selectedCampaign.height.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
+                {
+                    float.TryParse( field.label.text , out selectedCampaign.height );
+                    _editor.Refresh();
+                    Refresh();
+                } ) ,
 
-            new Label( "Rows:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
-            new Field( "Rows" , selectedCampaign.rows.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
-            {
-                int.TryParse( field.label.text , out selectedCampaign.rows );
-                _editor.Refresh();
-                Refresh();
-            } ) ,
+                new Label( "Rows:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
+                new Field( "Rows" , selectedCampaign.rows.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
+                {
+                    int.TryParse( field.label.text , out selectedCampaign.rows );
+                    _editor.Refresh();
+                    Refresh();
+                } ) ,
 
-            new Label( "Columns:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
-            new Field( "Columns" , selectedCampaign.columns.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
-            {
-                int.TryParse( field.label.text , out selectedCampaign.columns );
-                _editor.Refresh();
-                Refresh();
-            } )
-        };
+                new Label( "Columns:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
+                new Field( "Columns" , selectedCampaign.columns.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
+                {
+                    int.TryParse( field.label.text , out selectedCampaign.columns );
+                    _editor.Refresh();
+                    Refresh();
+                } )
+            };
 
-        _campaignEditor = new Layout( "CampaignEditor" , 3 , 4 , 0.25f , 0.1f , campaignEditorButtons.Count / 2 , container );
-        _campaignEditor.Add( campaignEditorButtons , true );
-        _campaignEditor.SetParent( container );
+            _campaignEditor = new Layout( "CampaignEditor" , 4 , 4 , 0.25f , 0.1f , campaignEditorButtons.Count / 2 , container );
+            _campaignEditor.Add( campaignEditorButtons , true );
+            _campaignEditor.SetParent( container );
+            _campaignEditor.SetPosition( campaignSets.position + ( Vector3.back * ( ( campaignSets.height + _campaignEditor.height ) * 0.5f ) ) );
+        }
     }
 
     public void HideCampaignEditor()
@@ -168,24 +176,23 @@ public class CampaignEditor
         HideCampaigns();
         HideCampaignSets();
         HideCampaignEditor();
-        dropdown.RemoveLayouts();
     }
 
     public void Refresh()
     {
         _campaigns?.Refresh();
-        _campaignSets?.Refresh();
+        campaignSets?.Refresh();
         _campaignEditor?.Refresh();
     }
+
+    public Layout campaignSets { get; set; }
 
     public CampaignDefinition selectedCampaign { get; private set; }
     public CampaignSet selectedCampaignSet { get; private set; }
     public GameObject container { get; }
-    public Dropdown dropdown { get; }
 
     private Editor _editor { get; }
     private Layout _campaigns { get; set; }
-    private Layout _campaignSets { get; set; }
     private Layout _campaignEditor { get; set; }
 
     public CampaignEditor( Editor editor , Vector3 position )
@@ -193,24 +200,6 @@ public class CampaignEditor
         _editor = editor;
         container = new GameObject( typeof( CampaignEditor ).Name );
         container.transform.SetParent( editor.container.transform );
-        dropdown = new Dropdown( "Campaigns" , "Campaigns" , 4 , 1 , container ,
-            Enter: ( Button button ) => button.SetColor( Color.green ) ,
-            Stay: ( Button button ) => 
-            {
-                if ( Input.GetMouseButtonDown( 0 ) )
-                    ShowCampaignSets( position );
-            } ,
-            Exit: ( Button button ) => button.SetColor( Color.white ) , 
-            Close: ( Button button ) => 
-            {
-                if ( Input.GetMouseButtonDown( 0 ) || Input.GetMouseButtonDown( 1 ) )
-                {
-                    HideCampaigns();
-                    HideCampaignSets();
-                }
-            } );
-
-        dropdown.SetPosition( position );
     }
 }
 #endif //UNITY_EDITOR

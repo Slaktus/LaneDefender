@@ -154,7 +154,6 @@ public class Editor
     private Button _saveButton { get; }
     private Level _level { get; set; }
 
-
     private const string _campaignDataPath = "Assets/AssetBundleSource/Campaigns/";
     private const string _stageDataPath = "Assets/AssetBundleSource/Stages/";
     private const string _waveDataPath = "Assets/AssetBundleSource/Waves/";
@@ -233,6 +232,9 @@ public class Editor
         missionEditor = new MissionEditor( this );
         stageEditor = new StageEditor( this );
         waveEditor = new WaveEditor( this );
+
+        campaignEditor.ShowCampaignSets();
+        campaignEditor.ShowCampaignEditor();
     }
 }
 
