@@ -78,7 +78,7 @@ public class Editor
         {
             int index = i;
             Dropdown dropdown = new Dropdown( "CampaignMap" + index , index.ToString() , campaignMap.tileMap.tileWidth - 1 , campaignMap.tileMap.tileHeight * 0.5f , campaignEditor.container ,
-                Enter: ( Button button ) => button.SetColor( Color.green ) ,
+                Enter: ( Button button ) => button.SetColor( /*missionEditor.missionSets != null && missionEditor.selectedMissionSet == campaignData.missionSets[ index ] ? button.color :*/ Color.green ) ,
                 Stay: ( Button button ) =>
                 {
                     if ( Input.GetMouseButtonDown( 0 ) && button.containsMouse )
@@ -88,6 +88,7 @@ public class Editor
                             if ( missionEditor.selectedMission.stageDefinition != null )
                                 ShowStage( missionEditor.selectedMission.stageDefinition );
 
+                            button.SetColor( Color.yellow );
                             missionEditor.ShowMissionTimeline();
                             stageEditor.Show();
 
@@ -99,7 +100,7 @@ public class Editor
                             missionEditor.ShowMissionSets( index , button.position + new Vector3( button.width * 0.5f , 0 , button.height * 0.5f ) );
                     }
                 } ,
-                Exit: ( Button button ) => button.SetColor( Color.white ) ,
+                Exit: ( Button button ) => button.SetColor( /*missionEditor.missionSets != null && missionEditor.selectedMissionSet == campaignData.missionSets[ index ] ? button.color :*/ Color.white ) ,
                 Close: ( Button button ) =>
                 {
                     Dropdown d = button as Dropdown;
@@ -108,7 +109,8 @@ public class Editor
                     {
                         missionEditor.HideMissions();
                         missionEditor.HideMissionSets();
-                        ( button as Dropdown ).RemoveLayouts();
+                        button.SetColor( Color.white );
+                        d.RemoveLayouts();
                     }
                 } );
 

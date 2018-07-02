@@ -6,12 +6,9 @@ public class StageEditor
 {
     public void Update()
     {
-        if ( selectedStageDefinition != null && stageEditorLayout == null )
-            ShowStageEditor();
-
         _stageSets?.Update();
         stageEditorLayout?.Update();
-        _stageDefinitionLayout?.Update();
+        _stages?.Update();
     }
 
     public void Show() => ShowStageSets();
@@ -43,7 +40,7 @@ public class StageEditor
             int index = i;
             buttons.Add( new Dropdown( "StageSet" , "Stage Set" , width , height , _container ,
                 fontSize: 20 ,
-                Enter: ( Button button ) => button.SetColor( _selectedStageSet == _editor.stageData.stageSets[ index ] ? button.color : Color.green ) ,
+                Enter: ( Button button ) => button.SetColor( _stages != null && _selectedStageSet == _editor.stageData.stageSets[ index ] ? button.color : Color.green ) ,
                 Stay: ( Button button ) =>
                 {
                     if ( Input.GetMouseButtonDown( 0 ) )
@@ -56,13 +53,18 @@ public class StageEditor
 
                         HideStageDefinitions();
                         ShowStageDefinitions( button.position );
+                        ( button as Dropdown ).AddLayout( _stages );
+
                     }
                 } ,
-                Exit: ( Button button ) => button.SetColor( _selectedStageSet == _editor.stageData.stageSets[ index ] ? button.color : Color.white ) ,
+                Exit: ( Button button ) => button.SetColor( _stages != null && _selectedStageSet == _editor.stageData.stageSets[ index ] ? button.color : Color.white ) ,
                 Close: ( Button button ) =>
                 {
-                    if ( Input.GetMouseButtonDown( 0 ) && !_stageSets.containsMouse &&( _stageDefinitionLayout == null || !_stageDefinitionLayout.containsMouse ) )
+                    Dropdown d = button as Dropdown;
+
+                    if ( Input.GetMouseButtonDown( 0 ) && !d.containsMouse )
                     {
+                        d.RemoveLayouts();
                         button.SetColor( Color.white );
                         _selectedStageSet = null;
                         HideStageDefinitions();
@@ -107,18 +109,24 @@ public class StageEditor
                                 buttons[ _selectedStageSet.stageDefinitions.IndexOf( selectedStageDefinition ) + 1 ].SetColor( Color.white );
 
                             selectedStageDefinition = _selectedStageSet.stageDefinitions[ index ];
+
                             _editor.HideStage();
+                            HideStageSets();
+                            HideStageDefinitions();
+
                             _editor.ShowStage( selectedStageDefinition );
-                            Refresh();
+                            _editor.missionEditor.ShowMissionTimeline();
+                            ShowStageSets();
+                            ShowStageEditor();
                         }
                     } ,
                     Exit: ( Button button ) => button.SetColor( Color.white ) ) );
             }
 
-        _stageDefinitionLayout = new Layout( "StageDefinitionButtons" , width , height * buttons.Count , padding , spacing , buttons.Count );
-        _stageDefinitionLayout.SetParent( _container );
-        _stageDefinitionLayout.SetPosition( position + ( Vector3.right * width ) + ( Vector3.back * ( ( height * ( buttons.Count - 1 ) * 0.5f ) + ( padding * 0.5f ) ) ) );
-        _stageDefinitionLayout.Add( buttons , true );
+        _stages = new Layout( "StageDefinitionButtons" , width , height * buttons.Count , padding , spacing , buttons.Count );
+        _stages.SetParent( _container );
+        _stages.SetPosition( position + ( Vector3.right * width ) + ( Vector3.back * ( ( height * ( buttons.Count - 1 ) * 0.5f ) + ( padding * 0.5f ) ) ) );
+        _stages.Add( buttons , true );
         _showingStageDefinitions = true;
     }
 
@@ -177,7 +185,7 @@ public class StageEditor
 
     public void HideStageDefinitions()
     {
-        _stageDefinitionLayout?.Destroy();
+        _stages?.Destroy();
         _showingStageDefinitions = false;
     }
 
@@ -212,7 +220,7 @@ public class StageEditor
     private GameObject _container { get; }
     private Layout _stageSets { get; set; }
     private StageSet _selectedStageSet { get; set; }
-    private Layout _stageDefinitionLayout { get; set; }
+    private Layout _stages { get; set; }
     private bool _showingStageDefinitions { get; set; }
 
     public StageEditor( Editor editor )

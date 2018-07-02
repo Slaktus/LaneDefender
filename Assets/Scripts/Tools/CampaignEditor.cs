@@ -13,7 +13,7 @@ public class CampaignEditor
 
     public void ShowCampaignSets()
     {
-        campaignSets?.Destroy();
+        HideCampaignSets();
         int count = _editor.campaignData.campaignSets.Count + 1;
         campaignSets = new Layout( "CampaignSets" , 4 , count , 0.25f , 0.1f , count , container );
 
@@ -25,10 +25,7 @@ public class CampaignEditor
                 {
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
-                        HideCampaignSets();
-                        HideCampaignEditor();
                         ScriptableObjects.Add( ScriptableObject.CreateInstance<CampaignSet>() , _editor.campaignData );
-
                         ShowCampaignSets();
 
                         if ( selectedCampaign != null )
@@ -41,17 +38,29 @@ public class CampaignEditor
         for ( int i = 0 ; buttons.Capacity - 1 > i ; i++ )
         {
             int index = i;
-            buttons.Add( new Button( "CampaignSet" , "Campaign Set" , 4 , 1 , container ,
-                Enter: ( Button button ) => button.SetColor( Color.green ) ,
+            buttons.Add( new Dropdown( "CampaignSet" , "Campaign Set" , 4 , 1 , container ,
+                Enter: ( Button button ) => button.SetColor( _campaigns != null && selectedCampaignSet == _editor.campaignData.campaignSets[ index ] ? button.color : Color.green ) ,
                 Stay: ( Button button ) =>
                 {
+                    Dropdown d = button as Dropdown;
+
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
                         selectedCampaignSet = _editor.campaignData.campaignSets[ index ];
                         ShowCampaigns( index , button.position + new Vector3( button.width * 0.5f , 0 , button.height * 0.5f ) );
+                        d.SetColor( Color.yellow );
+                        d.AddLayout( _campaigns );
                     }
                 } ,
-                Exit: ( Button button ) => button.SetColor( Color.white ) ) );
+                Exit: ( Button button ) => button.SetColor( _campaigns != null && selectedCampaignSet == _editor.campaignData.campaignSets[ index ] ? button.color : Color.white ) ,
+                Close: ( Button button ) =>
+                {
+                    Dropdown d = button as Dropdown;
+                    
+                    if ( Input.GetMouseButtonDown( 0 ) && _campaigns != null && !_campaigns.containsMouse )
+                        HideCampaigns();
+
+                } ) );
         }
 
         campaignSets.Add( buttons , true );
@@ -66,7 +75,7 @@ public class CampaignEditor
 
     public void ShowCampaigns( int index , Vector3 position )
     {
-        _campaigns?.Destroy();
+        HideCampaigns();
         int count = selectedCampaignSet.campaignDefinitions.Count + 1;
         _campaigns = new Layout( "CampaignLayout" , 4 , count , 0.25f , 0.1f , count , container );
         _campaigns.SetPosition( position + ( Vector3.right * _campaigns.width * 0.5f ) + ( Vector3.back * _campaigns.height * 0.5f ) );
@@ -79,11 +88,9 @@ public class CampaignEditor
                 {
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
-                        HideCampaigns();
-                        CampaignDefinition campaignDefinition = ScriptableObject.CreateInstance<CampaignDefinition>();
-                        campaignDefinition.Initialize( 20 , 15 , 5 , 5 );
                         ScriptableObjects.Add( CampaignDefinition.Default() , selectedCampaignSet );
                         ShowCampaigns( index , position );
+                        ShowCampaignSets();
                     }
                 } ,
                 Exit: ( Button button ) => button.SetColor( Color.white ) )
@@ -101,6 +108,8 @@ public class CampaignEditor
                         selectedCampaign = selectedCampaignSet.campaignDefinitions[ capturedIndex ];
 
                         HideCampaigns();
+                        HideCampaignSets();
+                        ShowCampaignSets();
                         ShowCampaignEditor();
                         _editor.ShowCampaignMap();
                     }

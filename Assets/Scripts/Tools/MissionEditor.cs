@@ -33,7 +33,7 @@ public class MissionEditor
 
     public void ShowMissionTimeline()
     {
-        _missionTimeline?.Destroy();
+        HideMissionTimeline();
 
         if ( _editor.stage != null )
         {
@@ -51,6 +51,12 @@ public class MissionEditor
 
             _missionTimeline.SetPosition( new Vector3( _editor.stage.start + ( _editor.stage.width * 0.5f ) , 0 , Camera.main.ViewportToWorldPoint( new Vector3( 0 , 1 , Camera.main.transform.position.y ) ).z ) + ( Vector3.back * _missionTimeline.height * 0.5f ) );
         }
+    }
+
+    public void HideMissionTimeline()
+    {
+        _missionTimeline?.Destroy();
+        _missionTimeline = null;
     }
 
     public void ShowMissionSets( int index , Vector3 position )
@@ -86,7 +92,7 @@ public class MissionEditor
                 {
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
-                        _selectedMissionSet = _editor.campaignData.missionSets[ capturedIndex ];
+                        selectedMissionSet = _editor.campaignData.missionSets[ capturedIndex ];
                         ShowMissions( index , button.position + new Vector3( button.width * 0.5f , 0 , button.height * 0.5f ) );
                     }
                 } ,
@@ -105,8 +111,8 @@ public class MissionEditor
 
     public void ShowMissions( int index , Vector3 position )
     {
-        missions?.Destroy();
-        int count = _selectedMissionSet.missionDefinitions.Count + 1;
+        HideMissions();
+        int count = selectedMissionSet.missionDefinitions.Count + 1;
         missions = new Layout( "MissionLayout" , 4 , count , 0.25f , 0.1f , count , container );
         missions.SetPosition( position + ( Vector3.right * missions.width * 0.5f ) + ( Vector3.back * missions.height * 0.5f ) );
         _editor.GetDropdown( index ).AddLayout( missions );
@@ -119,8 +125,7 @@ public class MissionEditor
                 {
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
-                        HideMissions();
-                        ScriptableObjects.Add( MissionDefinition.Default() , _selectedMissionSet );
+                        ScriptableObjects.Add( MissionDefinition.Default() , selectedMissionSet );
                         ShowMissions( index , position );
                     }
                 } ,
@@ -136,7 +141,7 @@ public class MissionEditor
                 {
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
-                        selectedMission = _selectedMissionSet.missionDefinitions[ capturedIndex ];
+                        selectedMission = selectedMissionSet.missionDefinitions[ capturedIndex ];
                         _editor.campaignEditor.selectedCampaign.Add( selectedMission , index );
                         _editor.GetDropdown( index ).SetLabel( selectedMission.name );
                         HideMissionSets();
@@ -166,6 +171,7 @@ public class MissionEditor
     private void ShowIndicator() => _indicator.enabled = true;
     private void HideIndicator() => _indicator.enabled = false;
 
+    public MissionSet selectedMissionSet { get; private set; }
     public MissionDefinition selectedMission { get; private set; }
     public float timelinePosition { get; private set; }
     public Layout missionSets { get; private set; }
@@ -176,7 +182,6 @@ public class MissionEditor
     private MeshRenderer _indicator { get; }
     private Button _missionTimeline { get; set; }
     private List<Dropdown> _dropdowns { get; set; }
-    private MissionSet _selectedMissionSet { get; set; }
 
     public MissionEditor( Editor editor )
     {
