@@ -13,6 +13,9 @@ public class Editor
         for ( int i = 0 ; _campaignMapDropdowns.Count > i ; i++ )
             _campaignMapDropdowns[ i ].Update();
 
+        _level?.Update();
+        _saveButton.Update();
+        _testButton.Update();
         campaignEditor.Update();
         missionEditor.Update();
         stageEditor.Update();
@@ -82,9 +85,9 @@ public class Editor
                     {
                         if ( missionEditor.selectedMission != null && campaignEditor.selectedCampaign.Get( index ) == missionEditor.selectedMission )
                         {
-                            //actually, we probably want to do something else here
-                            //we really want to be able to set the stage here, at least
-                            ShowStage( missionEditor.selectedMission.stageDefinition );
+                            if ( missionEditor.selectedMission.stageDefinition != null )
+                                ShowStage( missionEditor.selectedMission.stageDefinition );
+
                             missionEditor.ShowMissionTimeline();
                             stageEditor.Show();
 

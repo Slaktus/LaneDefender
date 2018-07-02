@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class MissionDefinition : DefinitionBase
 {
-    public static MissionDefinition Default() => CreateInstance<MissionDefinition>().Initialize( "MissionDefinition" , 120 , StageDefinition.Default() );
+    public static MissionDefinition Default() => CreateInstance<MissionDefinition>().Initialize( "MissionDefinition" , 120 , null );
 
     public MissionDefinition Initialize( string name , float duration , StageDefinition stageDefinition )
     {

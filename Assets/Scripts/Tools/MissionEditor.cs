@@ -35,9 +35,11 @@ public class MissionEditor
     {
         _missionTimeline?.Destroy();
 
-        _missionTimeline = new Button( "MissionTimeline" , string.Empty , _editor.stage.width , 1 , container ,
+        if ( _editor.stage != null )
+        {
+            _missionTimeline = new Button( "MissionTimeline" , string.Empty , _editor.stage.width , 1 , container ,
             Enter: ( Button button ) => ShowIndicator() ,
-            Stay: ( Button button ) => 
+            Stay: ( Button button ) =>
             {
                 if ( Input.GetMouseButtonDown( 0 ) )
                 {
@@ -47,7 +49,8 @@ public class MissionEditor
             } ,
             Exit: ( Button button ) => HideIndicator() );
 
-        _missionTimeline.SetPosition( new Vector3( _editor.stage.start + ( _editor.stage.width * 0.5f ) , 0 , Camera.main.ViewportToWorldPoint( new Vector3( 0 , 1 , Camera.main.transform.position.y ) ).z ) + ( Vector3.back * _missionTimeline.height * 0.5f ) );
+            _missionTimeline.SetPosition( new Vector3( _editor.stage.start + ( _editor.stage.width * 0.5f ) , 0 , Camera.main.ViewportToWorldPoint( new Vector3( 0 , 1 , Camera.main.transform.position.y ) ).z ) + ( Vector3.back * _missionTimeline.height * 0.5f ) );
+        }
     }
 
     public void ShowMissionSets( int index , Vector3 position )
