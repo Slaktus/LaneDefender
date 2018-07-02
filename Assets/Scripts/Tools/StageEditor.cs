@@ -1,8 +1,6 @@
 ﻿#if UNITY_EDITOR
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 
 public class StageEditor
 {
@@ -11,7 +9,7 @@ public class StageEditor
         if ( selectedStageDefinition != null && stageEditorLayout == null )
             ShowStageEditor();
 
-        _stageSetLayout?.Update();
+        _stageSets?.Update();
         stageEditorLayout?.Update();
         _stageDefinitionLayout?.Update();
     }
@@ -20,9 +18,13 @@ public class StageEditor
 
     private void ShowStageSets( float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
     {
-        List<Button> buttons = new List<Button>();
+        _stageSets?.Destroy();
+        int count = _editor.stageData.stageSets.Count + 1;
+        _stageSets = new Layout( "StageSetButtons" , width , height * count , padding , spacing , count , _container );
 
-        buttons.Add( new Button( "AddStageSet" , "Add Stage Set" , width , height , _container ,
+        List<Button> buttons = new List<Button>( count )
+        {
+            new Button( "AddStageSet" , "Add Stage Set" , width , height , _container ,
             fontSize: 20 ,
             Enter: ( Button button ) => button.SetColor( Color.green ) ,
             Stay: ( Button button ) =>
@@ -33,44 +35,43 @@ public class StageEditor
                     Refresh();
                 }
             } ,
-            Exit: ( Button button ) => button.SetColor( Color.white ) ) );
+            Exit: ( Button button ) => button.SetColor( Color.white ) )
+        };
 
-        if ( _editor.stageData.stageSets != null )
-            for ( int i = 0 ; _editor.stageData.stageSets.Count > i ; i++ )
-            {
-                int index = i;
-                buttons.Add( new Dropdown( "StageSet" , "Stage Set" , width , height , _container ,
-                    fontSize: 20 ,
-                    Enter: ( Button button ) => button.SetColor( _selectedStageSet == _editor.stageData.stageSets[ index ] ? button.color : Color.green ) ,
-                    Stay: ( Button button ) =>
+        for ( int i = 0 ; buttons.Capacity - 1 > i ; i++ )
+        {
+            int index = i;
+            buttons.Add( new Dropdown( "StageSet" , "Stage Set" , width , height , _container ,
+                fontSize: 20 ,
+                Enter: ( Button button ) => button.SetColor( _selectedStageSet == _editor.stageData.stageSets[ index ] ? button.color : Color.green ) ,
+                Stay: ( Button button ) =>
+                {
+                    if ( Input.GetMouseButtonDown( 0 ) )
                     {
-                        if ( Input.GetMouseButtonDown( 0 ) )
-                        {
-                            if ( _selectedStageSet != null )
-                                buttons[ _editor.stageData.stageSets.IndexOf( _selectedStageSet ) + 1 ].SetColor( Color.white );
+                        if ( _selectedStageSet != null )
+                            buttons[ _editor.stageData.stageSets.IndexOf( _selectedStageSet ) + 1 ].SetColor( Color.white );
 
-                            button.SetColor( Color.yellow );
-                            _selectedStageSet = _editor.stageData.stageSets[ index ];
+                        button.SetColor( Color.yellow );
+                        _selectedStageSet = _editor.stageData.stageSets[ index ];
 
-                            HideStageDefinitions();
-                            ShowStageDefinitions( button.position );
-                        }
-                    } ,
-                    Exit: ( Button button ) => button.SetColor( _selectedStageSet == _editor.stageData.stageSets[ index ] ? button.color : Color.white ) ,
-                    Close: ( Button button ) =>
+                        HideStageDefinitions();
+                        ShowStageDefinitions( button.position );
+                    }
+                } ,
+                Exit: ( Button button ) => button.SetColor( _selectedStageSet == _editor.stageData.stageSets[ index ] ? button.color : Color.white ) ,
+                Close: ( Button button ) =>
+                {
+                    if ( Input.GetMouseButtonDown( 0 ) && !_stageSets.containsMouse &&( _stageDefinitionLayout == null || !_stageDefinitionLayout.containsMouse ) )
                     {
-                        if ( Input.GetMouseButtonDown( 0 ) && !_stageSetLayout.containsMouse &&( _stageDefinitionLayout == null || !_stageDefinitionLayout.containsMouse ) )
-                        {
-                            button.SetColor( Color.white );
-                            _selectedStageSet = null;
-                            HideStageDefinitions();
-                        }
-                    } ) );
-            }
+                        button.SetColor( Color.white );
+                        _selectedStageSet = null;
+                        HideStageDefinitions();
+                    }
+                } ) );
+        }
 
-        _stageSetLayout = new Layout( "StageSetButtons" , width , height * buttons.Count , padding , spacing , buttons.Count , _container );
-        _stageSetLayout.SetLocalPosition( position + ( Vector3.back * height * ( buttons.Count - 1 ) * 0.5f ) );
-        _stageSetLayout.Add( buttons , true );
+        _stageSets.Add( buttons , true );
+        _stageSets.SetViewportPosition( new Vector2( 0 , 1 ) );
     }
 
     private void ShowStageDefinitions( Vector3 position , float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
@@ -116,7 +117,7 @@ public class StageEditor
 
         _stageDefinitionLayout = new Layout( "StageDefinitionButtons" , width , height * buttons.Count , padding , spacing , buttons.Count );
         _stageDefinitionLayout.SetParent( _container );
-        _stageDefinitionLayout.SetPosition( position + ( Vector3.left * width ) + ( Vector3.back * ( ( height * ( buttons.Count - 1 ) * 0.5f ) + ( padding * 0.5f ) ) ) );
+        _stageDefinitionLayout.SetPosition( position + ( Vector3.right * width ) + ( Vector3.back * ( ( height * ( buttons.Count - 1 ) * 0.5f ) + ( padding * 0.5f ) ) ) );
         _stageDefinitionLayout.Add( buttons , true );
         _showingStageDefinitions = true;
     }
@@ -163,7 +164,7 @@ public class StageEditor
 
         stageEditorLayout = new Layout( "StageEditor" , 3 , 4 , 0.25f , 0.1f , stageEditorButtons.Count / 2 , _container );
         stageEditorLayout.Add( stageEditorButtons , true );
-        //stageEditorLayout.SetPosition( _editor.waveEditorPosition + ( Vector3.back * ( _editor.waveSetLayoutHeight + ( stageEditorLayout.height * 0.5f ) ) ) );
+        stageEditorLayout.SetPosition( _stageSets.position + ( Vector3.back * ( _stageSets.height + stageEditorLayout.height ) * 0.5f ) );
     }
 
     public void HideStageEditor()
@@ -182,7 +183,7 @@ public class StageEditor
 
     public void HideStageSets()
     {
-        _stageSetLayout?.Destroy();
+        _stageSets?.Destroy();
     }
 
     public void Hide()
@@ -205,12 +206,11 @@ public class StageEditor
         Show();
     }
 
-    public Vector3 position => Vector3.zero;
     public StageDefinition selectedStageDefinition { get; private set; }
 
     private Editor _editor { get; }
     private GameObject _container { get; }
-    private Layout _stageSetLayout { get; set; }
+    private Layout _stageSets { get; set; }
     private StageSet _selectedStageSet { get; set; }
     private Layout _stageDefinitionLayout { get; set; }
     private bool _showingStageDefinitions { get; set; }

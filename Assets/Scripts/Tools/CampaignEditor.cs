@@ -40,15 +40,15 @@ public class CampaignEditor
 
         for ( int i = 0 ; buttons.Capacity - 1 > i ; i++ )
         {
-            int capturedIndex = i;
+            int index = i;
             buttons.Add( new Button( "CampaignSet" , "Campaign Set" , 4 , 1 , container ,
                 Enter: ( Button button ) => button.SetColor( Color.green ) ,
                 Stay: ( Button button ) =>
                 {
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
-                        selectedCampaignSet = _editor.campaignData.campaignSets[ capturedIndex ];
-                        ShowCampaigns( capturedIndex , button.position + new Vector3( button.width * 0.5f , 0 , button.height * 0.5f ) );
+                        selectedCampaignSet = _editor.campaignData.campaignSets[ index ];
+                        ShowCampaigns( index , button.position + new Vector3( button.width * 0.5f , 0 , button.height * 0.5f ) );
                     }
                 } ,
                 Exit: ( Button button ) => button.SetColor( Color.white ) ) );
