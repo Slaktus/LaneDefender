@@ -58,9 +58,9 @@ public class CampaignEditor
                     {
                         HideCampaigns();
                         button.Deselect();
+                        selectedCampaignSet = null;
                         button.SetColor( Color.white );
                     }
-
                 } ) );
         }
 

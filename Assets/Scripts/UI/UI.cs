@@ -166,8 +166,7 @@ public class Button : Element
             Exit?.Invoke( this );
             hovering = false;
         }
-
-        if ( !contains )
+        else if ( !contains )
             Close?.Invoke( this );
     }
 

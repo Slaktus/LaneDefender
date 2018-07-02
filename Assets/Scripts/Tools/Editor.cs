@@ -81,9 +81,9 @@ public class Editor
                 Enter: ( Button b ) => b.SetColor( b.selected ? b.color : Color.green ) ,
                 Stay: ( Button b ) =>
                 {
-                    if ( Input.GetMouseButtonDown( 0 ) && b.containsMouse )
+                    if ( Input.GetMouseButtonDown( 0 ) )
                     {
-                        if ( missionEditor.selectedMission != null && campaignEditor.selectedCampaign.Get( index ) == missionEditor.selectedMission )
+                        if ( missionEditor.selectedMission != null && campaignEditor.selectedCampaign.Has( index ) && campaignEditor.selectedCampaign.Get( index ) == missionEditor.selectedMission )
                         {
                             if ( missionEditor.selectedMission.stageDefinition != null )
                                 ShowStage( missionEditor.selectedMission.stageDefinition );
@@ -106,12 +106,12 @@ public class Editor
                 Exit: ( Button b ) => b.SetColor( b.selected ? b.color : Color.white ) ,
                 Close: ( Button b ) =>
                 {
-                    if ( b.selected && ( Input.GetMouseButtonDown( 0 ) || Input.GetMouseButtonDown( 1 ) ) && !b.containsMouse && ( missionEditor.missionSets == null || !missionEditor.missionSets.containsMouse ) && ( missionEditor.missions == null || !missionEditor.missions.containsMouse ) )
+                    if ( b.selected && ( Input.GetMouseButtonDown( 0 ) || Input.GetMouseButtonDown( 1 ) ) && ( missionEditor.missionSets == null || !missionEditor.missionSets.containsMouse ) && ( missionEditor.missions == null || !missionEditor.missions.containsMouse ) )
                     {
+                        b.Deselect();
+                        b.SetColor( Color.white );
                         missionEditor.HideMissions();
                         missionEditor.HideMissionSets();
-                        b.SetColor( Color.white );
-                        b.Deselect();
                     }
                 } );
 

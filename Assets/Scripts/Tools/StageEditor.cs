@@ -11,7 +11,13 @@ public class StageEditor
         _stages?.Update();
     }
 
-    public void Show() => ShowStageSets();
+    public void Show()
+    {
+        ShowStageSets();
+
+        if ( selectedStageDefinition != null )
+            ShowStageEditor();
+    }
 
     private void ShowStageSets( float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
     {

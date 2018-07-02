@@ -102,6 +102,7 @@ public class MissionEditor
                     if ( Input.GetMouseButtonDown( 0 ) && selectedMissionSet == _editor.campaignData.missionSets[ capturedIndex ] && missions != null && !missions.containsMouse )
                     {
                         HideMissions();
+                        selectedMissionSet = null;
                         button.SetColor( Color.white );
                     }
                 } ) );
@@ -113,6 +114,7 @@ public class MissionEditor
 
     public void HideMissionSets()
     {
+        selectedMissionSet = null;
         missionSets?.Destroy();
         missionSets = null;
     }
