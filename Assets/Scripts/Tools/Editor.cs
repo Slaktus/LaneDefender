@@ -85,7 +85,9 @@ public class Editor
                     {
                         if ( campaignEditor.selectedCampaign.Has( index ) )
                         {
-                            if ( campaignEditor.selectedCampaign.Get( index ).stageDefinition != null )
+                            missionEditor.SetSelectedMission( campaignEditor.selectedCampaign.Get( index ) );
+
+                            if ( missionEditor.selectedMission.stageDefinition != null )
                                 ShowStage( missionEditor.selectedMission.stageDefinition );
 
                             missionEditor.ShowMissionTimeline();

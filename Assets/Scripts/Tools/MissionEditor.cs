@@ -23,12 +23,22 @@ public class MissionEditor
     {
         selectedMission.Add( waveSet , timelinePosition );
 
-        Button dropdown = new Button( "Wave" , "Wave" , 2 , 1 , container ,
-            Enter: ( Button button ) => button.SetColor( Color.green ) ,
-            Exit: ( Button button ) => button.SetColor( Color.white ) );
+        Button button = new Button( "Wave" , "Wave" , 2 , 1 , container ,
+            Enter: ( Button b ) => b.SetColor( Color.green ) ,
+            Exit: ( Button b ) => b.SetColor( Color.white ) );
 
-        dropdown.SetPosition( new Vector3( _missionTimeline.rect.xMin + ( timelinePosition * _missionTimeline.rect.xMax ) , 0 , _missionTimeline.rect.yMin + 0.5f ) );
-        _buttons.Add( dropdown );
+        button.SetPosition( new Vector3( _missionTimeline.rect.xMin + ( timelinePosition * _missionTimeline.rect.xMax ) , 0 , _missionTimeline.rect.yMin + 0.5f ) );
+        _buttons.Add( button );
+    }
+
+    public void AddMissionToTimeline( WaveSet waveSet , float timelinePosition )
+    {
+        Button button = new Button( "Wave" , "Wave" , 2 , 1 , container ,
+            Enter: ( Button b ) => b.SetColor( Color.green ) ,
+            Exit: ( Button b ) => b.SetColor( Color.white ) );
+
+        button.SetPosition( new Vector3( _missionTimeline.rect.xMin + ( timelinePosition * _missionTimeline.rect.xMax ) , 0 , _missionTimeline.rect.yMin + 0.5f ) );
+        _buttons.Add( button );
     }
 
     public void ShowMissionTimeline()
@@ -44,12 +54,18 @@ public class MissionEditor
                 if ( Input.GetMouseButtonDown( 0 ) )
                 {
                     _editor.waveEditor.Show( new Vector3( _indicator.transform.position.x , 0 , button.rect.yMin ) );
+
+                    //this can probably be passed in above instead, save us some state
                     timelinePosition = Helpers.Normalize( _indicator.transform.position.x , button.rect.xMax , button.rect.xMin );
                 }
             } ,
             Exit: ( Button button ) => HideIndicator() );
 
             _missionTimeline.SetPosition( new Vector3( _editor.stage.start + ( _editor.stage.width * 0.5f ) , 0 , Camera.main.ViewportToWorldPoint( new Vector3( 0 , 1 , Camera.main.transform.position.y ) ).z ) + ( Vector3.back * _missionTimeline.height * 0.5f ) );
+
+            if ( selectedMission != null )
+                for ( int i = 0 ; selectedMission.waveSets.Count > i ; i++ )
+                    AddMissionToTimeline( selectedMission.waveSets[ i ] , selectedMission.waveTimes[ i ] );
         }
     }
 
@@ -179,6 +195,8 @@ public class MissionEditor
         HideMissionSets();
         HideIndicator();
     }
+
+    public void SetSelectedMission( MissionDefinition selectedMission ) => this.selectedMission = selectedMission;
 
     private void ShowIndicator() => _indicator.enabled = true;
     private void HideIndicator() => _indicator.enabled = false;
