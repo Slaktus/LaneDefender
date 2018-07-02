@@ -25,6 +25,7 @@ public class CampaignEditor
                 {
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
+                        HideCampaigns();
                         ScriptableObjects.Add( ScriptableObject.CreateInstance<CampaignSet>() , _editor.campaignData );
                         ShowCampaignSets();
 
@@ -57,8 +58,11 @@ public class CampaignEditor
                 {
                     Dropdown d = button as Dropdown;
                     
-                    if ( Input.GetMouseButtonDown( 0 ) && _campaigns != null && !_campaigns.containsMouse )
+                    if ( Input.GetMouseButtonDown( 0 ) && selectedCampaignSet == _editor.campaignData.campaignSets[ index ] && _campaigns != null && !_campaigns.containsMouse )
+                    {
                         HideCampaigns();
+                        d.SetColor( Color.white );
+                    }
 
                 } ) );
         }

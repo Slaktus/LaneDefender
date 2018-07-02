@@ -61,7 +61,7 @@ public class MissionEditor
 
     public void ShowMissionSets( int index , Vector3 position )
     {
-        missionSets?.Destroy();
+        HideMissionSets();
         int count = _editor.campaignData.missionSets.Count + 1;
         missionSets = new Layout( "MissionSets" , 4 , count , 0.25f , 0.1f , count , container );
         missionSets.SetPosition( position + ( Vector3.right * missionSets.width * 0.5f ) + ( Vector3.back * missionSets.height * 0.5f ) );
@@ -75,7 +75,7 @@ public class MissionEditor
                 {
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
-                        HideMissionSets();
+                        HideMissions();
                         ScriptableObjects.Add( ScriptableObject.CreateInstance<MissionSet>() , _editor.campaignData );
                         ShowMissionSets( index , position );
                     }
@@ -86,17 +86,28 @@ public class MissionEditor
         for ( int i = 0 ; buttons.Capacity - 1 > i ; i++ )
         {
             int capturedIndex = i;
-            buttons.Add( new Button( "MissionSet" , "Mission Set" , 4 , 1 , container ,
-                Enter: ( Button button ) => button.SetColor( Color.green ) ,
+            buttons.Add( new Dropdown( "MissionSet" , "Mission Set" , 4 , 1 , container ,
+                Enter: ( Button button ) => button.SetColor( selectedMissionSet == _editor.campaignData.missionSets[ capturedIndex ] ? button.color : Color.green ) ,
                 Stay: ( Button button ) =>
                 {
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
+                        button.SetColor( Color.yellow );
                         selectedMissionSet = _editor.campaignData.missionSets[ capturedIndex ];
                         ShowMissions( index , button.position + new Vector3( button.width * 0.5f , 0 , button.height * 0.5f ) );
                     }
                 } ,
-                Exit: ( Button button ) => button.SetColor( Color.white ) ) );
+                Exit: ( Button button ) => button.SetColor( selectedMissionSet == _editor.campaignData.missionSets[ capturedIndex ] ? button.color : Color.white ) ,
+                Close: ( Button button ) =>
+                {
+                    Dropdown d = button as Dropdown;
+
+                    if ( Input.GetMouseButtonDown( 0 ) && selectedMissionSet == _editor.campaignData.missionSets[ capturedIndex ] && missions != null && !missions.containsMouse )
+                    {
+                        HideMissions();
+                        d.SetColor( Color.white );
+                    }
+                } ) );
         }
 
         missionSets.Add( buttons );
