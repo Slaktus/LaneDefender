@@ -77,15 +77,15 @@ public class Editor
         for ( int i = 0 ; campaignMap.tileMap.count > i ; i++ )
         {
             int index = i;
-            Button button = new Button( "CampaignMap" + index , index.ToString() , campaignMap.tileMap.tileWidth - 1 , campaignMap.tileMap.tileHeight * 0.5f , campaignEditor.container ,
+            Button button = new Button( "CampaignMap" + index , campaignEditor.selectedCampaign.Has( index ) ? campaignEditor.selectedCampaign.Get( index ).name : index.ToString() , campaignMap.tileMap.tileWidth - 1 , campaignMap.tileMap.tileHeight * 0.5f , campaignEditor.container ,
                 Enter: ( Button b ) => b.SetColor( b.selected ? b.color : Color.green ) ,
                 Stay: ( Button b ) =>
                 {
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
-                        if ( missionEditor.selectedMission != null && campaignEditor.selectedCampaign.Has( index ) && campaignEditor.selectedCampaign.Get( index ) == missionEditor.selectedMission )
+                        if ( campaignEditor.selectedCampaign.Has( index ) )
                         {
-                            if ( missionEditor.selectedMission.stageDefinition != null )
+                            if ( campaignEditor.selectedCampaign.Get( index ).stageDefinition != null )
                                 ShowStage( missionEditor.selectedMission.stageDefinition );
 
                             missionEditor.ShowMissionTimeline();
