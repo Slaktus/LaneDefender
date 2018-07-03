@@ -11,6 +11,7 @@ public class MissionEditor
         missions?.Update();
         missionSets?.Update();
         _missionTimeline?.Update();
+        _missionEditorLayout?.Update();
         _indicator.transform.position = _editor.mousePosition;
 
         //should be replaced with a proper layout
@@ -236,6 +237,9 @@ public class MissionEditor
                         mapButton.Deselect();
                         HideMissionSets();
                         HideMissions();
+
+                        _editor.missionEditor.ShowMissionTimeline();
+                        _editor.missionEditor.ShowMissionEditor();
                     }
                 } ,
                 Exit: ( Button button ) => button.SetColor( Color.white ) ) );
@@ -249,6 +253,29 @@ public class MissionEditor
     {
         missions?.Destroy();
         missions = null;
+    }
+
+    public void ShowMissionEditor()
+    {
+        HideMissionEditor();
+        List<Element> missionEditorButtons = new List<Element>()
+        {
+            new Label( "Duration:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
+            new Field( "Duration" , selectedMission.duration.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
+            {
+                float.TryParse( field.label.text , out selectedMission.duration );
+            } )
+        };
+
+        _missionEditorLayout = new Layout( "StageEditor" , 3 , 1 , 0.25f , 0.1f , missionEditorButtons.Count / 2 , container );
+        _missionEditorLayout.Add( missionEditorButtons , true );
+        _missionEditorLayout.SetPosition( _editor.stageEditor.stageEditorLayout.position + ( Vector3.back * ( _missionEditorLayout.height + _editor.stageEditor.stageEditorLayout.height ) * 0.5f ) );
+    }
+
+    public void HideMissionEditor()
+    {
+        _missionEditorLayout?.Destroy();
+        _missionEditorLayout = null;
     }
 
     public void Hide()
@@ -272,8 +299,9 @@ public class MissionEditor
 
     private Editor _editor { get; }
     private MeshRenderer _indicator { get; }
-    private Button _missionTimeline { get; set; }
     private List<Button> _buttons { get; set; }
+    private Button _missionTimeline { get; set; }
+    private Layout _missionEditorLayout { get; set; }
 
     public MissionEditor( Editor editor )
     {

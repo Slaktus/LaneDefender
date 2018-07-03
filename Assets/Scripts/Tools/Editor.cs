@@ -92,8 +92,9 @@ public class Editor
                                 ShowStage( missionEditor.selectedMission.stageDefinition );
                             }
 
-                            missionEditor.ShowMissionTimeline();
                             stageEditor.Show();
+                            missionEditor.ShowMissionEditor();
+                            missionEditor.ShowMissionTimeline();
 
                             campaignEditor.Hide();
                             missionEditor.Hide();

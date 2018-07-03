@@ -119,9 +119,12 @@ public class StageEditor
 
                             _editor.missionEditor.selectedMission.stageDefinition = selectedStageDefinition;
                             _editor.ShowStage( selectedStageDefinition );
-                            _editor.missionEditor.ShowMissionTimeline();
+
                             ShowStageSets();
                             ShowStageEditor();
+                            _editor.missionEditor.ShowMissionTimeline();
+                            _editor.missionEditor.ShowMissionEditor();
+
                         }
                     } ,
                     Exit: ( Button button ) => button.SetColor( Color.white ) ) );
@@ -185,8 +188,6 @@ public class StageEditor
         stageEditorLayout = null;
     }
 
-    Layout stageEditorLayout { get; set; }
-
     public void HideStageDefinitions()
     {
         _stages?.Destroy();
@@ -221,6 +222,7 @@ public class StageEditor
     }
 
     public StageDefinition selectedStageDefinition { get; private set; }
+    public Layout stageEditorLayout { get; private set; }
 
     private Editor _editor { get; }
     private GameObject _container { get; }
