@@ -17,19 +17,15 @@ public class WaveEditor
             _waveEventLayouts[ i ].Update();
     }
 
-    public void Show( Vector3 position )
-    {
-        ShowWaveSets( position );
-
-        if ( selectedWaveDefinition != null )
-            ShowWaveEventButtons();
-    }
+    public void Show( Vector3 position ) => ShowWaveSets( position );
 
     private void ShowWaveSets( Vector3 position , float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
     {
-        List<Button> buttons = new List<Button>();
-
-        buttons.Add( new Button( "AddWaveSet" , "Add Wave Set" , width , height , _container ,
+        HideWaveSets();
+        int count = _editor.waveData.waveSets.Count + 1;
+        List<Button> buttons = new List<Button>( count )
+        {
+            new Button( "AddWaveSet" , "Add Wave Set" , width , height , _container ,
             fontSize: 20 ,
             Enter: ( Button button ) => button.SetColor( Color.green ) ,
             Stay: ( Button button ) =>
@@ -40,10 +36,11 @@ public class WaveEditor
                     Refresh();
                 }
             } ,
-            Exit: ( Button button ) => button.SetColor( Color.white ) ) );
+            Exit: ( Button button ) => button.SetColor( Color.white ) )
+        };
 
         if ( _editor.waveData.waveSets != null )
-            for ( int i = 0 ; _editor.waveData.waveSets.Count > i ; i++ )
+            for ( int i = 0 ; count - 1 > i ; i++ )
             {
                 int index = i;
                 buttons.Add( new Button( "WaveSet" , "Wave Set" , width , height , _container ,
@@ -56,6 +53,7 @@ public class WaveEditor
                             if ( selectedWaveSet != null )
                                 buttons[ _editor.waveData.waveSets.IndexOf( selectedWaveSet ) + 1 ].SetColor( Color.white );
 
+                            button.Select();
                             button.SetColor( Color.yellow );
                             selectedWaveSet = _editor.waveData.waveSets[ index ];
 
@@ -71,12 +69,13 @@ public class WaveEditor
                             button.SetColor( Color.white );
                             selectedWaveSet = null;
                             HideWaveDefinitions();
+                            HideWaveSets();
                         }
                     } ) );
             }
 
         _waveSetLayout = new Layout( "WaveSetButtons" , width , height * buttons.Count , padding , spacing , buttons.Count , _container );
-        _waveSetLayout.SetLocalPosition( position + ( Vector3.back * ( ( height * ( buttons.Count - 1 ) * 0.5f ) ) ) );
+        _waveSetLayout.SetLocalPosition( position + ( Vector3.back * ( ( height * ( buttons.Count - 1 ) * 0.5f ) ) ) + Vector3.up );
         _waveSetLayout.Add( buttons , true );
     }
 
@@ -113,7 +112,7 @@ public class WaveEditor
                                 buttons[ selectedWaveSet.waveDefinitions.IndexOf( selectedWaveDefinition ) + 1 ].SetColor( Color.white );
 
                             selectedWaveDefinition = selectedWaveSet.waveDefinitions[ index ];
-                            _editor.missionEditor.AddMissionToTimeline( selectedWaveSet );
+                            _editor.missionEditor.AddMissionToTimeline( selectedWaveDefinition );
                             ShowWaveEventButtons();
                             HideWaveDefinitions();
                             HideWaveSets();
@@ -220,7 +219,6 @@ public class WaveEditor
 
     public void HideWaveSets()
     {
-        selectedWaveSet = null;
         _waveSetLayout?.Destroy();
     }
 
@@ -237,13 +235,15 @@ public class WaveEditor
         Show( position );
     }
 
+    public void SetSelectedWaveDefinition( WaveDefinition selectedWaveDefinition ) => this.selectedWaveDefinition = selectedWaveDefinition;
+
     public Vector3 position => _waveSetLayout.position;
 
     public HeldEvent heldWaveEvent { get; set; }
+    public Layout _waveSetLayout { get; private set; }
     public WaveSet selectedWaveSet { get; private set; }
     public WaveDefinition selectedWaveDefinition { get; private set; }
 
-    private Layout _waveSetLayout { get; set; }
     private Layout _waveEventEditor { get; set; }
     private Layout _waveDefinitionLayout { get; set; }
     private Layout _waveEventEditorLayout { get; set; }

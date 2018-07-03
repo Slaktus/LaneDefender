@@ -19,25 +19,65 @@ public class MissionEditor
             _buttons[ i ].Update();
     }
 
-    public void AddMissionToTimeline( WaveSet waveSet )
+    public void AddMissionToTimeline( WaveDefinition waveDefinition )
     {
-        selectedMission.Add( waveSet , timelinePosition );
+        selectedMission.Add( waveDefinition , timelinePosition );
 
         Button button = new Button( "Wave" , "Wave" , 2 , 1 , container ,
-            Enter: ( Button b ) => b.SetColor( Color.green ) ,
-            Exit: ( Button b ) => b.SetColor( Color.white ) );
+            Enter: ( Button b ) => b.SetColor( b.selected ? b.color : Color.green ) ,
+            Stay: ( Button b ) =>
+            {
+                if ( !b.selected && Input.GetMouseButtonDown( 0 ) )
+                {
+                    for ( int i = 0 ; _buttons.Count > i ; i++ )
+                    {
+                        _buttons[ i ].Deselect();
+                        _buttons[ i ].SetColor( Color.white );
+                    }
 
-        button.SetPosition( new Vector3( _missionTimeline.rect.xMin + ( timelinePosition * _missionTimeline.rect.xMax ) , 0 , _missionTimeline.rect.yMin + 0.5f ) );
+                    _editor.waveEditor.SetSelectedWaveDefinition( waveDefinition );
+                    _editor.waveEditor.HideWaveEventButtons();
+                    _editor.waveEditor.ShowWaveEventButtons();
+                    b.SetColor( Color.yellow );
+                    b.Select();
+                }
+            } ,
+            Exit: ( Button b ) => b.SetColor( b.selected ? b.color : Color.white ) );
+
+        _editor.waveEditor.SetSelectedWaveDefinition( waveDefinition );
+        _editor.waveEditor.HideWaveEventButtons();
+        _editor.waveEditor.ShowWaveEventButtons();
         _buttons.Add( button );
+
+        button.SetPosition( new Vector3( _missionTimeline.rect.xMin + ( timelinePosition * _missionTimeline.rect.xMax ) , 0 , _missionTimeline.rect.yMin + 0.5f ) + Vector3.up );
+        button.SetColor( Color.yellow );
+        button.Select();
     }
 
-    public void AddMissionToTimeline( WaveSet waveSet , float timelinePosition )
+    public void AddMissionToTimeline( WaveDefinition waveDefinition , float timelinePosition )
     {
         Button button = new Button( "Wave" , "Wave" , 2 , 1 , container ,
-            Enter: ( Button b ) => b.SetColor( Color.green ) ,
-            Exit: ( Button b ) => b.SetColor( Color.white ) );
+            Enter: ( Button b ) => b.SetColor( b.selected ? b.color : Color.green ) ,
+            Stay: ( Button b ) =>
+            {
+                if ( !b.selected && Input.GetMouseButtonDown( 0 ) )
+                {
+                    for ( int i = 0 ; _buttons.Count > i ; i++ )
+                    {
+                        _buttons[ i ].Deselect();
+                        _buttons[ i ].SetColor( Color.white );
+                    }
 
-        button.SetPosition( new Vector3( _missionTimeline.rect.xMin + ( timelinePosition * _missionTimeline.rect.xMax ) , 0 , _missionTimeline.rect.yMin + 0.5f ) );
+                    _editor.waveEditor.SetSelectedWaveDefinition( waveDefinition );
+                    _editor.waveEditor.HideWaveEventButtons();
+                    _editor.waveEditor.ShowWaveEventButtons();
+                    b.SetColor( Color.yellow );
+                    b.Select();
+                }
+            } ,
+            Exit: ( Button b ) => b.SetColor( b.selected ? b.color : Color.white ) );
+
+        button.SetPosition( new Vector3( _missionTimeline.rect.xMin + ( timelinePosition * _missionTimeline.rect.xMax ) , 0 , _missionTimeline.rect.yMin + 0.5f ) + Vector3.up );
         _buttons.Add( button );
     }
 
@@ -51,12 +91,22 @@ public class MissionEditor
             Enter: ( Button button ) => ShowIndicator() ,
             Stay: ( Button button ) =>
             {
-                if ( Input.GetMouseButtonDown( 0 ) )
-                {
-                    _editor.waveEditor.Show( new Vector3( _indicator.transform.position.x , 0 , button.rect.yMin ) );
+                bool overlappingWave = false;
 
-                    //this can probably be passed in above instead, save us some state
-                    timelinePosition = Helpers.Normalize( _indicator.transform.position.x , button.rect.xMax , button.rect.xMin );
+                for ( int i = 0 ; _buttons.Count > i && !overlappingWave ; i++ )
+                    overlappingWave = _buttons[ i ].containsMouse;
+
+                if ( overlappingWave )
+                    HideIndicator();
+                else
+                {
+                    ShowIndicator();
+
+                    if ( Input.GetMouseButtonDown( 0 ) )
+                    {
+                        timelinePosition = Helpers.Normalize( _indicator.transform.position.x , button.rect.xMax , button.rect.xMin );
+                        _editor.waveEditor.Show( new Vector3( _indicator.transform.position.x , 0 , button.rect.yMin ) );
+                    }
                 }
             } ,
             Exit: ( Button button ) => HideIndicator() );
@@ -64,8 +114,8 @@ public class MissionEditor
             _missionTimeline.SetPosition( new Vector3( _editor.stage.start + ( _editor.stage.width * 0.5f ) , 0 , Camera.main.ViewportToWorldPoint( new Vector3( 0 , 1 , Camera.main.transform.position.y ) ).z ) + ( Vector3.back * _missionTimeline.height * 0.5f ) );
 
             if ( selectedMission != null )
-                for ( int i = 0 ; selectedMission.waveSets.Count > i ; i++ )
-                    AddMissionToTimeline( selectedMission.waveSets[ i ] , selectedMission.waveTimes[ i ] );
+                for ( int i = 0 ; selectedMission.waveDefinitions.Count > i ; i++ )
+                    AddMissionToTimeline( selectedMission.waveDefinitions[ i ] , selectedMission.waveTimes[ i ] );
         }
     }
 

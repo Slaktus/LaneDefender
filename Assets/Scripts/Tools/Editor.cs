@@ -17,15 +17,15 @@ public class Editor
         _saveButton.Update();
         _testButton.Update();
         campaignEditor.Update();
+        waveEditor.Update();
         missionEditor.Update();
         stageEditor.Update();
-        waveEditor.Update();
         stage?.Update();
     }
 
     private void HandleLaneHover()
     {
-        if ( stage != null && waveEditor.selectedWaveDefinition != null )
+        if ( stage != null && waveEditor.selectedWaveDefinition != null && waveEditor.selectedWaveSet == null )
         {
             Lane hoveredLane = stage.GetHoveredLane( mousePosition );
             stage.SetLaneColor( Color.black );
