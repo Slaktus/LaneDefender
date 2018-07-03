@@ -27,7 +27,13 @@ public class MissionEditor
             Enter: ( Button b ) => b.SetColor( b.selected ? b.color : Color.green ) ,
             Stay: ( Button b ) =>
             {
-                if ( !b.selected && Input.GetMouseButtonDown( 0 ) )
+                if ( Input.GetMouseButtonDown( 1 ) )
+                {
+                    selectedMission.Remove( waveDefinition );
+                    _buttons.Remove( b );
+                    b.Destroy();
+                }
+                else if ( !b.selected && Input.GetMouseButtonDown( 0 ) )
                 {
                     for ( int i = 0 ; _buttons.Count > i ; i++ )
                     {
@@ -60,7 +66,13 @@ public class MissionEditor
             Enter: ( Button b ) => b.SetColor( b.selected ? b.color : Color.green ) ,
             Stay: ( Button b ) =>
             {
-                if ( !b.selected && Input.GetMouseButtonDown( 0 ) )
+                if ( Input.GetMouseButtonDown( 1 ) )
+                {
+                    selectedMission.Remove( waveDefinition );
+                    _buttons.Remove( b );
+                    b.Destroy();
+                }
+                else if ( !b.selected && Input.GetMouseButtonDown( 0 ) )
                 {
                     for ( int i = 0 ; _buttons.Count > i ; i++ )
                     {
