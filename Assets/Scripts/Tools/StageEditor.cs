@@ -212,6 +212,8 @@ public class StageEditor
         }
     }
 
+    public void SetSelectedStageDefinition( StageDefinition selectedStageDefinition ) => this.selectedStageDefinition = selectedStageDefinition;
+
     public void Refresh()
     {
         Hide();

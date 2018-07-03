@@ -19,7 +19,7 @@ public class MissionEditor
             _buttons[ i ].Update();
     }
 
-    public void AddMissionToTimeline( WaveDefinition waveDefinition )
+    public void AddWaveToTimeline( WaveDefinition waveDefinition )
     {
         selectedMission.Add( waveDefinition , timelinePosition );
 
@@ -60,7 +60,7 @@ public class MissionEditor
         button.Select();
     }
 
-    public void AddMissionToTimeline( WaveDefinition waveDefinition , float timelinePosition )
+    public void AddWaveToTimeline( WaveDefinition waveDefinition , float timelinePosition )
     {
         Button button = new Button( "Wave" , "Wave" , 2 , 1 , container ,
             Enter: ( Button b ) => b.SetColor( b.selected ? b.color : Color.green ) ,
@@ -127,7 +127,7 @@ public class MissionEditor
 
             if ( selectedMission != null )
                 for ( int i = 0 ; selectedMission.waveDefinitions.Count > i ; i++ )
-                    AddMissionToTimeline( selectedMission.waveDefinitions[ i ] , selectedMission.waveTimes[ i ] );
+                    AddWaveToTimeline( selectedMission.waveDefinitions[ i ] , selectedMission.waveTimes[ i ] );
         }
     }
 

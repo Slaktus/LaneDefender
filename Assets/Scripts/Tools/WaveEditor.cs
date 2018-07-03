@@ -112,7 +112,7 @@ public class WaveEditor
                                 buttons[ selectedWaveSet.waveDefinitions.IndexOf( selectedWaveDefinition ) + 1 ].SetColor( Color.white );
 
                             selectedWaveDefinition = selectedWaveSet.waveDefinitions[ index ];
-                            _editor.missionEditor.AddMissionToTimeline( selectedWaveDefinition );
+                            _editor.missionEditor.AddWaveToTimeline( selectedWaveDefinition );
                             ShowWaveEventButtons();
                             HideWaveDefinitions();
                             HideWaveSets();

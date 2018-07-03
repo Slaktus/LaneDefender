@@ -14,13 +14,13 @@ public class Editor
             _campaignMapButtons[ i ].Update();
 
         _level?.Update();
+        stage?.Update();
         _saveButton.Update();
         _testButton.Update();
         campaignEditor.Update();
         waveEditor.Update();
         missionEditor.Update();
         stageEditor.Update();
-        stage?.Update();
     }
 
     private void HandleLaneHover()
@@ -66,7 +66,6 @@ public class Editor
     }
 
     public void ShowStage( StageDefinition stageDefinition ) => stage = new Stage( stageDefinition , null , new Player() );
-
     public void HideStage() => stage?.Destroy();
 
     public void ShowCampaignMap()
@@ -88,7 +87,10 @@ public class Editor
                             missionEditor.SetSelectedMission( campaignEditor.selectedCampaign.Get( index ) );
 
                             if ( missionEditor.selectedMission.stageDefinition != null )
+                            {
+                                stageEditor.SetSelectedStageDefinition( missionEditor.selectedMission.stageDefinition );
                                 ShowStage( missionEditor.selectedMission.stageDefinition );
+                            }
 
                             missionEditor.ShowMissionTimeline();
                             stageEditor.Show();
@@ -183,27 +185,29 @@ public class Editor
 
         _testButton = new Button( "Test" , "Test" , 1.5f , 0.5f , container ,
             fontSize: 20 ,
-            Enter: ( Button button ) => button.SetColor( waveEditor.selectedWaveDefinition != null ? Color.green : button.color ) ,
+            Enter: ( Button button ) => button.SetColor( stage != null && missionEditor.selectedMission != null ? Color.green : button.color ) ,
             Stay: ( Button button ) =>
             {
-                if ( waveEditor.selectedWaveDefinition != null && Input.GetMouseButtonDown( 0 ) )
+                if ( stage != null && missionEditor.selectedMission != null && Input.GetMouseButtonDown( 0 ) )
                 {
                     if ( _level == null )
                     {
-                        _level = new Level( 10 , showProgress: false );
-                        Wave wave = new Wave( 1 , stage );
+                        _level = new Level( missionEditor.selectedMission.duration , showProgress: false );
 
-                        for ( int i = 0 ; waveEditor.selectedWaveDefinition.waveEvents.Count > i ; i++ )
+                        for ( int i = 0 ; missionEditor.selectedMission.waveDefinitions.Count > i ; i++ )
                         {
-                            switch ( ( WaveEvent.Type ) waveEditor.selectedWaveDefinition.waveEvents[ i ].type )
-                            {
-                                case WaveEvent.Type.SpawnEnemy:
-                                    wave.Add( new SpawnEnemyEvent( Definitions.Enemy( Definitions.Enemies.Default ) , waveEditor.selectedWaveDefinition.waveEvents[ i ] ) );
-                                    break;
-                            }
+                            Wave wave = new Wave( missionEditor.selectedMission.waveTimes[ i ] * missionEditor.selectedMission.duration , stage );
+                            _level.Add( wave );
+
+                            for ( int j = 0 ; missionEditor.selectedMission.waveDefinitions[ i ].waveEvents.Count > j ; j++ )
+                                switch ( ( WaveEvent.Type ) missionEditor.selectedMission.waveDefinitions[ i ].waveEvents[ j ].type )
+                                {
+                                    case WaveEvent.Type.SpawnEnemy:
+                                        wave.Add( new SpawnEnemyEvent( Definitions.Enemy( Definitions.Enemies.Default ) , missionEditor.selectedMission.waveDefinitions[ i ].waveEvents[ j ] ) );
+                                        break;
+                                }
                         }
 
-                        _level.Add( wave );
                         button.SetLabel( "Stop" );
                     }
                     else
