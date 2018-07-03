@@ -14,7 +14,7 @@ public class MissionDefinition : DefinitionBase
     }
 
     public void SetDuration( float duration ) => this.duration = duration;
-    public override void Add( ScriptableObject toAdd ) => waveSets.Add( toAdd as WaveSet );
+    public override void Add( ScriptableObject toAdd ) => waveDefinitions.Add( toAdd as WaveDefinition );
 
     public void Add( ScriptableObject toAdd , float time )
     {
@@ -24,13 +24,13 @@ public class MissionDefinition : DefinitionBase
 
     public override void Remove( ScriptableObject toRemove )
     {
-        WaveSet waveSet = toRemove as WaveSet;
-        waveTimes.RemoveAt( waveSets.IndexOf( waveSet ) );
-        waveSets.Remove( waveSet );
+        WaveDefinition waveDefinition = toRemove as WaveDefinition;
+        waveTimes.RemoveAt( waveDefinitions.IndexOf( waveDefinition ) );
+        waveDefinitions.Remove( waveDefinition );
     }
 
     public float duration;
     public StageDefinition stageDefinition;
     public List<float> waveTimes = new List<float>();
-    public List<WaveSet> waveSets = new List<WaveSet>();
+    public List<WaveDefinition> waveDefinitions = new List<WaveDefinition>();
 }
