@@ -17,15 +17,15 @@ public class Editor
         stage?.Update();
         _saveButton.Update();
         _testButton.Update();
-        campaignEditor.Update();
         waveEditor.Update();
         missionEditor.Update();
+        campaignEditor.Update();
         stageEditor.Update();
     }
 
     private void HandleLaneHover()
     {
-        if ( stage != null && waveEditor.selectedWaveDefinition != null && waveEditor.selectedWaveSet == null )
+        if ( stage != null && waveEditor.selectedWaveDefinition != null && waveEditor.waveSets == null )
         {
             Lane hoveredLane = stage.GetHoveredLane( mousePosition );
             stage.SetLaneColor( Color.black );
@@ -106,6 +106,12 @@ public class Editor
                             b.SetColor( Color.yellow );
                             b.Select();
                         }
+                    }
+
+                    if ( Input.GetMouseButtonDown( 1 ) && campaignEditor.selectedCampaign.Has( index ) )
+                    {
+                        campaignEditor.selectedCampaign.Remove( campaignEditor.selectedCampaign.Get( index ) );
+                        ShowCampaignMap();
                     }
                 } ,
                 Exit: ( Button b ) => b.SetColor( b.selected ? b.color : Color.white ) ,

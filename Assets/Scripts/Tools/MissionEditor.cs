@@ -54,6 +54,13 @@ public class MissionEditor
         _editor.waveEditor.SetSelectedWaveDefinition( waveDefinition );
         _editor.waveEditor.HideWaveEventButtons();
         _editor.waveEditor.ShowWaveEventButtons();
+
+        for ( int i = 0 ; _buttons.Count > i ; i++ )
+        {
+            _buttons[ i ].Deselect();
+            _buttons[ i ].SetColor( Color.white );
+        }
+
         _buttons.Add( button );
 
         button.SetPosition( new Vector3( _missionTimeline.rect.xMin + ( timelinePosition * _missionTimeline.rect.xMax ) , 0 , _missionTimeline.rect.yMin + 0.5f ) + Vector3.up );
@@ -109,9 +116,9 @@ public class MissionEditor
                 for ( int i = 0 ; _buttons.Count > i && !overlappingWave ; i++ )
                     overlappingWave = _buttons[ i ].containsMouse;
 
-                if ( overlappingWave )
+                if ( overlappingWave || _editor.waveEditor.waveSets != null )
                     HideIndicator();
-                else
+                else if ( _editor.waveEditor.waveSets == null)
                 {
                     ShowIndicator();
 
@@ -237,9 +244,6 @@ public class MissionEditor
                         mapButton.Deselect();
                         HideMissionSets();
                         HideMissions();
-
-                        _editor.missionEditor.ShowMissionTimeline();
-                        _editor.missionEditor.ShowMissionEditor();
                     }
                 } ,
                 Exit: ( Button button ) => button.SetColor( Color.white ) ) );
@@ -269,7 +273,7 @@ public class MissionEditor
 
         _missionEditorLayout = new Layout( "StageEditor" , 3 , 1 , 0.25f , 0.1f , missionEditorButtons.Count / 2 , container );
         _missionEditorLayout.Add( missionEditorButtons , true );
-        _missionEditorLayout.SetPosition( _editor.stageEditor.stageEditorLayout.position + ( Vector3.back * ( _missionEditorLayout.height + _editor.stageEditor.stageEditorLayout.height ) * 0.5f ) );
+        _missionEditorLayout.SetPosition( ( _editor.stageEditor.stageEditorLayout != null ? _editor.stageEditor.stageEditorLayout.position : _editor.stageEditor.stageSets.position ) + ( Vector3.back * ( _missionEditorLayout.height + ( _editor.stageEditor.stageEditorLayout != null ? _editor.stageEditor.stageEditorLayout.height : _editor.stageEditor.stageSets.height ) ) * 0.5f ) );
     }
 
     public void HideMissionEditor()

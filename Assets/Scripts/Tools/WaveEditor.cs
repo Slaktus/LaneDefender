@@ -9,7 +9,7 @@ public class WaveEditor
 {
     public void Update()
     {
-        _waveSetLayout?.Update();
+        waveSets?.Update();
         _waveEventEditor?.Update();
         _waveDefinitionLayout?.Update();
 
@@ -23,9 +23,8 @@ public class WaveEditor
     {
         HideWaveSets();
         int count = _editor.waveData.waveSets.Count + 1;
-        List<Button> buttons = new List<Button>( count )
-        {
-            new Button( "AddWaveSet" , "Add Wave Set" , width , height , _container ,
+        List<Button> buttons = new List<Button>( count );
+        buttons.Add( new Button( "AddWaveSet" , "Add Wave Set" , width , height , _container ,
             fontSize: 20 ,
             Enter: ( Button button ) => button.SetColor( Color.green ) ,
             Stay: ( Button button ) =>
@@ -36,8 +35,22 @@ public class WaveEditor
                     Refresh();
                 }
             } ,
-            Exit: ( Button button ) => button.SetColor( Color.white ) )
-        };
+            Exit: ( Button button ) => button.SetColor( Color.white ) ,
+            Close: ( Button button ) =>
+            {
+                if ( Input.GetMouseButtonDown( 0 ) && !waveSets.containsMouse && ( _waveDefinitionLayout == null || !_waveDefinitionLayout.containsMouse ) )
+                {
+                    for ( int i = 0 ; buttons.Count > i ; i++ )
+                    {
+                        buttons[ i ].Deselect();
+                        buttons[ i ].SetColor( Color.white );
+                    }
+
+                    button.SetColor( Color.white );
+                    HideWaveDefinitions();
+                    HideWaveSets();
+                }
+            } ) );
 
         if ( _editor.waveData.waveSets != null )
             for ( int i = 0 ; count - 1 > i ; i++ )
@@ -61,22 +74,12 @@ public class WaveEditor
                             ShowWaveDefinitions( button.position );
                         }
                     } ,
-                    Exit: ( Button button ) => button.SetColor( selectedWaveSet == _editor.waveData.waveSets[ index ] ? button.color : Color.white ) ,
-                    Close: ( Button button ) =>
-                    {
-                        if ( Input.GetMouseButtonDown( 0 ) && !_waveSetLayout.containsMouse && ( _waveDefinitionLayout == null || !_waveDefinitionLayout.containsMouse )  )
-                        {
-                            button.SetColor( Color.white );
-                            selectedWaveSet = null;
-                            HideWaveDefinitions();
-                            HideWaveSets();
-                        }
-                    } ) );
+                    Exit: ( Button button ) => button.SetColor( selectedWaveSet == _editor.waveData.waveSets[ index ] ? button.color : Color.white ) ) );
             }
 
-        _waveSetLayout = new Layout( "WaveSetButtons" , width , height * buttons.Count , padding , spacing , buttons.Count , _container );
-        _waveSetLayout.SetLocalPosition( position + ( Vector3.back * ( ( height * ( buttons.Count - 1 ) * 0.5f ) ) ) + Vector3.up );
-        _waveSetLayout.Add( buttons , true );
+        waveSets = new Layout( "WaveSetButtons" , width , height * buttons.Count , padding , spacing , buttons.Count , _container );
+        waveSets.SetLocalPosition( position + ( Vector3.back * ( ( height * ( buttons.Count - 1 ) * 0.5f ) ) ) + Vector3.up );
+        waveSets.Add( buttons , true );
     }
 
     private void ShowWaveDefinitions( Vector3 position , float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
@@ -130,6 +133,7 @@ public class WaveEditor
 
     public void ShowWaveEventButtons()
     {
+        HideWaveEventButtons();
         List<List<Button>> waveEventButtons = new List<List<Button>>();
 
         for ( int i = 0 ; _editor.stage.lanes > i ; i++ )
@@ -146,6 +150,7 @@ public class WaveEditor
                     {
                         if ( Input.GetMouseButtonDown( 0 ) )
                         {
+                            butt.Select();
                             List<Element> waveEventEditorButtons = new List<Element>()
                             {
                                 new Label("Type:" , Color.black , 1.25f , 0.5f , _container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
@@ -169,6 +174,12 @@ public class WaveEditor
                             for ( int j = 0 ; waveEventButtons[ selectedWaveDefinition.waveEvents[ index ].lane ].Count > j ; j++ )
                                 waveEventButtons[ selectedWaveDefinition.waveEvents[ index ].lane ][ j ].Hide();
                         }
+
+                        if ( Input.GetMouseButtonDown( 1 ) )
+                        {
+                            selectedWaveDefinition.Remove( selectedWaveDefinition.waveEvents[ index ] );
+                            ShowWaveEventButtons();
+                        }
                     } ,
                     Exit: ( Button butt ) =>
                     {
@@ -182,10 +193,11 @@ public class WaveEditor
                     } , 
                     Close: ( Button butt ) => 
                     {
-                        if ( Input.GetMouseButtonDown( 0 ) )
+                        if ( Input.GetMouseButtonDown( 0 ) && butt.selected && ( _waveEventEditor == null || !_waveEventEditor.containsMouse ) )
                         {
                             _waveEventEditor?.Destroy();
                             _waveEventEditor = null;
+                            butt.Deselect();
 
                             for ( int j = 0 ; waveEventButtons[ selectedWaveDefinition.waveEvents[ index ].lane ].Count > j ; j++ )
                                 waveEventButtons[ selectedWaveDefinition.waveEvents[ index ].lane ][ j ].Show();
@@ -219,7 +231,8 @@ public class WaveEditor
 
     public void HideWaveSets()
     {
-        _waveSetLayout?.Destroy();
+        waveSets?.Destroy();
+        waveSets = null;
     }
 
     public void Hide()
@@ -237,10 +250,10 @@ public class WaveEditor
 
     public void SetSelectedWaveDefinition( WaveDefinition selectedWaveDefinition ) => this.selectedWaveDefinition = selectedWaveDefinition;
 
-    public Vector3 position => _waveSetLayout.position;
+    public Vector3 position => waveSets.position;
 
     public HeldEvent heldWaveEvent { get; set; }
-    public Layout _waveSetLayout { get; private set; }
+    public Layout waveSets { get; private set; }
     public WaveSet selectedWaveSet { get; private set; }
     public WaveDefinition selectedWaveDefinition { get; private set; }
 
