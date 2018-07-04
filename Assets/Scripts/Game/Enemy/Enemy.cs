@@ -8,7 +8,7 @@ public class Enemy : LaneEntity
     public Enemy( EnemyDefinition definition , EnemySettings settings , Lane lane , float entryPoint = 0 , GameObject parent = null ) : base( definition.name , settings.speed , definition.width , definition.laneHeightPadding , settings.health , definition.value , lane )
     {
         color = settings.color;
-        enter = Enter( entryPoint );
+        enter = Enter( entryPoint * lane.width );
 
         if ( parent != null )
             container.transform.SetParent( parent.transform );
