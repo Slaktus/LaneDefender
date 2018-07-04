@@ -29,7 +29,7 @@ public class Conveyor
     }
 
     /// <summary>
-    /// Add an item to the conveyor. Currently only a placeholder
+    /// Add an item to the conveyor
     /// </summary>
     /// <returns></returns>
     public float AddItemToConveyor( Inventory inventory )
@@ -125,6 +125,7 @@ public class Conveyor
     public ConveyorItem ItemAt( int index ) => _conveyorItems[ index ];
 
     public int itemCount => _conveyorItems.Count;
+    public bool showing => _quad.activeSelf;
     public Vector3 top => new Vector3( _rect.center.x , 0 , _rect.yMax );
     public Vector3 bottom => new Vector3( _rect.center.x , 0 , _rect.yMin );
     public Color color { get { return _meshRenderer.material.color; } set { _meshRenderer.material.color = value; } }
@@ -143,7 +144,7 @@ public class Conveyor
     private MeshRenderer _meshRenderer { get; }
     private List<ConveyorItem> _conveyorItems { get; }
 
-    public Conveyor( float speed , float width , float height , float itemInterval , int itemLimit , float itemWidthPadding , float itemSpacing )
+    public Conveyor( float speed , float width , float height , float itemInterval , int itemLimit , float itemWidthPadding , float itemSpacing , bool hide = false )
     {
         this.speed = speed;
         this.itemSpacing = itemSpacing;
@@ -166,5 +167,8 @@ public class Conveyor
 
         _meshRenderer = _quad.GetComponent<MeshRenderer>();
         _meshRenderer.material = Entry.instance.unlitColor;
+
+        if ( hide )
+            Hide();
     }
 }

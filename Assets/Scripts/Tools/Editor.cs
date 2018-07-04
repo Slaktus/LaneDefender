@@ -15,6 +15,91 @@ public class Editor
 
         _level?.Update();
         stage?.Update();
+        stage?.conveyor?.Update();
+
+        if ( stage != null && stage.conveyor != null && stage.conveyor.showing )
+        {
+            Ray mouseRay = Camera.main.ScreenPointToRay( Input.mousePosition );
+
+            //The actual raycast returns an array with all the targets the ray passed through
+            //Note that we don't pass in the ray itself -- that's because the method taking a ray as argument flat-out doesn't work
+            //We don't bother constraining the raycast by layer mask just yet, since the ground plane is the only collider in the scene
+            RaycastHit[] hits = Physics.RaycastAll( mouseRay.origin , mouseRay.direction , float.PositiveInfinity );
+
+            //These references might be populated later
+            Lane hoveredLane = null;
+            ConveyorItem hoveredItem = null;
+
+            //Proceed if we hit the ground plane
+            if ( hits.Length > 0 )
+            {
+                //Get the mouse position on the ground plane
+                Vector3 mousePosition = hits[ 0 ].point;
+
+                //See if the mouse is hovering any lanes
+                hoveredLane = stage.GetHoveredLane( mousePosition );
+
+                //Proceed if the mouse is hovering the conveyor
+                if ( stage.conveyor.Contains( mousePosition ) )
+                {
+                    //Try to get a hovered conveyor item
+                    hoveredItem = stage.conveyor.GetHoveredItem( mousePosition );
+
+                    //Proceed if an item is hovered and no item is held
+                    if ( hoveredItem != null && _heldItem == null )
+                    {
+                        //Instantiate a new HeldItem if no item is held and the left mouse button is pressed
+                        //Otherwise, change the color of the item to indicate hover
+                        if ( _heldItem == null && Input.GetMouseButtonDown( 0 ) )
+                            _heldItem = new HeldItem( hoveredItem );
+                        else
+                            hoveredItem.color = Color.yellow;
+                    }
+                }
+
+                //Reset lane colors
+                stage.SetLaneColor( Color.black );
+
+                //Proceed if a lane is hovered and an item is held
+                if ( _heldItem != null && hoveredLane != null )
+                {
+                    hoveredLane.color = Color.yellow;
+
+                    //Proceed if the left mouse button is not held
+                    //This will only happen if the left mouse button is released
+                    if ( !Input.GetMouseButton( 0 ) )
+                    {
+                        hoveredLane.Add( new LaneItem( _heldItem , hoveredLane ) );
+                        _heldItem.conveyorItem.Destroy();
+                        _heldItem.Destroy();
+                        _heldItem = null;
+                    }
+                }
+
+                //Proceed if an item is held
+                if ( _heldItem != null )
+                {
+                    //Position the held item at the world-space mouse position
+                    _heldItem.SetPosition( mousePosition );
+
+                    //Proceed if the left mouse button is released or the right mouse button is pressed
+                    if ( !Input.GetMouseButton( 0 ) || Input.GetMouseButtonDown( 1 ) )
+                    {
+                        //Reset the held conveyor item's color and clean up the held item
+                        _heldItem.conveyorItem.color = Color.white;
+                        _heldItem.Destroy();
+                        _heldItem = null;
+                    }
+                }
+            }
+
+            //Reset the color of any item not currently hovered
+            stage.conveyor.SetItemColor( Color.white , _heldItem != null ? _heldItem.conveyorItem : hoveredItem );
+
+            if ( Time.time > _itemTime && 1 > _level.progress )
+                _itemTime = stage.conveyor.AddItemToConveyor( new Inventory() );
+        }
+
         _saveButton.Update();
         _testButton.Update();
         waveEditor.Update();
@@ -66,7 +151,17 @@ public class Editor
         }
     }
 
-    public void ShowStage( StageDefinition stageDefinition ) => stage = new Stage( stageDefinition , null , new Player() );
+    public void ShowStage( StageDefinition stageDefinition ) => stage = new Stage( stageDefinition , new Player() ,
+        new Conveyor(
+            speed: 5 ,
+            width: 5 ,
+            height: stageDefinition.height + ( stageDefinition.laneSpacing * ( stageDefinition.laneCount - 1 ) ) ,
+            itemInterval: 3 ,
+            itemLimit: 8 ,
+            itemWidthPadding: 2 ,
+            itemSpacing: 0.1f , 
+            hide: true ) );
+
     public void HideStage() => stage?.Destroy();
 
     public void ShowCampaignMap()
@@ -171,6 +266,8 @@ public class Editor
     public WaveEditor waveEditor { get; }
 
     private List<Button> _campaignMapButtons { get; }
+    private HeldItem _heldItem { get; set; }
+    private float _itemTime { get; set; }
     private Button _testButton { get; }
     private Button _saveButton { get; }
     private Level _level { get; set; }
@@ -206,6 +303,7 @@ public class Editor
                 {
                     if ( _level == null )
                     {
+                        stage.conveyor.Show();
                         _level = new Level( missionEditor.selectedMission.duration , showProgress: false );
 
                         for ( int i = 0 ; missionEditor.selectedMission.waveDefinitions.Count > i ; i++ )
@@ -226,10 +324,14 @@ public class Editor
                     }
                     else
                     {
-                        button.SetLabel( "Test" );
                         stage.ClearLanes();
+                        stage.conveyor.Hide();
+                        stage.conveyor.Clear();
+                        button.SetLabel( "Test" );
                         _level.DestroyProgress();
+                        _heldItem = null;
                         _level = null;
+                        _itemTime = 0;
                     }
                 }
             } ,

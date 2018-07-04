@@ -209,5 +209,5 @@ public class Stage
         ground.transform.SetParent( _container.transform );
     }
 
-    public Stage ( StageDefinition stageDefinition , Conveyor conveyor , Player player ) : this( stageDefinition.speed , stageDefinition.width , stageDefinition.height , stageDefinition.laneSpacing , stageDefinition.laneCount , conveyor , player ) { }
+    public Stage( StageDefinition stageDefinition , Player player , Conveyor conveyor ) : this( stageDefinition.speed , stageDefinition.width , stageDefinition.height , stageDefinition.laneSpacing , stageDefinition.laneCount , conveyor , player ) { }
 }
