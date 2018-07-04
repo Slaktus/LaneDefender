@@ -286,7 +286,7 @@ public class Layout : Panel
         for ( int i = 0 ; elements.Count > i && !contains ; i++ )
             contains = elements[ i ].Contains( position );
 
-        return contains && base.Contains( position );
+        return contains || base.Contains( position );
     }
 
     public override void Update()

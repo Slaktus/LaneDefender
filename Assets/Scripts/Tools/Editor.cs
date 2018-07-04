@@ -25,7 +25,7 @@ public class Editor
 
     private void HandleLaneHover()
     {
-        if ( stage != null && waveEditor.selectedWaveDefinition != null && waveEditor.waveSets == null )
+        if ( stage != null && waveEditor.selectedWaveDefinition != null && waveEditor.waveSets == null && waveEditor.waveEventEditor == null )
         {
             Lane hoveredLane = stage.GetHoveredLane( mousePosition );
             stage.SetLaneColor( Color.black );
@@ -34,11 +34,11 @@ public class Editor
             {
                 hoveredLane.color = Color.yellow;
 
-                if ( Input.GetMouseButtonDown( 0 ) )
+                if ( Input.GetMouseButtonDown( 0 ) && !waveEditor.waveEventLayouts[ stage.IndexOf( hoveredLane ) ].containsMouse )
                 {
                     int index = stage.IndexOf( hoveredLane );
                     WaveEventDefinition waveEventDefinition = ScriptableObject.CreateInstance<WaveEventDefinition>();
-                    waveEventDefinition.Initialize( 0 , index , WaveEvent.Type.SpawnEnemy );
+                    waveEventDefinition.Initialize( 0 , index , WaveEvent.Type.SpawnEnemy , Helpers.Normalize( mousePosition.x , hoveredLane.width , hoveredLane.start.x ) );
                     ScriptableObjects.Add( waveEventDefinition , waveEditor.selectedWaveDefinition );
                     waveEditor.HideWaveEventButtons();
                     waveEditor.ShowWaveEventButtons();
@@ -54,6 +54,7 @@ public class Editor
                     if ( hoveredLane != null )
                     {
                         waveEditor.heldWaveEvent.waveEventDefinition.SetLane( stage.IndexOf( hoveredLane ) );
+                        waveEditor.heldWaveEvent.waveEventDefinition.entryPoint = Helpers.Normalize( mousePosition.x , hoveredLane.end.x , hoveredLane.start.x );
                         waveEditor.HideWaveEventButtons();
                         waveEditor.ShowWaveEventButtons();
                     }
@@ -110,6 +111,12 @@ public class Editor
 
                     if ( Input.GetMouseButtonDown( 1 ) && campaignEditor.selectedCampaign.Has( index ) )
                     {
+                        Debug.Log( index );
+                        //ok, so the problem is that it's the same damn instance!
+                        //that's ... uh, gonna be a bit of a bitch to work around
+                        //some kind of double bookkeeping required that I'm too tired to handle now
+                        //but at least hey, that's it -- when looking up the index and removing the instance, it finds the other identical instance, because it's the same in both
+                        //duh
                         campaignEditor.selectedCampaign.Remove( campaignEditor.selectedCampaign.Get( index ) );
                         ShowCampaignMap();
                     }

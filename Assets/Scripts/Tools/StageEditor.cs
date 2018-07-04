@@ -21,7 +21,7 @@ public class StageEditor
 
     private void ShowStageSets( float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
     {
-        stageSets?.Destroy();
+        HideStageSets();
         int count = _editor.stageData.stageSets.Count + 1;
         stageSets = new Layout( "StageSetButtons" , width , height * count , padding , spacing , count , _container );
 
@@ -82,6 +82,7 @@ public class StageEditor
 
     private void ShowStageDefinitions( Vector3 position , float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
     {
+        HideStageDefinitions();
         List<Button> buttons = new List<Button>();
 
         buttons.Add( new Button( "AddStageDefinition" , "Add Stage\nDefinition" , width , height , _container ,
@@ -192,6 +193,7 @@ public class StageEditor
     public void HideStageDefinitions()
     {
         _stages?.Destroy();
+        _stages = null;
         _showingStageDefinitions = false;
     }
 

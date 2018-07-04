@@ -125,7 +125,7 @@ public class MissionEditor
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
                         timelinePosition = Helpers.Normalize( _indicator.transform.position.x , button.rect.xMax , button.rect.xMin );
-                        _editor.waveEditor.Show( new Vector3( _indicator.transform.position.x , 0 , button.rect.yMin ) );
+                        _editor.waveEditor.Show(  );
                     }
                 }
             } ,
@@ -293,6 +293,8 @@ public class MissionEditor
 
     private void ShowIndicator() => _indicator.enabled = true;
     private void HideIndicator() => _indicator.enabled = false;
+
+    public Vector3 indicatorPosition => new Vector3( _indicator.transform.position.x , 0 , _missionTimeline.rect.yMin );
 
     public MissionSet selectedMissionSet { get; private set; }
     public MissionDefinition selectedMission { get; private set; }
