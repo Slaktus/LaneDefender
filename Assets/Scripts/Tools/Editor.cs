@@ -110,7 +110,7 @@ public class Editor
 
     private void HandleLaneHover()
     {
-        if ( stage != null && waveEditor.selectedWaveDefinition != null && waveEditor.waveSets == null && waveEditor.waveEventEditor == null )
+        if ( stage != null && ( stage.conveyor == null || !stage.conveyor.showing ) && waveEditor.selectedWaveDefinition != null && waveEditor.waveSets == null && waveEditor.waveEventEditor == null )
         {
             Lane hoveredLane = stage.GetHoveredLane( mousePosition );
             stage.SetLaneColor( Color.black );
@@ -321,6 +321,7 @@ public class Editor
                         }
 
                         button.SetLabel( "Stop" );
+                        waveEditor.HideWaveEventButtons();
                     }
                     else
                     {
@@ -332,6 +333,8 @@ public class Editor
                         _heldItem = null;
                         _level = null;
                         _itemTime = 0;
+
+                        waveEditor.ShowWaveEventButtons();
                     }
                 }
             } ,

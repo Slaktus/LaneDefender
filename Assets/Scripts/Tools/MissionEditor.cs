@@ -71,31 +71,42 @@ public class MissionEditor
     public void AddWaveToTimeline( WaveDefinition waveDefinition , float timelinePosition )
     {
         Button button = new Button( "Wave" , "Wave" , 2 , 1 , container ,
-            Enter: ( Button b ) => b.SetColor( b.selected ? b.color : Color.green ) ,
+            Enter: ( Button b ) => 
+            {
+                if ( _editor.stage.conveyor == null || !_editor.stage.conveyor.showing )
+                    b.SetColor( b.selected ? b.color : Color.green );
+            } ,
             Stay: ( Button b ) =>
             {
-                if ( Input.GetMouseButtonDown( 1 ) )
+                if ( _editor.stage.conveyor == null || !_editor.stage.conveyor.showing )
                 {
-                    selectedMission.Remove( waveDefinition );
-                    _buttons.Remove( b );
-                    b.Destroy();
-                }
-                else if ( !b.selected && Input.GetMouseButtonDown( 0 ) )
-                {
-                    for ( int i = 0 ; _buttons.Count > i ; i++ )
+                    if ( Input.GetMouseButtonDown( 1 ) )
                     {
-                        _buttons[ i ].Deselect();
-                        _buttons[ i ].SetColor( Color.white );
+                        selectedMission.Remove( waveDefinition );
+                        _buttons.Remove( b );
+                        b.Destroy();
                     }
+                    else if ( !b.selected && Input.GetMouseButtonDown( 0 ) )
+                    {
+                        for ( int i = 0 ; _buttons.Count > i ; i++ )
+                        {
+                            _buttons[ i ].Deselect();
+                            _buttons[ i ].SetColor( Color.white );
+                        }
 
-                    _editor.waveEditor.SetSelectedWaveDefinition( waveDefinition );
-                    _editor.waveEditor.HideWaveEventButtons();
-                    _editor.waveEditor.ShowWaveEventButtons();
-                    b.SetColor( Color.yellow );
-                    b.Select();
+                        _editor.waveEditor.SetSelectedWaveDefinition( waveDefinition );
+                        _editor.waveEditor.HideWaveEventButtons();
+                        _editor.waveEditor.ShowWaveEventButtons();
+                        b.SetColor( Color.yellow );
+                        b.Select();
+                    }
                 }
             } ,
-            Exit: ( Button b ) => b.SetColor( b.selected ? b.color : Color.white ) );
+            Exit: ( Button b ) => 
+            {
+                if ( _editor.stage.conveyor == null || !_editor.stage.conveyor.showing )
+                    b.SetColor( b.selected ? b.color : Color.white );
+            } );
 
         button.SetPosition( new Vector3( _missionTimeline.rect.xMin + ( timelinePosition * _missionTimeline.rect.xMax ) , 0 , _missionTimeline.rect.yMin + 0.5f ) + Vector3.up );
         _buttons.Add( button );
@@ -108,7 +119,6 @@ public class MissionEditor
         if ( _editor.stage != null )
         {
             _missionTimeline = new Button( "MissionTimeline" , string.Empty , _editor.stage.width , 1 , container ,
-            Enter: ( Button button ) => ShowIndicator() ,
             Stay: ( Button button ) =>
             {
                 bool overlappingWave = false;
@@ -116,16 +126,16 @@ public class MissionEditor
                 for ( int i = 0 ; _buttons.Count > i && !overlappingWave ; i++ )
                     overlappingWave = _buttons[ i ].containsMouse;
 
-                if ( overlappingWave || _editor.waveEditor.waveSets != null )
+                if ( overlappingWave || _editor.waveEditor.waveSets != null || ( _editor.stage.conveyor != null && _editor.stage.conveyor.showing ) )
                     HideIndicator();
                 else if ( _editor.waveEditor.waveSets == null)
                 {
                     ShowIndicator();
 
-                    if ( Input.GetMouseButtonDown( 0 ) )
+                    if ( Input.GetMouseButtonDown( 0 ) && ( _editor.stage.conveyor != null && !_editor.stage.conveyor.showing ) )
                     {
                         timelinePosition = Helpers.Normalize( _indicator.transform.position.x , button.rect.xMax , button.rect.xMin );
-                        _editor.waveEditor.Show(  );
+                        _editor.waveEditor.Show();
                     }
                 }
             } ,

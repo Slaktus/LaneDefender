@@ -154,7 +154,7 @@ public class WaveEditor
             if ( waveEventButtons.Count > laneIndex )
             {
                 Button button = new Button( "WaveEvent" + index.ToString() , index.ToString() , 1 , 1 , _container ,
-                    Enter: ( Button butt ) => butt.SetColor( Color.red ) ,
+                    Enter: ( Button butt ) => butt.SetColor( Color.green ) ,
                     Stay: ( Button butt ) =>
                     {
                         if ( Input.GetMouseButtonUp( 0 ) )
