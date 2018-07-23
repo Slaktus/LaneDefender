@@ -22,11 +22,31 @@ public class StageEditor
     private void ShowStageSets( float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
     {
         HideStageSets();
-        int count = _editor.stageData.stageSets.Count + 1;
+        int count = _editor.stageData.stageSets.Count + 2;
         stageSets = new Layout( "StageSetButtons" , width , height * count , padding , spacing , count , _container );
 
         List<Button> buttons = new List<Button>( count )
         {
+            new Button( "BackToCampaign" , "Back to Campaign" , width , height , _container , fontSize: 20 ,
+            Enter: ( Button button ) => button.SetColor( Color.green ) ,
+            Stay: ( Button button ) =>
+            {
+                if ( Input.GetMouseButtonDown( 0 ) )
+                {
+                    _editor.waveEditor.Hide();
+                    _editor.stageEditor.Hide();
+                    _editor.missionEditor.Hide();
+                    _editor.missionEditor.HideMissionEditor();
+                    _editor.missionEditor.HideMissionTimeline();
+
+                    _editor.campaignEditor.ShowCampaignSets();
+                    _editor.campaignEditor.ShowCampaignEditor();
+                    _editor.ShowCampaignMap();
+                }
+            } ,
+
+            Exit: ( Button button ) => button.SetColor( Color.white ) ) ,
+
             new Button( "AddStageSet" , "Add Stage Set" , width , height , _container ,
             fontSize: 20 ,
             Enter: ( Button button ) => button.SetColor( Color.green ) ,
@@ -42,7 +62,7 @@ public class StageEditor
             Exit: ( Button button ) => button.SetColor( Color.white ) )
         };
 
-        for ( int i = 0 ; buttons.Capacity - 1 > i ; i++ )
+        for ( int i = 0 ; buttons.Capacity - 2 > i ; i++ )
         {
             int index = i;
             buttons.Add( new Button( "StageSet" , "Stage Set" , width , height , _container ,
@@ -78,6 +98,7 @@ public class StageEditor
 
         stageSets.Add( buttons , true );
         stageSets.SetViewportPosition( new Vector2( 0 , 1 ) );
+        stageSets.SetPosition( stageSets.position + Vector3.up );
     }
 
     private void ShowStageDefinitions( Vector3 position , float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
@@ -210,10 +231,7 @@ public class StageEditor
         _selectedStageSet = null;
 
         if ( selectedStageDefinition != null )
-        {
             _editor.HideStage();
-            _editor.ShowStage( selectedStageDefinition );
-        }
     }
 
     public void SetSelectedStageDefinition( StageDefinition selectedStageDefinition ) => this.selectedStageDefinition = selectedStageDefinition;

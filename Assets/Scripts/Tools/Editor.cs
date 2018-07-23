@@ -162,7 +162,11 @@ public class Editor
             itemSpacing: 0.1f , 
             hide: true ) );
 
-    public void HideStage() => stage?.Destroy();
+    public void HideStage()
+    {
+        stage?.Destroy();
+        stage = null;
+    }
 
     public void ShowCampaignMap()
     {
@@ -341,7 +345,7 @@ public class Editor
             Exit: ( Button button ) => button.SetColor( Color.white ) );
 
         _testButton.SetViewportPosition( new Vector2( 1 , 1 ) );
-        _testButton.SetPosition( _testButton.position + Vector3.left * _testButton.width );
+        _testButton.SetPosition( _testButton.position + ( Vector3.left * _testButton.width ) + Vector3.up );
 
         _saveButton = new Button( "Save" , "Save" , 1.5f , 0.5f , container ,
             fontSize: 20 ,

@@ -108,7 +108,7 @@ public class MissionEditor
                     b.SetColor( b.selected ? b.color : Color.white );
             } );
 
-        button.SetPosition( new Vector3( _missionTimeline.rect.xMin + ( timelinePosition * _missionTimeline.rect.xMax ) , 0 , _missionTimeline.rect.yMin + 0.5f ) + Vector3.up );
+        button.SetPosition( new Vector3( _missionTimeline.rect.xMin + ( timelinePosition * _missionTimeline.rect.xMax ) , 0 , _missionTimeline.rect.yMin + 0.5f ) + ( Vector3.up * ( _missionTimeline.position.y + 1 ) ) );
         _buttons.Add( button );
     }
 
@@ -141,7 +141,7 @@ public class MissionEditor
             } ,
             Exit: ( Button button ) => HideIndicator() );
 
-            _missionTimeline.SetPosition( new Vector3( _editor.stage.start + ( _editor.stage.width * 0.5f ) , 0 , Camera.main.ViewportToWorldPoint( new Vector3( 0 , 1 , Camera.main.transform.position.y ) ).z ) + ( Vector3.back * _missionTimeline.height * 0.5f ) );
+            _missionTimeline.SetPosition( new Vector3( _editor.stage.start + ( _editor.stage.width * 0.5f ) , 0 , Camera.main.ViewportToWorldPoint( new Vector3( 0 , 1 , Camera.main.transform.position.y ) ).z ) + ( Vector3.back * _missionTimeline.height * 0.5f ) + Vector3.up );
 
             if ( selectedMission != null )
                 for ( int i = 0 ; selectedMission.waveDefinitions.Count > i ; i++ )
@@ -151,6 +151,10 @@ public class MissionEditor
 
     public void HideMissionTimeline()
     {
+        for ( int i = 0 ; _buttons.Count > i ; i++ )
+            _buttons[ i ].Destroy();
+
+        _buttons.Clear();
         _missionTimeline?.Destroy();
         _missionTimeline = null;
     }
@@ -272,7 +276,7 @@ public class MissionEditor
     public void ShowMissionEditor()
     {
         HideMissionEditor();
-        List<Element> missionEditorButtons = new List<Element>()
+        List<Element> missionEditorButtons = new List<Element>( 2 )
         {
             new Label( "Duration:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
             new Field( "Duration" , selectedMission.duration.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>

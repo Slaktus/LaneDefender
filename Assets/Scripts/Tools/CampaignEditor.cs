@@ -1,6 +1,7 @@
 ﻿#if UNITY_EDITOR
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class CampaignEditor
 {
@@ -66,6 +67,7 @@ public class CampaignEditor
 
         campaignSets.Add( buttons , true );
         campaignSets.SetViewportPosition( new Vector2( 0 , 1 ) );
+        campaignSets.SetPosition( campaignSets.position + Vector3.up );
     }
 
     public void HideCampaignSets()
