@@ -55,7 +55,9 @@ public class StageEditor
                 if ( Input.GetMouseButtonDown( 0 ) )
                 {
                     ScriptableObjects.Add( ScriptableObject.CreateInstance<StageSet>() , _editor.stageData );
-                    Refresh();
+
+                    ShowStageSets();
+                    ShowStageEditor();
                     _editor.missionEditor.ShowMissionEditor();
                 }
             } ,
@@ -162,6 +164,7 @@ public class StageEditor
 
     public void ShowStageEditor()
     {
+        HideStageEditor();
         List<Element> stageEditorButtons = new List<Element>()
         {
             new Label( "Lanes:" , Color.black , 1.25f , 0.5f , _container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
