@@ -36,8 +36,9 @@ public class StageEditor
                     _editor.waveEditor.Hide();
                     _editor.stageEditor.Hide();
                     _editor.missionEditor.Hide();
+                    _editor.timelineEditor.Hide();
                     _editor.missionEditor.HideMissionEditor();
-                    _editor.missionEditor.HideMissionTimeline();
+                    _editor.timelineEditor.HideMissionTimeline();
 
                     _editor.campaignEditor.ShowCampaignSets();
                     _editor.campaignEditor.ShowCampaignEditor();
@@ -147,7 +148,7 @@ public class StageEditor
 
                             ShowStageSets();
                             ShowStageEditor();
-                            _editor.missionEditor.ShowMissionTimeline();
+                            _editor.timelineEditor.ShowMissionTimeline();
                             _editor.missionEditor.ShowMissionEditor();
 
                         }

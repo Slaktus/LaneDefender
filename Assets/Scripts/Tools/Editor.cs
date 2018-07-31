@@ -108,6 +108,7 @@ public class Editor
         _testButton.Update();
         waveEditor.Update();
         missionEditor.Update();
+        timelineEditor.Update();
         campaignEditor.Update();
         stageEditor.Update();
     }
@@ -198,9 +199,10 @@ public class Editor
 
                             stageEditor.Show();
                             missionEditor.ShowMissionEditor();
-                            missionEditor.ShowMissionTimeline();
+                            timelineEditor.ShowMissionTimeline();
 
                             campaignEditor.Hide();
+                            timelineEditor.Hide();
                             missionEditor.Hide();
                             HideCampaignMap();
                         }
@@ -268,6 +270,7 @@ public class Editor
     public StageData stageData { get; }
     public WaveData waveData { get; }
 
+    public TimelineEditor timelineEditor { get; }
     public CampaignEditor campaignEditor { get; }
     public MissionEditor missionEditor { get; }
     public StageEditor stageEditor { get; }
@@ -364,6 +367,7 @@ public class Editor
         _saveButton.SetPosition( _testButton.position + Vector3.left * ( _saveButton.width ) );
 
         campaignEditor = new CampaignEditor( this , Vector3.zero );
+        timelineEditor = new TimelineEditor(this);
         missionEditor = new MissionEditor( this );
         stageEditor = new StageEditor( this );
         waveEditor = new WaveEditor( this );

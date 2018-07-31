@@ -78,7 +78,7 @@ public class WaveEditor
             }
 
         waveSets = new Layout( "WaveSetButtons" , width , height * buttons.Count , padding , spacing , buttons.Count , _container );
-        waveSets.SetLocalPosition( _editor.missionEditor.indicatorPosition + ( Vector3.back * ( ( height * ( buttons.Count - 1 ) * 0.5f ) ) ) + Vector3.up );
+        waveSets.SetLocalPosition( _editor.timelineEditor.indicatorPosition + ( Vector3.back * ( ( height * ( buttons.Count - 1 ) * 0.5f ) ) ) + Vector3.up );
         waveSets.Add( buttons , true );
     }
 
@@ -115,7 +115,7 @@ public class WaveEditor
                                 buttons[ selectedWaveSet.waveDefinitions.IndexOf( selectedWaveDefinition ) + 1 ].SetColor( Color.white );
 
                             selectedWaveDefinition = selectedWaveSet.waveDefinitions[ index ];
-                            _editor.missionEditor.AddWaveToTimeline( selectedWaveDefinition );
+                            _editor.timelineEditor.AddWaveToTimeline( selectedWaveDefinition );
                             ShowWaveEventButtons();
                             HideWaveDefinitions();
                             HideWaveSets();
