@@ -16,11 +16,31 @@ public class MissionEditor
     public void ShowMissionSets( int index , Vector3 position )
     {
         HideMissionSets();
-        int count = _editor.campaignData.missionSets.Count + 1;
-        missionSets = new Layout( "MissionSets" , 4 , count , 0.25f , 0.1f , count , container );
+        int count = _editor.campaignData.missionSets.Count;
+        missionSets = new Layout( "MissionSets" , 4 , count + 1 , 0.25f , 0.1f , count + 1 , container );
         missionSets.SetPosition( position + ( Vector3.right * missionSets.width * 0.5f ) + ( Vector3.back * missionSets.height * 0.5f ) );
 
-        List<Button> buttons = new List<Button>( count )
+        missionSets.Add(new List<Button>(Button.GetButtons(count, (int capturedIndex) => new Button("MissionSet", "Mission Set", 4, 1, container,
+            Enter: (Button button) => button.SetColor(selectedMissionSet == _editor.campaignData.missionSets[ capturedIndex ] ? button.color : Color.green),
+            Stay: (Button button) =>
+            {
+                if (Input.GetMouseButtonDown(0))
+                {
+                    button.SetColor(Color.yellow);
+                    selectedMissionSet = _editor.campaignData.missionSets[ capturedIndex ];
+                    ShowMissions(index, button.position + new Vector3(button.width * 0.5f, 0, button.height * 0.5f));
+                }
+            },
+            Exit: (Button button) => button.SetColor(selectedMissionSet == _editor.campaignData.missionSets[ capturedIndex ] ? button.color : Color.white),
+            Close: (Button button) =>
+            {
+                if (Input.GetMouseButtonDown(0) && selectedMissionSet == _editor.campaignData.missionSets[ capturedIndex ] && missions != null && !missions.containsMouse)
+                {
+                    HideMissions();
+                    selectedMissionSet = null;
+                    button.SetColor(Color.white);
+                }
+            })))
         {
             new Button( "NewMissionSet" , "New Set" , 4 , 1 , container ,
                 Enter: ( Button button ) => button.SetColor( Color.green ) ,
@@ -34,36 +54,7 @@ public class MissionEditor
                     }
                 } ,
                 Exit: ( Button button ) => button.SetColor( Color.white ) )
-        };
-
-        for ( int i = 0 ; buttons.Capacity - 1 > i ; i++ )
-        {
-            int capturedIndex = i;
-            buttons.Add( new Button( "MissionSet" , "Mission Set" , 4 , 1 , container ,
-                Enter: ( Button button ) => button.SetColor( selectedMissionSet == _editor.campaignData.missionSets[ capturedIndex ] ? button.color : Color.green ) ,
-                Stay: ( Button button ) =>
-                {
-                    if ( Input.GetMouseButtonDown( 0 ) )
-                    {
-                        button.SetColor( Color.yellow );
-                        selectedMissionSet = _editor.campaignData.missionSets[ capturedIndex ];
-                        ShowMissions( index , button.position + new Vector3( button.width * 0.5f , 0 , button.height * 0.5f ) );
-                    }
-                } ,
-                Exit: ( Button button ) => button.SetColor( selectedMissionSet == _editor.campaignData.missionSets[ capturedIndex ] ? button.color : Color.white ) ,
-                Close: ( Button button ) =>
-                {
-                    if ( Input.GetMouseButtonDown( 0 ) && selectedMissionSet == _editor.campaignData.missionSets[ capturedIndex ] && missions != null && !missions.containsMouse )
-                    {
-                        HideMissions();
-                        selectedMissionSet = null;
-                        button.SetColor( Color.white );
-                    }
-                } ) );
-        }
-
-        missionSets.Add( buttons );
-        missionSets.Refresh();
+        } , true );
     }
 
     public void HideMissionSets()
@@ -76,11 +67,27 @@ public class MissionEditor
     public void ShowMissions( int index , Vector3 position )
     {
         HideMissions();
-        int count = selectedMissionSet.missionDefinitions.Count + 1;
-        missions = new Layout( "MissionLayout" , 4 , count , 0.25f , 0.1f , count , container );
+        int count = selectedMissionSet.missionDefinitions.Count;
+        missions = new Layout("MissionLayout", 4, count + 1, 0.25f, 0.1f, count + 1, container);
         missions.SetPosition( position + ( Vector3.right * missions.width * 0.5f ) + ( Vector3.back * missions.height * 0.5f ) );
 
-        List<Button> buttons = new List<Button>( count )
+        missions.Add(new List<Button>(Button.GetButtons(count, (int capturedIndex) => new Button("Mission", "Mission", 4, 1, container,
+              Enter: (Button button) => button.SetColor(Color.green),
+              Stay: (Button button) =>
+              {
+                  if (Input.GetMouseButtonDown(0))
+                  {
+                      selectedMission = selectedMissionSet.missionDefinitions[ capturedIndex ];
+                      _editor.campaignEditor.selectedCampaign.Add(selectedMission, index);
+                      Button mapButton = _editor.GetMapButton(index);
+                      mapButton.SetLabel(selectedMission.name);
+                      mapButton.SetColor(Color.white);
+                      mapButton.Deselect();
+                      HideMissionSets();
+                      HideMissions();
+                  }
+              },
+              Exit: (Button button) => button.SetColor(Color.white))))
         {
             new Button( "NewMission" , "New Mission" , 4 , 1 , container ,
                 Enter: ( Button button ) => button.SetColor( Color.green ) ,
@@ -93,31 +100,7 @@ public class MissionEditor
                     }
                 } ,
                 Exit: ( Button button ) => button.SetColor( Color.white ) )
-        };
-
-        for ( int i = 0 ; buttons.Capacity - 1 > i ; i++ )
-        {
-            int capturedIndex = i;
-            buttons.Add( new Button( "Mission" , "Mission" , 4 , 1 , container ,
-                Enter: ( Button button ) => button.SetColor( Color.green ) ,
-                Stay: ( Button button ) =>
-                {
-                    if ( Input.GetMouseButtonDown( 0 ) )
-                    {
-                        selectedMission = selectedMissionSet.missionDefinitions[ capturedIndex ];
-                        _editor.campaignEditor.selectedCampaign.Add( selectedMission , index );
-                        Button mapButton = _editor.GetMapButton( index );
-                        mapButton.SetLabel( selectedMission.name );
-                        mapButton.SetColor( Color.white );
-                        mapButton.Deselect();
-                        HideMissionSets();
-                        HideMissions();
-                    }
-                } ,
-                Exit: ( Button button ) => button.SetColor( Color.white ) ) );
-        }
-
-        missions.Add( buttons );
+        });
         missions.Refresh();
     }
 

@@ -7,7 +7,8 @@ public class TimelineEditor
     public void Update()
     {
         _missionTimeline?.Update();
-        _indicator.transform.position = _editor.mousePosition;
+        _missionTimeline?.LateUpdate();
+        _indicator.transform.position = _editor.mousePosition + Vector3.up;
 
         //should be replaced with a proper layout
         //layouts can ignore constraints now after all
