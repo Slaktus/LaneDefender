@@ -13,6 +13,10 @@ public class Editor
         for ( int i = 0 ; _campaignMapButtons.Count > i ; i++ )
             _campaignMapButtons[ i ].Update();
 
+        //best argument ever for making some kind of screen or layout container
+        for (int i = 0; _campaignMapButtons.Count > i; i++)
+            _campaignMapButtons[ i ].LateUpdate();
+
         _level?.Update();
         stage?.Update();
         stage?.conveyor?.Update();

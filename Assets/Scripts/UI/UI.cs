@@ -141,6 +141,16 @@ public class Field : Button
 
 public class Button : Element
 {
+    public static List<Button> GetButtons(int count, Func<int, Button> GetButton)
+    {
+        List<Button> buttons = new List<Button>(count);
+
+        for (int i = 0; count > i; i++)
+            buttons.Add(GetButton(i));
+
+        return buttons;
+    }
+
     public override void Destroy()
     {
         GameObject.Destroy( container );
@@ -148,26 +158,28 @@ public class Button : Element
 
     public override void Update()
     {
-        bool contains = containsMouse;
+        if (!hovering && !containsMouse)
+            Close?.Invoke(this);
+    }
 
-        if ( contains )
+    public override void LateUpdate()
+    {
+        if (containsMouse)
         {
-            if ( !hovering )
+            if (!hovering)
             {
-                Enter?.Invoke( this );
+                Enter?.Invoke(this);
                 hovering = true;
             }
             else
-                Stay?.Invoke( this );
+                Stay?.Invoke(this);
 
         }
-        else if ( hovering )
+        else if (hovering)
         {
-            Exit?.Invoke( this );
+            Exit?.Invoke(this);
             hovering = false;
         }
-        else if ( !contains )
-            Close?.Invoke( this );
     }
 
     public void ShowQuad() => quad.enabled = true;
@@ -208,6 +220,7 @@ public class Button : Element
 
     protected MeshRenderer quad { get; set; }
     protected bool hovering { get; set; }
+    protected bool closing { get; set; }
     protected Label label { get; set; }
 
     private Action<Button> Close { get; set; }
@@ -291,8 +304,11 @@ public class Layout : Panel
 
     public override void Update()
     {
-        for ( int i = 0 ; elements.Count > i ; i++ )
+        for ( int i = 0 ; elements.Count > i ; i++)
             elements[ i ].Update();
+
+        for (int i = 0; elements.Count > i; i++)
+            elements[ i ].LateUpdate();
     }
 
     public override void Destroy()
@@ -443,6 +459,7 @@ public abstract class Element
     public virtual bool Contains( Vector3 position ) => Contains( new Vector2( position.x , position.z ) );
     public virtual bool Contains( Vector2 position ) => rect.Contains( position );
     public virtual bool containsMouse => Contains( mousePos );
+    public virtual void LateUpdate() { }
     public virtual void Update() { }
 
     protected Vector3 mousePos => Camera.main.ScreenToWorldPoint( new Vector3( Input.mousePosition.x , Input.mousePosition.y , Camera.main.transform.position.y ) );
