@@ -4,23 +4,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-public class MissionEditor
+public class MissionEditor : Layout
 {
-    public void Update()
-    {
-        missions?.Update();
-        missionSets?.Update();
-        _missionEditorLayout?.Update();
-    }
-
     public void ShowMissionSets( int index , Vector3 position )
     {
         HideMissionSets();
         int count = _editor.campaignData.missionSets.Count;
-        missionSets = new Layout( "MissionSets" , 4 , count + 1 , 0.25f , 0.1f , count + 1 , container );
+        Add(missionSets = new Layout("MissionSets", 4, count + 1, 0.25f, 0.1f, count + 1, container));
         missionSets.SetPosition( position + ( Vector3.right * missionSets.width * 0.5f ) + ( Vector3.back * missionSets.height * 0.5f ) );
 
-        missionSets.Add(new List<Button>(Button.GetButtons(count, (int capturedIndex) => new Button("MissionSet", "Mission Set", 4, 1, container,
+        missionSets.Add(new List<Button>(Button.GetButtons(count, (int capturedIndex) => new Button("Mission Set", 4, 1, container, "MissionSet",
             Enter: (Button button) => button.SetColor(selectedMissionSet == _editor.campaignData.missionSets[ capturedIndex ] ? button.color : Color.green),
             Stay: (Button button) =>
             {
@@ -42,7 +35,7 @@ public class MissionEditor
                 }
             })))
         {
-            new Button( "NewMissionSet" , "New Set" , 4 , 1 , container ,
+            new Button( "New Set" , 4 , 1 , container , "NewMissionSet" ,
                 Enter: ( Button button ) => button.SetColor( Color.green ) ,
                 Stay: ( Button button ) =>
                 {
@@ -59,6 +52,9 @@ public class MissionEditor
 
     public void HideMissionSets()
     {
+        if (missionSets != null)
+            Remove(missionSets);
+
         selectedMissionSet = null;
         missionSets?.Destroy();
         missionSets = null;
@@ -68,28 +64,28 @@ public class MissionEditor
     {
         HideMissions();
         int count = selectedMissionSet.missionDefinitions.Count;
-        missions = new Layout("MissionLayout", 4, count + 1, 0.25f, 0.1f, count + 1, container);
+        Add(missions = new Layout("MissionLayout", 4, count + 1, 0.25f, 0.1f, count + 1, container));
         missions.SetPosition( position + ( Vector3.right * missions.width * 0.5f ) + ( Vector3.back * missions.height * 0.5f ) );
 
-        missions.Add(new List<Button>(Button.GetButtons(count, (int capturedIndex) => new Button("Mission", "Mission", 4, 1, container,
-              Enter: (Button button) => button.SetColor(Color.green),
-              Stay: (Button button) =>
-              {
-                  if (Input.GetMouseButtonDown(0))
-                  {
-                      selectedMission = selectedMissionSet.missionDefinitions[ capturedIndex ];
-                      _editor.campaignEditor.selectedCampaign.Add(selectedMission, index);
-                      Button mapButton = _editor.GetMapButton(index);
-                      mapButton.SetLabel(selectedMission.name);
-                      mapButton.SetColor(Color.white);
-                      mapButton.Deselect();
-                      HideMissionSets();
-                      HideMissions();
-                  }
-              },
-              Exit: (Button button) => button.SetColor(Color.white))))
+        missions.Add(new List<Button>(Button.GetButtons(count, (int capturedIndex) => new Button("Mission", 4, 1, container, "Mission",
+            Enter: (Button button) => button.SetColor(Color.green),
+            Stay: (Button button) =>
+            {
+                if (Input.GetMouseButtonDown(0))
+                {
+                    selectedMission = selectedMissionSet.missionDefinitions[ capturedIndex ];
+                    _editor.campaignEditor.selectedCampaign.Add(selectedMission, index);
+                    Button mapButton = _editor.GetMapButton(index);
+                    mapButton.SetLabel(selectedMission.name);
+                    mapButton.SetColor(Color.white);
+                    mapButton.Deselect();
+                    HideMissionSets();
+                    HideMissions();
+                }
+            },
+            Exit: (Button button) => button.SetColor(Color.white))))
         {
-            new Button( "NewMission" , "New Mission" , 4 , 1 , container ,
+            new Button( "New Mission" , 4 , 1 , container , "NewMission" ,
                 Enter: ( Button button ) => button.SetColor( Color.green ) ,
                 Stay: ( Button button ) =>
                 {
@@ -100,12 +96,14 @@ public class MissionEditor
                     }
                 } ,
                 Exit: ( Button button ) => button.SetColor( Color.white ) )
-        });
-        missions.Refresh();
+        }, true);
     }
 
     public void HideMissions()
     {
+        if (missions != null)
+            Remove(missions);
+
         missions?.Destroy();
         missions = null;
     }
@@ -122,19 +120,22 @@ public class MissionEditor
             } )
         };
 
-        _missionEditorLayout = new Layout( "StageEditor" , 3 , 1 , 0.25f , 0.1f , missionEditorButtons.Count / 2 , container );
+        Add(_missionEditorLayout = new Layout( "StageEditor" , 3 , 1 , 0.25f , 0.1f , missionEditorButtons.Count / 2 , container ));
         _missionEditorLayout.Add( missionEditorButtons , true );
         _missionEditorLayout.SetPosition( ( _editor.stageEditor.stageEditorLayout != null ? _editor.stageEditor.stageEditorLayout.position : _editor.stageEditor.stageSets.position ) + ( Vector3.back * ( _missionEditorLayout.height + ( _editor.stageEditor.stageEditorLayout != null ? _editor.stageEditor.stageEditorLayout.height : _editor.stageEditor.stageSets.height ) ) * 0.5f ) );
     }
 
     public void HideMissionEditor()
     {
+        if (_missionEditorLayout != null)
+            Remove(_missionEditorLayout);
+
         _missionEditorLayout?.Destroy();
         _missionEditorLayout = null;
     }
 
     //NOTE: Find everyone who calls this and make them hide TimelineEditor too
-    public void Hide()
+    public override void Hide()
     {
         HideMissions();
         HideMissionSets();
@@ -151,11 +152,9 @@ public class MissionEditor
     private Editor _editor { get; }
     private Layout _missionEditorLayout { get; set; }
 
-    public MissionEditor( Editor editor )
+    public MissionEditor(Editor editor, GameObject parent = null) : base(typeof(MissionEditor).Name, parent)
     {
         _editor = editor;
-        container = new GameObject( typeof( MissionEditor ).Name );
-        container.transform.SetParent( editor.container.transform );
     }
 }
 #endif //UNITY_EDITOR

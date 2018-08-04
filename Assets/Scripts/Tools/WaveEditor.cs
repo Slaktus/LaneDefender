@@ -5,27 +5,17 @@ using UnityEngine;
 using UnityEditor;
 using System;
 
-public class WaveEditor
+public class WaveEditor : Layout
 {
-    public void Update()
-    {
-        waveSets?.Update();
-        waveEventEditor?.Update();
-        _waveDefinitionLayout?.Update();
-
-        for ( int i = 0 ; waveEventLayouts.Count > i ; i++ )
-            waveEventLayouts[ i ].Update();
-    }
-
-    public void Show() => ShowWaveSets();
+    public override void Show() => ShowWaveSets();
 
     private void ShowWaveSets( float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
     {
         HideWaveSets();
         int count = _editor.waveData.waveSets.Count;
-        waveSets = new Layout("WaveSetButtons", width, height * (count + 1), padding, spacing, count + 1, _container);
+        Add(waveSets = new Layout("WaveSetButtons", width, height * (count + 1), padding, spacing, count + 1, _container));
         waveSets.SetLocalPosition(_editor.timelineEditor.indicatorPosition + (Vector3.back * (height * count * 0.5f)) + Vector3.up);
-        waveSets.Add(new List<Button>(Button.GetButtons(count, (int index) => new Button("WaveSet", "Wave Set", width, height, _container,
+        waveSets.Add(new List<Button>(Button.GetButtons(count, (int index) => new Button("Wave Set", width, height, _container, "WaveSet",
             fontSize: 20,
             Enter: (Button button) => button.SetColor(selectedWaveSet == _editor.waveData.waveSets[ index ] ? button.color : Color.green),
             Stay: (Button button) =>
@@ -42,7 +32,7 @@ public class WaveEditor
             },
             Exit: (Button button) => button.SetColor(selectedWaveSet == _editor.waveData.waveSets[ index ] ? button.color : Color.white))))
         {
-            new Button( "AddWaveSet" , "Add Wave Set" , width , height , _container ,
+            new Button( "Add Wave Set" , width , height , _container , "AddWaveSet" ,
             fontSize: 20 ,
             Enter: ( Button button ) => button.SetColor( Color.green ) ,
             Stay: ( Button button ) =>
@@ -66,13 +56,22 @@ public class WaveEditor
         }, true);
     }
 
+    public void HideWaveSets()
+    {
+        if (waveSets != null)
+            Remove(waveSets);
+
+        waveSets?.Destroy();
+        waveSets = null;
+    }
+
     private void ShowWaveDefinitions( Vector3 position , float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
     {
-        
+        HideWaveDefinitions();
         int count = selectedWaveSet.waveDefinitions.Count;
-        _waveDefinitionLayout = new Layout("WaveDefinitionButtons", width, height * (count + 1), padding, spacing, count + 1, _container);
+        Add(_waveDefinitionLayout = new Layout("WaveDefinitionButtons", width, height * (count + 1), padding, spacing, count + 1, _container));
         _waveDefinitionLayout.SetPosition(position + (Vector3.left * width) + (Vector3.back * ((height * count * 0.5f) + (padding * 0.5f))));
-        _waveDefinitionLayout.Add(new List<Button>(Button.GetButtons(count, (int index) => new Button("WaveDefinition", "Wave Definition", width, height, _container,
+        _waveDefinitionLayout.Add(new List<Button>(Button.GetButtons(count, (int index) => new Button("Wave Definition", width, height, _container, "WaveDefinition",
             fontSize: 20,
             Enter: (Button button) => button.SetColor(Color.green),
             Stay: (Button button) =>
@@ -88,7 +87,7 @@ public class WaveEditor
             },
             Exit: (Button button) => button.SetColor(Color.white))))
         {
-            new Button( "AddWaveDefinition" , "Add Wave\nDefinition" , width , height , _container ,
+            new Button( "Add Wave\nDefinition" , width , height , _container , "AddWaveDefinition" ,
             fontSize: 20 ,
             Enter: ( Button button ) => button.SetColor( Color.green ) ,
             Stay: ( Button button ) =>
@@ -104,6 +103,15 @@ public class WaveEditor
         }, true);
     }
 
+    public void HideWaveDefinitions()
+    {
+        if (_waveDefinitionLayout != null)
+            Remove(_waveDefinitionLayout);
+
+        _waveDefinitionLayout?.Destroy();
+        _waveDefinitionLayout = null;
+    }
+
     public void ShowWaveEventButtons()
     {
         HideWaveEventButtons();
@@ -115,6 +123,7 @@ public class WaveEditor
             Layout layout = new Layout( "WaveEvent" + i.ToString() + "Layout" , waveEventButtons[ i ].Count , 1 , 0.25f , 0.1f , 1 , _container , false );
             layout.SetLocalPosition( _editor.stage.LaneBy( i ).start + ( Vector3.left * layout.width * 0.5f ) );
             waveEventLayouts.Add( layout );
+            Add(layout);
         }
 
         for ( int i = 0 ; selectedWaveDefinition.waveEvents.Count > i ; i++ )
@@ -126,17 +135,17 @@ public class WaveEditor
 
             if ( waveEventButtons.Count > laneIndex )
             {
-                Button button = new Button( "WaveEvent" + index.ToString() , index.ToString() , 1 , 1 , _container ,
-                    Enter: ( Button butt ) => butt.SetColor( Color.green ) ,
-                    Stay: ( Button butt ) =>
+                Button button = new Button(index.ToString(), 1, 1, _container, "WaveEvent" + index.ToString(),
+                    Enter: (Button butt) => butt.SetColor(Color.green),
+                    Stay: (Button butt) =>
                     {
-                        if ( Input.GetMouseButtonUp( 0 ) )
+                        if (Input.GetMouseButtonUp(0))
                         {
                             butt.Select();
                             List<Element> waveEventEditorButtons = new List<Element>()
                             {
                                 new Label("Type:" , Color.black , 1.25f , 0.5f , _container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
-                                new Button( "Type" , WaveEvent.Type.SpawnEnemy.ToString() , 2 , 0.5f , _container ,
+                                new Button( WaveEvent.Type.SpawnEnemy.ToString() , 2 , 0.5f , _container , "Type" ,
                                     fontSize: 20 ,
                                     Enter: ( Button b ) => b.SetColor( Color.green ) ,
                                     Stay: ( Button b ) => { } ,
@@ -149,42 +158,42 @@ public class WaveEditor
                                 new Field( "Entry" , waveEvent.entryPoint.ToString() , 2 , 0.5f , 20 , _container , Field.ContentMode.Numbers , EndInput: ( Field field ) => float.TryParse( field.label.text , out selectedWaveDefinition.waveEvents[ index ].entryPoint ) )
                             };
 
-                            waveEventEditor = new Layout( "WaveEventEditor" , 3.5f , 3 , 0.25f , 0.1f , waveEventEditorButtons.Count / 2 , _container );
-                            waveEventEditor.Add( waveEventEditorButtons , true );
-                            waveEventEditor.SetPosition( butt.position );
+                            waveEventEditor = new Layout("WaveEventEditor", 3.5f, 3, 0.25f, 0.1f, waveEventEditorButtons.Count / 2, _container);
+                            waveEventEditor.Add(waveEventEditorButtons, true);
+                            waveEventEditor.SetPosition(butt.position);
 
-                            for ( int j = 0 ; waveEventButtons[ laneIndex ].Count > j ; j++ )
+                            for (int j = 0; waveEventButtons[ laneIndex ].Count > j; j++)
                                 waveEventButtons[ laneIndex ][ j ].Hide();
                         }
 
-                        if ( Input.GetMouseButtonDown( 1 ) )
+                        if (Input.GetMouseButtonDown(1))
                         {
-                            selectedWaveDefinition.Remove( waveEvent );
+                            selectedWaveDefinition.Remove(waveEvent);
                             ShowWaveEventButtons();
                         }
-                    } ,
-                    Exit: ( Button butt ) =>
+                    },
+                    Exit: (Button butt) =>
                     {
-                        if ( heldWaveEvent == null && Input.GetMouseButton( 0 ) )
+                        if (heldWaveEvent == null && Input.GetMouseButton(0))
                         {
-                            heldWaveEvent = new HeldEvent( butt.rect.position , waveEvent , laneIndex );
-                            heldWaveEvent.SetText( index.ToString() );
+                            heldWaveEvent = new HeldEvent(butt.rect.position, waveEvent, laneIndex);
+                            heldWaveEvent.SetText(index.ToString());
                         }
 
-                        butt.SetColor( Color.white );
-                    } ,
-                    Close: ( Button butt ) =>
+                        butt.SetColor(Color.white);
+                    },
+                    Close: (Button butt) =>
                     {
-                        if ( Input.GetMouseButtonDown( 0 ) && butt.selected && ( waveEventEditor == null || !waveEventEditor.containsMouse ) )
+                        if (Input.GetMouseButtonDown(0) && butt.selected && (waveEventEditor == null || !waveEventEditor.containsMouse))
                         {
                             waveEventEditor?.Destroy();
                             waveEventEditor = null;
                             butt.Deselect();
 
-                            for ( int j = 0 ; waveEventButtons[ selectedWaveDefinition.waveEvents[ index ].lane ].Count > j ; j++ )
+                            for (int j = 0; waveEventButtons[ selectedWaveDefinition.waveEvents[ index ].lane ].Count > j; j++)
                                 waveEventButtons[ selectedWaveDefinition.waveEvents[ index ].lane ][ j ].Show();
                         }
-                    } );
+                    });
 
                 waveEventButtons[ laneIndex ].Add( button );
                 waveEventLayouts[ laneIndex ].Add( button );
@@ -195,39 +204,29 @@ public class WaveEditor
 
     public void HideWaveEventButtons()
     {
-        for ( int i = 0 ; waveEventLayouts.Count > i ; i++ )
+        for ( int i = 0 ; waveEventLayouts.Count > i ; i++)
+        {
+            Remove(waveEventLayouts[ i ]);
             waveEventLayouts[ i ].Destroy();
+        }
 
         waveEventLayouts.Clear();
     }
 
-    public void HideWaveDefinitions()
-    {
-        _waveDefinitionLayout?.Destroy();
-    }
-
-    public void HideWaveSets()
-    {
-        waveSets?.Destroy();
-        waveSets = null;
-    }
-
-    public void Hide()
+    public override void Hide()
     {
         HideWaveEventButtons();
         HideWaveDefinitions();
         HideWaveSets();
     }
 
-    public void Refresh()
+    public override void Refresh()
     {
         Hide();
         Show();
     }
 
     public void SetSelectedWaveDefinition( WaveDefinition selectedWaveDefinition ) => this.selectedWaveDefinition = selectedWaveDefinition;
-
-    public Vector3 position => waveSets.position;
 
     public HeldEvent heldWaveEvent { get; set; }
     public Layout waveSets { get; private set; }
@@ -241,12 +240,10 @@ public class WaveEditor
     private GameObject _container { get; }
     private Editor _editor { get; }
 
-    public WaveEditor( Editor editor )
+    public WaveEditor(Editor editor, GameObject parent = null) : base(typeof(WaveEditor).Name, parent)
     {
         _editor = editor;
         waveEventLayouts = new List<Layout>();
-        _container = new GameObject( "WaveEditor" );
-        _container.transform.SetParent( editor.container.transform );
     }
 }
 #endif //UNITY_EDITOR

@@ -1,21 +1,13 @@
 ﻿#if UNITY_EDITOR
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-public class Editor
+public class Editor : Layout
 {
-    public void Update()
+    public override void Update()
     {
         HandleLaneHover();
-
-        for ( int i = 0 ; _campaignMapButtons.Count > i ; i++ )
-            _campaignMapButtons[ i ].Update();
-
-        //best argument ever for making some kind of screen or layout container
-        for (int i = 0; _campaignMapButtons.Count > i; i++)
-            _campaignMapButtons[ i ].LateUpdate();
 
         _level?.Update();
         stage?.Update();
@@ -104,13 +96,7 @@ public class Editor
                 _itemTime = stage.conveyor.AddItemToConveyor( new Inventory() );
         }
 
-        _saveButton.Update();
-        _testButton.Update();
-        waveEditor.Update();
-        missionEditor.Update();
-        timelineEditor.Update();
-        campaignEditor.Update();
-        stageEditor.Update();
+        base.Update();
     }
 
     private void HandleLaneHover()
@@ -181,20 +167,20 @@ public class Editor
         for ( int i = 0 ; campaignMap.tileMap.count > i ; i++ )
         {
             int index = i;
-            Button button = new Button( "CampaignMap" + index , campaignEditor.selectedCampaign.Has( index ) ? campaignEditor.selectedCampaign.Get( index ).name : index.ToString() , campaignMap.tileMap.tileWidth - 1 , campaignMap.tileMap.tileHeight * 0.5f , campaignEditor.container ,
-                Enter: ( Button b ) => b.SetColor( b.selected ? b.color : Color.green ) ,
-                Stay: ( Button b ) =>
+            Button button = new Button(campaignEditor.selectedCampaign.Has(index) ? campaignEditor.selectedCampaign.Get(index).name : index.ToString(), campaignMap.tileMap.tileWidth - 1, campaignMap.tileMap.tileHeight * 0.5f, container, "CampaignMap" + index,
+                Enter: (Button b) => b.SetColor(b.selected ? b.color : Color.green),
+                Stay: (Button b) =>
                 {
-                    if ( Input.GetMouseButtonDown( 0 ) )
+                    if (Input.GetMouseButtonDown(0))
                     {
-                        if ( campaignEditor.selectedCampaign.Has( index ) )
+                        if (campaignEditor.selectedCampaign.Has(index))
                         {
-                            missionEditor.SetSelectedMission( campaignEditor.selectedCampaign.Get( index ) );
+                            missionEditor.SetSelectedMission(campaignEditor.selectedCampaign.Get(index));
 
-                            if ( missionEditor.selectedMission.stageDefinition != null )
+                            if (missionEditor.selectedMission.stageDefinition != null)
                             {
-                                stageEditor.SetSelectedStageDefinition( missionEditor.selectedMission.stageDefinition );
-                                ShowStage( missionEditor.selectedMission.stageDefinition );
+                                stageEditor.SetSelectedStageDefinition(missionEditor.selectedMission.stageDefinition);
+                                ShowStage(missionEditor.selectedMission.stageDefinition);
                             }
 
                             stageEditor.Show();
@@ -208,50 +194,54 @@ public class Editor
                         }
                         else
                         {
-                            missionEditor.ShowMissionSets( index , b.position + new Vector3( b.width * 0.5f , 0 , b.height * 0.5f ) );
-                            b.SetColor( Color.yellow );
+                            missionEditor.ShowMissionSets(index, b.position + new Vector3(b.width * 0.5f, 0, b.height * 0.5f));
+                            b.SetColor(Color.yellow);
                             b.Select();
                         }
                     }
 
-                    if ( Input.GetMouseButtonDown( 1 ) && campaignEditor.selectedCampaign.Has( index ) )
+                    if (Input.GetMouseButtonDown(1) && campaignEditor.selectedCampaign.Has(index))
                     {
-                        Debug.Log( index );
+                        Debug.Log(index);
                         //ok, so the problem is that it's the same damn instance!
                         //that's ... uh, gonna be a bit of a bitch to work around
                         //some kind of double bookkeeping required that I'm too tired to handle now
                         //but at least hey, that's it -- when looking up the index and removing the instance, it finds the other identical instance, because it's the same in both
                         //duh
-                        campaignEditor.selectedCampaign.Remove( campaignEditor.selectedCampaign.Get( index ) );
+                        campaignEditor.selectedCampaign.Remove(campaignEditor.selectedCampaign.Get(index));
                         ShowCampaignMap();
                     }
-                } ,
-                Exit: ( Button b ) => b.SetColor( b.selected ? b.color : Color.white ) ,
-                Close: ( Button b ) =>
+                },
+                Exit: (Button b) => b.SetColor(b.selected ? b.color : Color.white),
+                Close: (Button b) =>
                 {
-                    if ( b.selected && ( Input.GetMouseButtonDown( 0 ) || Input.GetMouseButtonDown( 1 ) ) && ( missionEditor.missionSets == null || !missionEditor.missionSets.containsMouse ) && ( missionEditor.missions == null || !missionEditor.missions.containsMouse ) )
+                    if (b.selected && (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1)) && (missionEditor.missionSets == null || !missionEditor.missionSets.containsMouse) && (missionEditor.missions == null || !missionEditor.missions.containsMouse))
                     {
                         b.Deselect();
-                        b.SetColor( Color.white );
+                        b.SetColor(Color.white);
                         missionEditor.HideMissions();
                         missionEditor.HideMissionSets();
                     }
-                } );
+                });
 
             button.SetPosition( campaignMap.tileMap.PositionOf( index ) );
             _campaignMapButtons.Add( button );
+            Add(button);
         }
     }
 
     public void HideCampaignMap()
     {
-        for ( int i = 0 ; _campaignMapButtons.Count > i ; i++ )
+        for ( int i = 0 ; _campaignMapButtons.Count > i ; i++)
+        {
+            Remove(_campaignMapButtons[ i ]);
             _campaignMapButtons[ i ].Destroy();
+        }
 
         _campaignMapButtons.Clear();
     }
 
-    public void Refresh()
+    public override void Refresh()
     {
         ShowCampaignMap();
     }
@@ -264,7 +254,6 @@ public class Editor
     public Vector3 mousePosition => Camera.main.ScreenToWorldPoint( new Vector3( Input.mousePosition.x , Input.mousePosition.y , Camera.main.transform.position.y ) );
     public CampaignMap campaignMap { get; private set; }
     public Stage stage { get; private set; }
-    public GameObject container { get; }
 
     public CampaignData campaignData { get; }
     public StageData stageData { get; }
@@ -287,7 +276,7 @@ public class Editor
     private const string _stageDataPath = "Assets/AssetBundleSource/Stages/";
     private const string _waveDataPath = "Assets/AssetBundleSource/Waves/";
 
-    public Editor()
+    public Editor(GameObject parent) : base("Editor", parent)
     {
         waveData = Load<WaveData>( _waveDataPath );
         stageData = Load<StageData>( _stageDataPath );
@@ -303,35 +292,34 @@ public class Editor
             campaignData = Create<CampaignData>( _campaignDataPath );
 
         _campaignMapButtons = new List<Button>();
-        container = new GameObject( "Editor" );
 
-        _testButton = new Button( "Test" , "Test" , 1.5f , 0.5f , container ,
-            fontSize: 20 ,
-            Enter: ( Button button ) => button.SetColor( stage != null && missionEditor.selectedMission != null ? Color.green : button.color ) ,
-            Stay: ( Button button ) =>
+        Add(_testButton = new Button("Test", 1.5f, 0.5f, container, "Test",
+            fontSize: 20,
+            Enter: (Button button) => button.SetColor(stage != null && missionEditor.selectedMission != null ? Color.green : button.color),
+            Stay: (Button button) =>
             {
-                if ( stage != null && missionEditor.selectedMission != null && Input.GetMouseButtonDown( 0 ) )
+                if (stage != null && missionEditor.selectedMission != null && Input.GetMouseButtonDown(0))
                 {
-                    if ( _level == null )
+                    if (_level == null)
                     {
                         stage.conveyor.Show();
-                        _level = new Level( missionEditor.selectedMission.duration , showProgress: false );
+                        _level = new Level(missionEditor.selectedMission.duration, showProgress: false);
 
-                        for ( int i = 0 ; missionEditor.selectedMission.waveDefinitions.Count > i ; i++ )
+                        for (int i = 0; missionEditor.selectedMission.waveDefinitions.Count > i; i++)
                         {
-                            Wave wave = new Wave( missionEditor.selectedMission.waveTimes[ i ] * missionEditor.selectedMission.duration , stage );
-                            _level.Add( wave );
+                            Wave wave = new Wave(missionEditor.selectedMission.waveTimes[ i ] * missionEditor.selectedMission.duration, stage);
+                            _level.Add(wave);
 
-                            for ( int j = 0 ; missionEditor.selectedMission.waveDefinitions[ i ].waveEvents.Count > j ; j++ )
-                                switch ( ( WaveEvent.Type ) missionEditor.selectedMission.waveDefinitions[ i ].waveEvents[ j ].type )
+                            for (int j = 0; missionEditor.selectedMission.waveDefinitions[ i ].waveEvents.Count > j; j++)
+                                switch ((WaveEvent.Type) missionEditor.selectedMission.waveDefinitions[ i ].waveEvents[ j ].type)
                                 {
                                     case WaveEvent.Type.SpawnEnemy:
-                                        wave.Add( new SpawnEnemyEvent( Definitions.Enemy( Definitions.Enemies.Default ) , missionEditor.selectedMission.waveDefinitions[ i ].waveEvents[ j ] ) );
+                                        wave.Add(new SpawnEnemyEvent(Definitions.Enemy(Definitions.Enemies.Default), missionEditor.selectedMission.waveDefinitions[ i ].waveEvents[ j ]));
                                         break;
                                 }
                         }
 
-                        button.SetLabel( "Stop" );
+                        button.SetLabel("Stop");
                         waveEditor.HideWaveEventButtons();
                     }
                     else
@@ -339,7 +327,7 @@ public class Editor
                         stage.ClearLanes();
                         stage.conveyor.Hide();
                         stage.conveyor.Clear();
-                        button.SetLabel( "Test" );
+                        button.SetLabel("Test");
                         _level.DestroyProgress();
                         _heldItem = null;
                         _level = null;
@@ -348,29 +336,29 @@ public class Editor
                         waveEditor.ShowWaveEventButtons();
                     }
                 }
-            } ,
-            Exit: ( Button button ) => button.SetColor( Color.white ) );
+            },
+            Exit: (Button button) => button.SetColor(Color.white)));
 
         _testButton.SetViewportPosition( new Vector2( 1 , 1 ) );
         _testButton.SetPosition( _testButton.position + ( Vector3.left * _testButton.width ) + Vector3.up );
 
-        _saveButton = new Button( "Save" , "Save" , 1.5f , 0.5f , container ,
-            fontSize: 20 ,
-            Enter: ( Button button ) => button.SetColor( Color.green ) ,
-            Stay: ( Button button ) =>
+        Add( _saveButton = new Button("Save", 1.5f, 0.5f, container, "Save",
+            fontSize: 20,
+            Enter: (Button button) => button.SetColor(Color.green),
+            Stay: (Button button) =>
             {
-                if ( Input.GetMouseButtonDown( 0 ) )
+                if (Input.GetMouseButtonDown(0))
                     ScriptableObjects.Save();
-            } ,
-            Exit: ( Button button ) => button.SetColor( Color.white ) );
+            },
+            Exit: (Button button) => button.SetColor(Color.white)));
 
         _saveButton.SetPosition( _testButton.position + Vector3.left * ( _saveButton.width ) );
 
-        campaignEditor = new CampaignEditor( this , Vector3.zero );
-        timelineEditor = new TimelineEditor(this);
-        missionEditor = new MissionEditor( this );
-        stageEditor = new StageEditor( this );
-        waveEditor = new WaveEditor( this );
+        Add(campaignEditor = new CampaignEditor( this , Vector3.zero , container));
+        Add(timelineEditor = new TimelineEditor(this, container));
+        Add(missionEditor = new MissionEditor( this, container));
+        Add(stageEditor = new StageEditor( this, container));
+        Add(waveEditor = new WaveEditor( this, container));
 
         campaignEditor.ShowCampaignSets();
         campaignEditor.ShowCampaignEditor();

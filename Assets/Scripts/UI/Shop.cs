@@ -206,7 +206,7 @@ public class UpgradeElement : Layout
 {
     public UpgradeElement( string name , float width , float height , Color color , GameObject parent , Action<Button> Enter = null , Action<Button> Stay = null , Action<Button> Exit = null ) : base( "Upgrade" + name , width , height , 0 , 0 , 1 )
     {
-        Add( new Button( "Upgrade" + name , "Upgrade\n" + name , width - 1 , height - 1 , parent , Enter , Stay , Exit ) );
+        Add( new Button("Upgrade\n" + name, width - 1, height - 1, parent, "Upgrade" + name, Enter, Stay, Exit));
         container.transform.SetParent( parent.transform );
         quad.material.color = color;
     }
@@ -216,7 +216,7 @@ public class BuyElement : Layout
 {
     public BuyElement( string name , float width , float height , Color color , GameObject parent , Action<Button> Enter , Action<Button> Stay , Action<Button> Exit ) : base( "Buy" + name , width , height , 0 , 0 , 1 )
     {
-        Add( new Button( "Buy" + name , "Buy\n" + name , width - 1 , height - 1 , parent , Enter , Stay , Exit ) );
+        Add( new Button("Buy\n" + name, width - 1, height - 1, parent, "Buy" + name, Enter, Stay, Exit));
         container.transform.SetParent( parent.transform );
         quad.material.color = color;
     }

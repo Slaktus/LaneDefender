@@ -24,7 +24,7 @@ public class Entry : MonoBehaviour
 #if !UNITY_EDITOR
         StartSession( new Player() );
 #else
-        neoEditor = new Editor();
+        neoEditor = new Editor(gameObject);
         //missionEditor = new MissionEditor();
         //campaignEditor = new CampaignEditor();
         //editor = new Editor();

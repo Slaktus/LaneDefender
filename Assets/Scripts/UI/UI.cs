@@ -97,7 +97,7 @@ public class Field : Button
     private EditMode _editMode { get; }
     private bool _click;
 
-    public Field( string name , string label , float width , float height , int fontSize = 35 , GameObject parent = null , ContentMode contentMode = ContentMode.TextAndNumbers , EditMode editMode = EditMode.SingleClick , Action<Field> StartInput = null , Action<Field> EndInput = null ) : base( name , label , width , height , parent , hideQuad: true , fontSize: fontSize )
+    public Field( string name , string label , float width , float height , int fontSize = 35 , GameObject parent = null , ContentMode contentMode = ContentMode.TextAndNumbers , EditMode editMode = EditMode.SingleClick , Action<Field> StartInput = null , Action<Field> EndInput = null ) : base(label, width, height, parent, name, hideQuad: true, fontSize: fontSize)
     {
         this.StartInput = StartInput;
         this.EndInput = EndInput;
@@ -139,7 +139,7 @@ public class Field : Button
     }
 }
 
-public class Button : Element
+public class Button : Panel
 {
     public static List<Button> GetButtons(int count, Func<int, Button> GetButton)
     {
@@ -150,11 +150,8 @@ public class Button : Element
 
         return buttons;
     }
-
-    public override void Destroy()
-    {
-        GameObject.Destroy( container );
-    }
+        
+    public override void Destroy() => GameObject.Destroy(container);
 
     public override void Update()
     {
@@ -182,8 +179,6 @@ public class Button : Element
         }
     }
 
-    public void ShowQuad() => quad.enabled = true;
-    public void HideQuad() => quad.enabled = false;
     public void ShowLabel() => label.Show();
     public void HideLabel() => label.Hide();
 
@@ -218,7 +213,6 @@ public class Button : Element
 
     public bool selected { get; private set; }
 
-    protected MeshRenderer quad { get; set; }
     protected bool hovering { get; set; }
     protected bool closing { get; set; }
     protected Label label { get; set; }
@@ -228,17 +222,13 @@ public class Button : Element
     private Action<Button> Stay { get; set; }
     private Action<Button> Exit { get; set; }
 
-    public Button( string name , string label , float width , float height , GameObject parent , Action<Button> Enter = null , Action<Button> Stay = null , Action<Button> Exit = null , Action<Button> Close = null , bool hideQuad = false , int fontSize = 35 , float characterSize = 0.15f ) : base( name + typeof( Button ).Name , width , height )
+    public Button(string label, float width, float height, GameObject parent, string name = "Button", Action<Button> Enter = null, Action<Button> Stay = null, Action<Button> Exit = null, Action<Button> Close = null, bool hideQuad = false, int fontSize = 35, float characterSize = 0.15f) : base( name , width , height , hideQuad)
     {
         SetClose( Close );
         SetEnter( Enter );
         SetStay( Stay );
         SetExit( Exit );
 
-        quad = GameObject.CreatePrimitive( PrimitiveType.Quad ).GetComponent<MeshRenderer>();
-        quad.transform.SetParent( container.transform );
-        quad.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
-        quad.transform.localScale = new Vector3( width , height , 1 );
         quad.transform.name = "ButtonBG";
 
         if ( parent != null )
@@ -248,9 +238,6 @@ public class Button : Element
         }
 
         this.label = new Label( label , Color.black , width , height , container , fontSize: fontSize, characterSize: characterSize );
-
-        if ( hideQuad )
-            HideQuad();
     }
 }
 
@@ -304,23 +291,18 @@ public class Layout : Panel
 
     public override void Update()
     {
-        for ( int i = 0 ; elements.Count > i ; i++)
-            elements[ i ].Update();
-
-        for (int i = 0; elements.Count > i; i++)
-            elements[ i ].LateUpdate();
+        Updater?.Invoke();
+        LateUpdater?.Invoke();
     }
 
     public override void Destroy()
     {
-        for ( int i = 0 ; elements.Count > i ; i++ )
-            elements[ i ].Destroy();
-
+        Destroyer?.Invoke();
         elements.Clear();
         base.Destroy();
     }
 
-    public void Refresh()
+    public virtual void Refresh()
     {
         if ( constrainElements )
         {
@@ -357,8 +339,13 @@ public class Layout : Panel
 
     public void Add( Element element , bool refresh = false )
     {
-        element.SetParent( container );
-        elements.Add( element );
+        Hider += element.Hide;
+        Shower += element.Show;
+        Updater += element.Update;
+        LateUpdater += element.LateUpdate;
+        Destroyer += element.Destroy;
+        element.SetParent(container);
+        elements.Add(element);
 
         if ( refresh )
             Refresh();
@@ -366,7 +353,13 @@ public class Layout : Panel
 
     public void Remove( Element element , bool refresh = false )
     {
-        elements.Remove( element );
+        Hider -= element.Hide;
+        Shower -= element.Show;
+        Updater -= element.Update;
+        LateUpdater -= element.LateUpdate;
+        Destroyer -= element.Destroy;
+        element.SetParent(container.transform.parent.gameObject);
+        elements.Remove(element);
 
         if ( refresh )
             Refresh();
@@ -390,6 +383,18 @@ public class Layout : Panel
             Refresh();
     }
 
+    public override void Show()
+    {
+        Shower?.Invoke();
+        base.Show();
+    }
+
+    public override void Hide()
+    {
+        Hider?.Invoke();
+        base.Show();
+    }
+
     public Vector3 position => container.transform.position;
     public float padding { get; protected set; }
     public float spacing { get; protected set; }
@@ -397,6 +402,12 @@ public class Layout : Panel
     public bool constrainElements { get; private set; }
 
     protected List<Element> elements { get; set; }
+
+    private event Action Hider;
+    private event Action Shower;
+    private event Action Updater;
+    private event Action LateUpdater;
+    private event Action Destroyer;
 
     public Layout( string name , float width , float height , float padding , float spacing , int rows , GameObject parent = null , bool constrainElements = true ) : base( name , width , height )
     {
@@ -410,7 +421,7 @@ public class Layout : Panel
             SetParent( parent );
     }
 
-    public Layout( string name , GameObject parent = null ) : base( name , 0 , 0 )
+    public Layout( string name , GameObject parent = null ) : base( name , 0 , 0, true )
     {
         constrainElements = false;
         elements = new List<Element>();
@@ -418,19 +429,18 @@ public class Layout : Panel
         if ( parent != null )
             SetParent( parent );
     }
-
 }
 
 public class Panel : Element
 {
-    public override void Show() => quad.enabled = true;
-    public override void Hide() => quad.enabled = false;
+    public void ShowQuad() => quad.enabled = true;
+    public void HideQuad() => quad.enabled = false;
     public override void Destroy() => GameObject.Destroy( container );
     public override void SetLocalScale( Vector3 localScale ) => quad.transform.localScale = localScale;
 
     protected MeshRenderer quad { get; set; }
 
-    public Panel( string name , float width , float height ) : base( name + typeof( Panel ).Name , width , height )
+    public Panel( string name , float width , float height , bool hideQuad = false ) : base( name , width , height )
     {
         quad = GameObject.CreatePrimitive( PrimitiveType.Quad ).GetComponent<MeshRenderer>();
         quad.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
@@ -439,7 +449,10 @@ public class Panel : Element
         quad.transform.SetParent( container.transform );
         quad.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
         quad.transform.localScale = new Vector3( width , height , 1 );
-        quad.transform.name = name + "PanelBG";
+        quad.transform.name = name + "BG";
+
+        if (hideQuad)
+            HideQuad();
     }
 }
 
@@ -452,8 +465,6 @@ public abstract class Element
 
     public abstract void SetLocalScale( Vector3 localScale );
     public abstract void Destroy();
-    public abstract void Show();
-    public abstract void Hide();
 
     public Rect rect => new Rect( container.transform.position.x - ( width * 0.5f ) , container.transform.position.z - ( height * 0.5f ) , width , height );
     public virtual bool Contains( Vector3 position ) => Contains( new Vector2( position.x , position.z ) );
@@ -461,6 +472,8 @@ public abstract class Element
     public virtual bool containsMouse => Contains( mousePos );
     public virtual void LateUpdate() { }
     public virtual void Update() { }
+    public virtual void Show() { }
+    public virtual void Hide() { }
 
     protected Vector3 mousePos => Camera.main.ScreenToWorldPoint( new Vector3( Input.mousePosition.x , Input.mousePosition.y , Camera.main.transform.position.y ) );
     protected GameObject container { get; set; }
