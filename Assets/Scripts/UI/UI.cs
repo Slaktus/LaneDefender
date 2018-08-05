@@ -304,6 +304,8 @@ public class Layout : Panel
 
     public virtual void Refresh()
     {
+        Refresher?.Invoke();
+
         if ( constrainElements )
         {
             int count = elements.Count;
@@ -344,6 +346,10 @@ public class Layout : Panel
         Updater += element.Update;
         LateUpdater += element.LateUpdate;
         Destroyer += element.Destroy;
+
+        if (element is Layout)
+            Refresher += (element as Layout).Refresh;
+
         element.SetParent(container);
         elements.Add(element);
 
@@ -358,6 +364,10 @@ public class Layout : Panel
         Updater -= element.Update;
         LateUpdater -= element.LateUpdate;
         Destroyer -= element.Destroy;
+
+        if (element is Layout)
+            Refresher -= (element as Layout).Refresh;
+
         element.SetParent(container.transform.parent.gameObject);
         elements.Remove(element);
 
@@ -408,6 +418,7 @@ public class Layout : Panel
     private event Action Updater;
     private event Action LateUpdater;
     private event Action Destroyer;
+    private event Action Refresher;
 
     public Layout( string name , float width , float height , float padding , float spacing , int rows , GameObject parent = null , bool constrainElements = true ) : base( name , width , height )
     {

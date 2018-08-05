@@ -10,8 +10,8 @@ public abstract class MouseObject
     public Color color { get { return meshRenderer.material.color; } set { meshRenderer.material.color = value; } }
     public Vector3 position { get { return container.transform.position; } protected set { container.transform.position = value; } }
 
-    protected GameObject quad { get; }
     protected Label label { get; }
+    protected GameObject quad { get; }
     protected GameObject container { get; }
     protected MeshRenderer meshRenderer { get; }
 

@@ -85,11 +85,12 @@ public abstract class LaneObject
     public abstract float front { get; }
     public abstract float back { get; }
 
+    protected Label label { get; }
     protected Lane lane { get; set; }
     protected GameObject cube { get; }
-    protected Label label { get; }
     protected GameObject container { get; }
     protected MeshRenderer meshRenderer { get; }
+
     protected IEnumerator changeLane { get; set; }
     protected IEnumerator pushAhead { get; set; }
     protected IEnumerator pushBack { get; set; }

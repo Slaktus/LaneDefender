@@ -12,15 +12,15 @@ public class StageEditor : Layout
             ShowStageEditor();
     }
 
-    private void ShowStageSets( float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
+    private void ShowStageSets()
     {
         HideStageSets();
         int count = _editor.stageData.stageSets.Count;
-        Add(stageSets = new Layout( "StageSetButtons" , width , height * (count + 2), padding , spacing , count + 2, _container ));
+        Add(stageSets = new Layout( "StageSetButtons" , 3, (count + 2), 0.25f, 0.1f, count + 2, container ));
         stageSets.SetViewportPosition(new Vector2(0, 1));
         stageSets.SetPosition(stageSets.position + Vector3.up);
 
-        stageSets.Add(new List<Button>(Button.GetButtons(count, (int index) => new Button("Stage Set", width, height, _container, "StageSet",
+        stageSets.Add(new List<Button>(Button.GetButtons(count, (int index) => new Button("Stage Set", width, height, container, "StageSet",
             fontSize: 20,
             Enter: (Button button) => button.SetColor(_stages != null && _selectedStageSet == _editor.stageData.stageSets[ index ] ? button.color : Color.green),
             Stay: (Button button) =>
@@ -45,7 +45,7 @@ public class StageEditor : Layout
                 }
             })))
         {
-            new Button( "Add Stage Set" , width , height , _container , "AddStageSet" ,
+            new Button( "Add Stage Set" , width , height , container , "AddStageSet" ,
             fontSize: 20 ,
             Enter: ( Button button ) => button.SetColor( Color.green ) ,
             Stay: ( Button button ) =>
@@ -61,7 +61,7 @@ public class StageEditor : Layout
             } ,
             Exit: ( Button button ) => button.SetColor( Color.white ) ) ,
 
-            new Button( "Back to Campaign" , width , height , _container , "BackToCampaign" , fontSize: 20 ,
+            new Button( "Back to Campaign" , width , height , container , "BackToCampaign" , fontSize: 20 ,
             Enter: ( Button button ) => button.SetColor( Color.green ) ,
             Stay: ( Button button ) =>
             {
@@ -96,9 +96,9 @@ public class StageEditor : Layout
     {
         HideStageDefinitions();
         int count = _selectedStageSet.stageDefinitions.Count;
-        Add(_stages = new Layout("StageDefinitionButtons", width, height * (count + 1), padding, spacing, count + 1, _container));
+        Add(_stages = new Layout("StageDefinitionButtons", width, height * (count + 1), padding, spacing, count + 1, container));
         _stages.SetPosition(position + (Vector3.right * width) + (Vector3.back * ((height * (count ) * 0.5f) + (padding * 0.5f))));
-        _stages.Add(new List<Button>(Button.GetButtons(count, (int index) => new Button("Stage Definition", width, height, _container, "StageDefinition",
+        _stages.Add(new List<Button>(Button.GetButtons(count, (int index) => new Button("Stage Definition", width, height, container, "StageDefinition",
             fontSize: 20,
             Enter: (Button button) => button.SetColor(Color.green),
             Stay: (Button button) =>
@@ -123,7 +123,7 @@ public class StageEditor : Layout
             },
             Exit: (Button button) => button.SetColor(Color.white))))
         {
-            new Button( "Add Stage\nDefinition" , width , height , _container , "AddStageDefinition" ,
+            new Button( "Add Stage\nDefinition" , width , height , container , "AddStageDefinition" ,
             fontSize: 20 ,
             Enter: ( Button button ) => button.SetColor( Color.green ) ,
             Stay: ( Button button ) =>
@@ -150,40 +150,40 @@ public class StageEditor : Layout
     public void ShowStageEditor()
     {
         HideStageEditor();
-        Add(stageEditorLayout = new Layout( "StageEditor" , 3 , 4 , 0.25f , 0.1f , 5 , _container ));
+        Add(stageEditorLayout = new Layout( "StageEditor" , 3 , 4 , 0.25f , 0.1f , 5 , container ));
         stageEditorLayout.SetPosition(stageSets.position + (Vector3.back * (stageSets.height + stageEditorLayout.height) * 0.5f));
         stageEditorLayout.Add(new List<Element>()
         {
-            new Label( "Lanes:" , Color.black , 1.25f , 0.5f , _container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
-            new Field( "Lanes" , selectedStageDefinition.laneCount.ToString() , 2 , 0.5f , 20 , _container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
+            new Label( "Lanes:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
+            new Field( "Lanes" , selectedStageDefinition.laneCount.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
             {
                 int.TryParse( field.label.text , out selectedStageDefinition.laneCount );
                 Refresh();
             } ) ,
 
-            new Label( "Width:" , Color.black , 1.25f , 0.5f , _container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
-            new Field( "Width" , selectedStageDefinition.width.ToString() , 2 , 0.5f , 20 , _container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
+            new Label( "Width:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
+            new Field( "Width" , selectedStageDefinition.width.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
             {
                 float.TryParse( field.label.text , out selectedStageDefinition.width );
                 Refresh();
             } ) ,
 
-            new Label( "Height:" , Color.black , 1.25f , 0.5f , _container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
-            new Field( "Height" , selectedStageDefinition.height.ToString() , 2 , 0.5f , 20 , _container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
+            new Label( "Height:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
+            new Field( "Height" , selectedStageDefinition.height.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
             {
                 float.TryParse( field.label.text , out selectedStageDefinition.height );
                 Refresh();
             } ) ,
 
-            new Label( "Spacing:" , Color.black , 1.25f , 0.5f , _container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
-            new Field( "Spacing" , selectedStageDefinition.laneSpacing.ToString() , 2 , 0.5f , 20 , _container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
+            new Label( "Spacing:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
+            new Field( "Spacing" , selectedStageDefinition.laneSpacing.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
             {
                 float.TryParse( field.label.text , out selectedStageDefinition.laneSpacing );
                 Refresh();
             } ) ,
 
-            new Label( "Speed:" , Color.black , 1.25f , 0.5f , _container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
-            new Field( "Speed" , selectedStageDefinition.speed.ToString() , 2 , 0.5f , 20 , _container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
+            new Label( "Speed:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
+            new Field( "Speed" , selectedStageDefinition.speed.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) =>
             {
                 float.TryParse( field.label.text , out selectedStageDefinition.speed );
                 Refresh();
@@ -224,7 +224,6 @@ public class StageEditor : Layout
     public Layout stageSets { get; private set; }
 
     private Editor _editor { get; }
-    private GameObject _container { get; }
     private StageSet _selectedStageSet { get; set; }
     private Layout _stages { get; set; }
 

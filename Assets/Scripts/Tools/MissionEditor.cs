@@ -147,7 +147,6 @@ public class MissionEditor : Layout
     public MissionDefinition selectedMission { get; private set; }
     public Layout missionSets { get; private set; }
     public Layout missions { get; private set; }
-    public GameObject container { get; }
 
     private Editor _editor { get; }
     private Layout _missionEditorLayout { get; set; }
