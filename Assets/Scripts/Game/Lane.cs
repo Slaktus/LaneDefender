@@ -2,38 +2,26 @@
 using UnityEngine;
 using System;
 
-/// <summary>
-/// Lanes hold items and eventually much, much more
-/// </summary>
 public class Lane
 {
-    /// <summary>
-    /// Updates all the items on this lane
-    /// </summary>
-    public void Update() => Updater();
+    public void Update() => Updater?.Invoke();
 
     public T Add<T>( T laneObject ) where T : LaneObject
     {
-        Updater += laneObject.update.MoveNext;
+        Updater += laneObject.Update;
         objects.Add( laneObject );
         return laneObject;
     }
 
     public void Remove<T>( T laneObject ) where T : LaneObject
     {
-        Updater -= laneObject.update.MoveNext;
+        Updater -= laneObject.Update;
         objects.Remove( laneObject );
     }
 
     public void Show() => _quad.SetActive( true );
     public void Hide() => _quad.SetActive( false );
 
-    /// <summary>
-    /// Check if the lane's rect contains a world-space position
-    /// The position is projected to 2D
-    /// </summary>
-    /// <param name="position">Position to check</param>
-    /// <returns>True if the rect contains the point, false if not</returns>
     public bool Contains( Vector3 position ) => _rect.Contains( new Vector2( position.x , position.z ) );
 
     public int Count<T>()
@@ -81,21 +69,13 @@ public class Lane
     public Stage stage { get; }
     public List<LaneObject> objects { get; }
 
-    /// <summary>
-    /// Why a rect? Why not a collider like the ground plane?
-    /// Because this has way, way, waaaay fewer moving parts and much fewer things that can go wrong
-    /// Since all the mouse positions we want are on the same plane, we can project them to 2D
-    /// Rects are fast, and best of all -- they're structs, so we can create and discard them willy-nilly!
-    /// </summary>
     private Rect _rect { get; set; }
     private GameObject _quad { get; }
     private MeshRenderer _meshRenderer { get; }
-    private event Func<bool> Updater;
+    private event Action Updater;
 
     public Lane( Stage stage , float depth , float width , float height , string name , GameObject parent )
     {
-        Updater += () => false;
-
         this.stage = stage;
         objects = new List<LaneObject>();
         _rect = new Rect( 0 , -depth , width , height );

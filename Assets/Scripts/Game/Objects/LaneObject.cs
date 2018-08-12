@@ -1,10 +1,8 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public abstract class LaneObject
+public abstract class LaneObject : BaseObject
 {
-    public abstract IEnumerator Update();
-
     public IEnumerator Enter( float entryPoint )
     {
         bool interrupt = false;
@@ -56,40 +54,17 @@ public abstract class LaneObject
         changeLane = null;
     }
 
-    /// <summary>
-    /// Remove the item from the lane then destroy the scene graph representation
-    /// </summary>
-    public virtual void Destroy()
+    public override void Destroy()
     {
         lane.Remove( this );
         GameObject.Destroy( container );
     }
 
-    public bool Contains( Vector3 position ) => rect.Contains( new Vector2( position.x , position.z ) );
-
-    public IEnumerator update { get; private set; }
-
-    public float top => rect.yMax;
-    public float bottom => rect.yMin;
-    public bool valid => container != null;
-    public Vector3 topPoint => new Vector3( rect.center.x , 0 , top );
-    public Vector3 backPoint => new Vector3( back , 0 , rect.center.y );
-    public Vector3 frontPoint => new Vector3( front , 0 , rect.center.y );
-    public Vector3 bottomPoint => new Vector3( rect.center.x , 0 , bottom );
-    public bool overlap => overlapping != null && Mathf.Approximately( cube.transform.localPosition.y , 0 );
-    public Rect rect => new Rect( position.x - ( scale.x * 0.5f ) , position.z - ( scale.z * 0.5f ) , scale.x , scale.z );
-    public Vector3 scale { get { return cube.transform.localScale; } protected set { cube.transform.localScale = value; } }
-    public Vector3 position { get { return container.transform.position; } protected set { container.transform.position = value; } }
+    public bool overlap => overlapping != null && Mathf.Approximately( body.transform.localPosition.y , 0 );
 
     public abstract LaneEntity overlapping { get; }
-    public abstract float front { get; }
-    public abstract float back { get; }
 
-    protected Label label { get; }
     protected Lane lane { get; set; }
-    protected GameObject cube { get; }
-    protected GameObject container { get; }
-    protected MeshRenderer meshRenderer { get; }
 
     protected IEnumerator changeLane { get; set; }
     protected IEnumerator pushAhead { get; set; }
@@ -102,21 +77,9 @@ public abstract class LaneObject
     protected abstract float start { get; }
     protected abstract float end { get; }
 
-    public LaneObject( string containerName , Lane lane , float speed = 0 )
+    public LaneObject(string name, Lane lane, float speed = 0) : base(name, GameObject.CreatePrimitive(PrimitiveType.Cube))
     {
-        update = Update();
         this.lane = lane;
         this.speed = speed;
-        container = new GameObject( containerName );
-
-        cube = GameObject.CreatePrimitive( PrimitiveType.Cube );
-        cube.transform.SetParent( container.transform );
-        cube.transform.localRotation = Quaternion.identity;
-
-        meshRenderer = cube.GetComponent<MeshRenderer>();
-        meshRenderer.material = Entry.instance.unlitColor;
-
-        label = new Label( string.Empty , Color.black , 1 , 1 , container );
-        label.SetLocalRotation( Quaternion.Euler( 90 , 0 , 0 ) );
     }
 }

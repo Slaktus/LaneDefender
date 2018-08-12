@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class HeldEvent : MouseObject
+public class HeldEvent : BaseObject
 {
     public override void Destroy()
     {
@@ -14,10 +14,10 @@ public class HeldEvent : MouseObject
     public WaveEventDefinition waveEventDefinition { get; private set; }
     public int laneIndex { get; }
 
-    public HeldEvent( Vector3 position , WaveEventDefinition waveEventDefinition , int laneIndex ) : base( "Held" + waveEventDefinition.type.ToString() )
+    public HeldEvent(Vector3 position, WaveEventDefinition waveEventDefinition, int laneIndex) : base("Held" + waveEventDefinition.type.ToString(), GameObject.CreatePrimitive(PrimitiveType.Quad))
     {
         container.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
-        quad.transform.localRotation = Quaternion.identity;
+        body.transform.localRotation = Quaternion.identity;
         meshRenderer.material.color = Color.white;
 
         label.SetLocalRotation( Quaternion.identity );

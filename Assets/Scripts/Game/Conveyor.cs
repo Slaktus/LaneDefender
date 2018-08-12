@@ -1,21 +1,12 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Conveyor keeps and updates conveyor items, as well as managing item match-three logic
-/// </summary>
 public class Conveyor
 {
-    /// <summary>
-    /// Updates all the items on the conveyor
-    /// Should strictly speaking be an event, but right now this is safe
-    /// </summary>
     public void Update()
     {
-        //Check all the items on the conveyor for match-three
         for ( int i = 0 ; _conveyorItems.Count > i ; i++ )
         {
-            //If the conveyor item is part of a match-three, upgrade it and clean up the two other items
             if ( _conveyorItems[ i ].matchThree )
             {
                 ItemAt( i + 2 ).Destroy();
@@ -23,15 +14,11 @@ public class Conveyor
                 _conveyorItems[ i ].PowerUp();
             }
 
-            //Update the conveyor item
             _conveyorItems[ i ].Update();
+            Debug.Log(i + " update");
         }
     }
 
-    /// <summary>
-    /// Add an item to the conveyor
-    /// </summary>
-    /// <returns></returns>
     public float AddItemToConveyor( Inventory inventory )
     {
         if ( _itemLimit > _conveyorItems.Count )
@@ -43,11 +30,6 @@ public class Conveyor
         return Time.time + itemInterval;
     }
 
-    /// <summary>
-    /// Returns a reference to a hovered conveyor item
-    /// </summary>
-    /// <param name="position"></param>
-    /// <returns></returns>
     public ConveyorItem GetHoveredItem( Vector3 position )
     {
         for ( int i = 0 ; _conveyorItems.Count > i ; i++ )
@@ -57,11 +39,6 @@ public class Conveyor
         return null;
     }
 
-    /// <summary>
-    /// Set color of all items except optional
-    /// </summary>
-    /// <param name="color">Color to apply</param>
-    /// <param name="except">Item to except</param>
     public void SetItemColor( Color color , ConveyorItem except = null )
     {
         for ( int i = 0 ; _conveyorItems.Count > i ; i++ )
@@ -84,44 +61,16 @@ public class Conveyor
         GameObject.Destroy( _quad );
     }
 
-    /// <summary>
-    /// Set the speed at which items travel down the conveyor
-    /// </summary>
-    /// <param name="speed">Speed at which items move down the conveyor</param>
     public void SetSpeed( float speed ) => this.speed = speed;
 
-    /// <summary>
-    /// Set the interval at which items spawn at the top of the conveyor
-    /// </summary>
-    /// <param name="itemInterval">Interval at which to spawn items</param>
     public void SetItemInterval( float itemInterval ) => this.itemInterval = itemInterval;
 
-    /// <summary>
-    /// Remove an item from the conveyor
-    /// </summary>
-    /// <param name="item">Item to remove</param>
     public void RemoveItemFromConveyor( ConveyorItem item ) => _conveyorItems.Remove( item );
 
-    /// <summary>
-    /// Check if the item's rect contains a world-space position
-    /// The position is projected to 2D
-    /// </summary>
-    /// <param name="position">Position to check</param>
-    /// <returns>True if the rect contains the point, false if not</returns>
     public bool Contains( Vector3 position ) => _rect.Contains( new Vector2( position.x , position.z ) );
 
-    /// <summary>
-    /// Get the index of a conveyor item
-    /// </summary>
-    /// <param name="conveyorItem">The item to return the index of</param>
-    /// <returns>The index of the item</returns>
     public int IndexOf( ConveyorItem conveyorItem ) => _conveyorItems.IndexOf( conveyorItem );
 
-    /// <summary>
-    /// Get the conveyor item at given index
-    /// </summary>
-    /// <param name="index">The index of the item to return</param>
-    /// <returns>The item at the index</returns>
     public ConveyorItem ItemAt( int index ) => _conveyorItems[ index ];
 
     public int itemCount => _conveyorItems.Count;

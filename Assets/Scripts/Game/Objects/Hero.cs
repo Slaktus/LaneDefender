@@ -4,12 +4,9 @@ using UnityEngine;
 
 public class Hero : LaneEntity
 {
-    /// <summary>
-    /// Updates the item's position, cleaning it up if it reaches the end of the lane
-    /// </summary>
-    public override IEnumerator Update()
+    public override void Update()
     {
-        while ( container != null )
+        if ( container != null )
         {
             if ( overlap )
                 Interaction( overlapping );
@@ -27,8 +24,6 @@ public class Hero : LaneEntity
 
             if ( destroy )
                 Destroy();
-
-            yield return null;
         }
     }
     public Color color { get { return meshRenderer.material.color; } set { meshRenderer.material.color = value; } }

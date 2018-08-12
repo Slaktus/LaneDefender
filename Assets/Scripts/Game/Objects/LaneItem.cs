@@ -1,39 +1,28 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-/// <summary>
-/// Items travelling down lanes. Will eventually interact with many, many other items
-/// </summary>
 public class LaneItem : LaneObject
 {
-    /// <summary>
-    /// Updates the item's position, cleaning it up if it reaches the end of the lane
-    /// </summary>
-    public override IEnumerator Update()
+    public override void Update()
     {
         bool move = true;
 
-        while ( true )
-        {
-            if ( changeLane != null )
-                move = !changeLane.MoveNext();
+        if ( changeLane != null )
+            move = !changeLane.MoveNext();
 
-            float x = position.x - ( ( speed * Time.deltaTime ) * ( move ? 1 : 0 ) );
-            bool destroy = end + ( cube.transform.localScale.x * 0.5f ) > x;
-            position = new Vector3( Mathf.Clamp( x , end + ( scale.x * 0.5f ) , start - ( scale.x * 0.5f ) ) , position.y , position.z );
-            Debug.DrawLine( new Vector3( rect.xMin , 0 , rect.yMin ) , new Vector3( rect.xMax , 0 , rect.yMax ) , Color.yellow );
+        float x = position.x - ( ( speed * Time.deltaTime ) * ( move ? 1 : 0 ) );
+        bool destroy = end + ( body.transform.localScale.x * 0.5f ) > x;
+        position = new Vector3( Mathf.Clamp( x , end + ( scale.x * 0.5f ) , start - ( scale.x * 0.5f ) ) , position.y , position.z );
+        Debug.DrawLine( new Vector3( rect.xMin , 0 , rect.yMin ) , new Vector3( rect.xMax , 0 , rect.yMax ) , Color.yellow );
 
-            if ( leap != null )
-                leap.MoveNext();
+        if ( leap != null )
+            leap.MoveNext();
 
-            if ( overlap )
-                overlapping.Interaction( this );
+        if ( overlap )
+            overlapping.Interaction( this );
 
-            if ( destroy )
-                Destroy();
-
-            yield return null;
-        }
+        if ( destroy )
+            Destroy();
     }
 
     public void Split()
@@ -61,12 +50,12 @@ public class LaneItem : LaneObject
 
     private IEnumerator Leap( LaneEntity laneEntity )
     {
-        cube.transform.localPosition = Vector3.up;
+        body.transform.localPosition = Vector3.up;
 
         while ( laneEntity.valid && back > laneEntity.back )
             yield return null;
 
-        cube.transform.localPosition = Vector3.zero;
+        body.transform.localPosition = Vector3.zero;
     }
 
     public override LaneEntity overlapping
@@ -98,18 +87,18 @@ public class LaneItem : LaneObject
 
     public LaneItem( HeldItem heldItem , Lane lane ) : base( "Lane" + heldItem.conveyorItem.type.ToString() , lane )
     {
-        cube.transform.localScale = new Vector3( heldItem.conveyorItem.width , 1 , heldItem.conveyorItem.height );
+        body.transform.localScale = new Vector3( heldItem.conveyorItem.width , 1 , heldItem.conveyorItem.height );
 
         meshRenderer.material.color = Color.white;
         label.SetText( heldItem.conveyorItem.text );
 
-        position = lane.end + ( Vector3.up * 0.5f ) + ( Vector3.left * cube.transform.localScale.x * 0.5f );
+        position = lane.end + ( Vector3.up * 0.5f ) + ( Vector3.left * body.transform.localScale.x * 0.5f );
         this.heldItem = heldItem;
     }
 
     public LaneItem( Lane lane , string name , float width , float height , Vector3 position ) : base( "Lane" + name , lane )
     {
-        cube.transform.localScale = new Vector3( width , 1 , height );
+        body.transform.localScale = new Vector3( width , 1 , height );
 
         meshRenderer.material.color = Color.grey;
         label.SetColor( Color.white );

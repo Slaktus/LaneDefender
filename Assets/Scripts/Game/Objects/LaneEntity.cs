@@ -3,14 +3,11 @@ using UnityEngine;
 
 public class LaneEntity : LaneObject
 {
-    /// <summary>
-    /// Updates the item's position, cleaning it up if it reaches the end of the lane
-    /// </summary>
-    public override IEnumerator Update()
+    public override void Update()
     {
         bool move = true;
 
-        while ( container != null )
+        if ( container != null )
         {
             if ( overlap )
                 Interaction( overlapping );
@@ -28,13 +25,11 @@ public class LaneEntity : LaneObject
                 move = !enter.MoveNext();
 
             float x = position.x + ( ( speed * Time.deltaTime ) * ( move ? 1 : 0 ) );
-            bool destroy = x > lane.end.x - ( cube.transform.localScale.x * 0.5f ) || 0 >= health;
+            bool destroy = x > lane.end.x - ( body.transform.localScale.x * 0.5f ) || 0 >= health;
             position = new Vector3( Mathf.Clamp( x , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
 
             if ( destroy )
                 Destroy();
-
-            yield return null;
         }
     }
 
@@ -240,9 +235,9 @@ public class LaneEntity : LaneObject
 
     public LaneEntity( string name , float speed , float width , float laneHeightPadding , int health , int value , Lane lane ) : base( "Lane" + name , lane , speed )
     {
-        cube.transform.localScale = new Vector3( width , 1 , lane.height - laneHeightPadding );
+        body.transform.localScale = new Vector3( width , 1 , lane.height - laneHeightPadding );
 
-        position = lane.start + ( Vector3.up * 0.5f ) + ( Vector3.right * cube.transform.localScale.x * 0.5f );
+        position = lane.start + ( Vector3.up * 0.5f ) + ( Vector3.right * body.transform.localScale.x * 0.5f );
         meshRenderer.material.color = Color.white;
         label.SetText( name );
 

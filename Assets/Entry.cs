@@ -1,23 +1,10 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-/// <summary>
-/// Entry point sets up and updates session, keeps a naive Singleton-ish reference to self and temporarily holds asset references
-/// MonoBehaviour is Unity's scriptable component base class. Its most important for catching events and running co-routines
-/// MonoBehaviours are not thread-safe (nor is the UnityEngine API)
-/// </summary>
 public class Entry : MonoBehaviour
 {
-    /// <summary>
-    /// Placeholder material, temporary scene reference until assets are properly handled
-    /// </summary>
     public Material unlitColor;
 
-    /// <summary>
-    /// Sets up session and stores static instance to self
-    /// Start is a special MonoBehaviour method that gets called on the frame the GameObject the MonoBehaviour is attached to gets added to the scene
-    /// In this case, the Entry MonoBehaviour is attached to an existing scene object, which is added when the scene is loaded
-    /// </summary>
 	void Awake()
     {
         instance = this;
@@ -87,7 +74,7 @@ public class Entry : MonoBehaviour
 
         while ( 1 > session.level.progress || session.stage.enemies > 0 || session.stage.items > 0 )
         {
-            session.Update( 1 > session.level.progress );
+            session.Update( 1 > session.level.progress || session.stage.enemies > 0);
             yield return null;
         }
 
@@ -134,8 +121,5 @@ public class Entry : MonoBehaviour
         StartSession( session.player );
     }
 
-    /// <summary>
-    /// Singleton-ish self-reference. Useful for accessing assets
-    /// </summary>
     public static Entry instance { get; private set; }
 }
