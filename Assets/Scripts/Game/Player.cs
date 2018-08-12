@@ -21,8 +21,8 @@ public class Player
 
 public class Inventory
 {
-    public ItemSettings Settings( Definitions.Items item ) => itemSettings[ items.IndexOf( item ) ];
     public HeroSettings Settings( Definitions.Heroes hero ) => heroSettings[ heroes.IndexOf( hero ) ];
+    public ItemSettings Settings(Definitions.Items item) => itemSettings[ items.IndexOf(item) ];
     public void AddCoins( int value ) => coins += value;
 
     public void AddHero( Definitions.Heroes hero )
@@ -31,10 +31,40 @@ public class Inventory
         heroSettings.Add( new HeroSettings( Color.white , 3 ) );
     }
 
-    public void AddItem( Definitions.Items hero , int level = 0 )
+    public void AddItem( Definitions.Items item , int level = 0 )
     {
-        items.Add( hero );
-        itemSettings.Add( new ItemSettings( level ) );
+        items.Add( item );
+        itemSettings.Add(new ItemSettings(level, GetEffects(item)));
+    }
+
+    public static Definitions.Effects[] GetEffects(Definitions.Items item)
+    {
+        switch (item)
+        {
+            case Definitions.Items.Damage:
+                return new Definitions.Effects[] { Definitions.Effects.Damage, Definitions.Effects.PushBack };
+
+            case Definitions.Items.LaneDown:
+                return new Definitions.Effects[] { Definitions.Effects.LaneDown };
+
+            case Definitions.Items.LaneUp:
+                return new Definitions.Effects[] { Definitions.Effects.LaneUp };
+
+            case Definitions.Items.Leap:
+                return new Definitions.Effects[] { Definitions.Effects.Leap, Definitions.Effects.Damage, Definitions.Effects.PushBack };
+
+            case Definitions.Items.Part:
+                return new Definitions.Effects[] { Definitions.Effects.Damage, Definitions.Effects.PushBack };
+
+            case Definitions.Items.Split:
+                return new Definitions.Effects[] { Definitions.Effects.Damage, Definitions.Effects.PushBack, Definitions.Effects.Split };
+
+            case Definitions.Items.Wreck:
+                return new Definitions.Effects[] { Definitions.Effects.Leap, Definitions.Effects.Damage, Definitions.Effects.PushBack };
+
+            default:
+                return new Definitions.Effects[] { };
+        }
     }
 
     public List<HeroSettings> heroSettings { get; }
@@ -61,11 +91,11 @@ public class Inventory
             Definitions.Items.LaneDown,
         };
 
-        itemSettings = new List<ItemSettings>( items.Count )
+        itemSettings = new List<ItemSettings>(items.Count)
         {
-            new ItemSettings( 0 ) ,
-            new ItemSettings( 0 ) ,
-            new ItemSettings( 0 )
+            new ItemSettings( 0 , GetEffects(items[0])) ,
+            new ItemSettings( 0 , GetEffects(items[1])) ,
+            new ItemSettings( 0 , GetEffects(items[2]))
         };
     }
 
@@ -82,6 +112,8 @@ public class ItemSettings
     public void Upgrade() => level++;
 
     public int level { get; private set; }
+    public Definitions.Effects[] effects { get; private set; }
+
     public int damage
     {
         get
@@ -94,8 +126,9 @@ public class ItemSettings
         }
     }
 
-    public ItemSettings( int level )
+    public ItemSettings( int level , Definitions.Effects[] effects)
     {
+        this.effects = effects;
         this.level = level;
     }
 }

@@ -60,6 +60,16 @@ public static class Definitions
         Wreck = 6,
         Count = 7,
     }
+
+    public enum Effects
+    {
+        PushBack,
+        LaneDown,
+        LaneUp,
+        Damage,
+        Split,
+        Leap,
+    }
 }
 
 public class ItemDefinition

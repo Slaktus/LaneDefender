@@ -1,14 +1,7 @@
 ﻿using UnityEngine;
 
-/// <summary>
-/// Handles the session. Keeps references to most of the game's moving parts, and updates them with the data they need to operate
-/// Session is basically an observer -- it handles messaging between game systems based on their state
-/// </summary>
 public class Session
 {
-    /// <summary>
-    /// Updates the session by fetching data and sharing it with the game handlers
-    /// </summary>
     public void Update( bool addConveyorItems )
     {
         coinCounter.SetCounterValue( player.inventory.coins );
@@ -130,36 +123,15 @@ public class Session
         conveyor.Hide();
     }
 
-    /// <summary>
-    /// Level holds the lanes and methods for operating on them
-    /// </summary>
     public Stage stage { get; }
-
-    /// <summary>
-    /// Conveyor handles items and methods for operating on them
-    /// </summary>
-    public Conveyor conveyor { get; }
-
+    public Player player { get; }
     public Level level { get; set; }
-
+    public Conveyor conveyor { get; }
     public CoinCounter coinCounter { get; }
-
-    /// <summary>
-    /// Getter using UnityEngine's Camera class, which features a convenience getter for the first camera in the scene with the tag "Main"
-    /// </summary>
-    private Camera camera => Camera.main;
-
-    /// <summary>
-    /// Last time an item was added to the conveyor
-    /// </summary>
-    private float itemTime { get; set; }
-
-    /// <summary>
-    /// Currently held item
-    /// </summary>
     public HeldItem heldItem { get; private set; }
 
-    public Player player { get; }
+    private Camera camera => Camera.main;
+    private float itemTime { get; set; }
 
     public Session( Player player , float width , float height , float spacing , int lanes )
     {

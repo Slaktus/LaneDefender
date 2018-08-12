@@ -74,6 +74,7 @@ public class LaneItem : LaneObject
 
     public Definitions.Items type => heldItem != null ? heldItem.conveyorItem.type : Definitions.Items.Wreck;
     public int damage => heldItem != null ? heldItem.conveyorItem.damage : 1;
+    public Definitions.Effects[] effects { get; }
     public HeldItem heldItem { get; }
 
     public override float front => rect.xMin;
@@ -87,6 +88,7 @@ public class LaneItem : LaneObject
 
     public LaneItem( HeldItem heldItem , Lane lane ) : base( "Lane" + heldItem.conveyorItem.type.ToString() , lane )
     {
+        effects = heldItem.conveyorItem.settings.effects;
         body.transform.localScale = new Vector3( heldItem.conveyorItem.width , 1 , heldItem.conveyorItem.height );
 
         meshRenderer.material.color = Color.white;
@@ -96,8 +98,9 @@ public class LaneItem : LaneObject
         this.heldItem = heldItem;
     }
 
-    public LaneItem( Lane lane , string name , float width , float height , Vector3 position ) : base( "Lane" + name , lane )
+    public LaneItem(Definitions.Effects[] effects, Lane lane , string name , float width , float height , Vector3 position ) : base( "Lane" + name , lane )
     {
+        this.effects = effects;
         body.transform.localScale = new Vector3( width , 1 , height );
 
         meshRenderer.material.color = Color.grey;

@@ -38,7 +38,7 @@ public class LaneEntity : LaneObject
         if ( health == 0 )
         {
             lane.stage.AddCoins( defeatValue );
-            lane.Add( new LaneItem( lane , "Wreck" , scale.x , scale.z , position ) );
+            lane.Add( new LaneItem( new Definitions.Effects[] { Definitions.Effects.Damage, Definitions.Effects.Leap, Definitions.Effects.PushBack } , lane , "Wreck" , scale.x , scale.z , position ) );
         }
 
         base.Destroy();
@@ -57,7 +57,43 @@ public class LaneEntity : LaneObject
         if ( laneObject is LaneItem )
         {
             LaneItem laneItem = laneObject as LaneItem;
+            bool destroy = true;
 
+            for ( int i = 0; laneItem.effects.Length > i; i++)
+            {
+                switch (laneItem.effects[ i ])
+                {
+                    case Definitions.Effects.Damage:
+                        Damage(laneItem.damage);
+                        break;
+
+                    case Definitions.Effects.LaneDown:
+                        changeLane = ChangeLane(laneItem.heldItem.conveyorItem.level + 1);
+                        break;
+
+                    case Definitions.Effects.LaneUp:
+                        changeLane = ChangeLane(-laneItem.heldItem.conveyorItem.level - 1);
+                        break;
+
+                    case Definitions.Effects.Leap:
+                        laneItem.LeapEntity(this);
+                        destroy = false;
+                        break;
+
+                    case Definitions.Effects.PushBack:
+                        pushBack = PushBack();
+                        break;
+
+                    case Definitions.Effects.Split:
+                        laneItem.Split();
+                        break;
+                }
+            }
+
+            if (destroy)
+                laneItem.Destroy();
+
+            /*
             switch ( laneItem.type )
             {
                 case Definitions.Items.Part:
@@ -91,6 +127,7 @@ public class LaneEntity : LaneObject
                     laneItem.Destroy();
                     break;
             }
+            */
         }
         else
         {

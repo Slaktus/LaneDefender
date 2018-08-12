@@ -2,20 +2,13 @@
 
 public class ConveyorItem : BaseObject
 {
-    public override void Update()
-    {
-        Debug.Log(position.z);
-        Debug.Log(speed + " " + limit + " " + top + " " + height);
-        Debug.Log(Mathf.Clamp(position.z - (speed * Time.deltaTime), limit, top - (height * 0.5f)));
-        position = new Vector3(position.x, position.y, Mathf.Clamp(position.z - (speed * Time.deltaTime), limit, _conveyor.top.z - (height * 0.5f)));
-    }
-
     public override void Destroy()
     {
         _conveyor.RemoveItemFromConveyor( this );
         GameObject.Destroy( container );
     }
 
+    public override void Update() => position = new Vector3(position.x, position.y, Mathf.Clamp(position.z - (speed * Time.deltaTime), limit, _conveyor.top.z - (height * 0.5f)));
     public void PowerUp() => label.SetText(type.ToString() + "\n" + ++power);
     public void SetHeld(bool held) => this.held = held;
 
