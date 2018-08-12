@@ -8,8 +8,13 @@ public class StageEditor : Layout
     {
         ShowStageSets();
 
-        if ( selectedStageDefinition != null )
+        if (selectedStageDefinition != null )
+        {
+            if ( _editor.stage == null)
+                _editor.ShowStage(selectedStageDefinition);
+
             ShowStageEditor();
+        }
     }
 
     private void ShowStageSets()
@@ -20,7 +25,7 @@ public class StageEditor : Layout
         stageSets.SetViewportPosition(new Vector2(0, 1));
         stageSets.SetPosition(stageSets.position + Vector3.up);
 
-        stageSets.Add(new List<Button>(Button.GetButtons(count, (int index) => new Button("Stage Set", width, height, container, "StageSet",
+        stageSets.Add(new List<Button>(Button.GetButtons(count, (int index) => new Button("Stage Set", 3, 1, container, "StageSet",
             fontSize: 20,
             Enter: (Button button) => button.SetColor(_stages != null && _selectedStageSet == _editor.stageData.stageSets[ index ] ? button.color : Color.green),
             Stay: (Button button) =>
@@ -45,7 +50,7 @@ public class StageEditor : Layout
                 }
             })))
         {
-            new Button( "Add Stage Set" , width , height , container , "AddStageSet" ,
+            new Button( "Add Stage Set" , 3 , 1 , container , "AddStageSet" ,
             fontSize: 20 ,
             Enter: ( Button button ) => button.SetColor( Color.green ) ,
             Stay: ( Button button ) =>
@@ -61,7 +66,7 @@ public class StageEditor : Layout
             } ,
             Exit: ( Button button ) => button.SetColor( Color.white ) ) ,
 
-            new Button( "Back to Campaign" , width , height , container , "BackToCampaign" , fontSize: 20 ,
+            new Button( "Back to Campaign" , 3 , 1 , container , "BackToCampaign" , fontSize: 20 ,
             Enter: ( Button button ) => button.SetColor( Color.green ) ,
             Stay: ( Button button ) =>
             {
@@ -83,7 +88,7 @@ public class StageEditor : Layout
         }, true );
     }
 
-    public void HideStageSets()
+    private void HideStageSets()
     {
         if (stageSets != null)
             Remove(stageSets);
@@ -92,13 +97,13 @@ public class StageEditor : Layout
         stageSets = null;
     }
 
-    private void ShowStageDefinitions(Vector3 position, float width = 3, float height = 1, float padding = 0.25f, float spacing = 0.1f)
+    private void ShowStageDefinitions(Vector3 position)
     {
         HideStageDefinitions();
         int count = _selectedStageSet.stageDefinitions.Count;
-        Add(_stages = new Layout("StageDefinitionButtons", width, height * (count + 1), padding, spacing, count + 1, container));
-        _stages.SetPosition(position + (Vector3.right * width) + (Vector3.back * ((height * (count ) * 0.5f) + (padding * 0.5f))));
-        _stages.Add(new List<Button>(Button.GetButtons(count, (int index) => new Button("Stage Definition", width, height, container, "StageDefinition",
+        Add(_stages = new Layout("StageDefinitionButtons", 3, 1 * (count + 1), 0.25f, 0.1f, count + 1, container));
+        _stages.SetPosition(position + (Vector3.right * 3) + (Vector3.back * ((count * 0.5f) + (0.25f * 0.5f))));
+        _stages.Add(new List<Button>(Button.GetButtons(count, (int index) => new Button("Stage Definition", 3, 1, container, "StageDefinition",
             fontSize: 20,
             Enter: (Button button) => button.SetColor(Color.green),
             Stay: (Button button) =>
@@ -123,7 +128,7 @@ public class StageEditor : Layout
             },
             Exit: (Button button) => button.SetColor(Color.white))))
         {
-            new Button( "Add Stage\nDefinition" , width , height , container , "AddStageDefinition" ,
+            new Button( "Add Stage\nDefinition" , 3 , 1 , container , "AddStageDefinition" ,
             fontSize: 20 ,
             Enter: ( Button button ) => button.SetColor( Color.green ) ,
             Stay: ( Button button ) =>
@@ -207,7 +212,7 @@ public class StageEditor : Layout
         HideStageDefinitions();
         _selectedStageSet = null;
 
-        if ( selectedStageDefinition != null )
+        if ( _editor.stage != null )
             _editor.HideStage();
     }
 

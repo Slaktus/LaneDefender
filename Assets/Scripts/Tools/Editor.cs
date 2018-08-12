@@ -92,7 +92,7 @@ public class Editor : Layout
             //Reset the color of any item not currently hovered
             stage.conveyor.SetItemColor( Color.white , _heldItem != null ? _heldItem.conveyorItem : hoveredItem );
 
-            if ( Time.time > _itemTime && 1 > _level.progress )
+            if ( Time.time > _itemTime && ( 1 > _level.progress || stage.enemies > 0 ) )
                 _itemTime = stage.conveyor.AddItemToConveyor( new Inventory() );
         }
 
@@ -241,10 +241,7 @@ public class Editor : Layout
         _campaignMapButtons.Clear();
     }
 
-    public override void Refresh()
-    {
-        ShowCampaignMap();
-    }
+    public override void Refresh() => ShowCampaignMap();
 
     public Button GetMapButton( int index ) => _campaignMapButtons[ index ];
 
@@ -333,7 +330,8 @@ public class Editor : Layout
                         _level = null;
                         _itemTime = 0;
 
-                        waveEditor.ShowWaveEventButtons();
+                        if (waveEditor.selectedWaveDefinition != null)
+                            waveEditor.ShowWaveEventButtons();
                     }
                 }
             },

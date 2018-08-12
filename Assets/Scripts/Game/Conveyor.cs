@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class Conveyor
 {
     public void Update()
     {
         for ( int i = 0 ; _conveyorItems.Count > i ; i++ )
-        {
             if ( _conveyorItems[ i ].matchThree )
             {
                 ItemAt( i + 2 ).Destroy();
@@ -14,20 +14,26 @@ public class Conveyor
                 _conveyorItems[ i ].PowerUp();
             }
 
-            _conveyorItems[ i ].Update();
-            Debug.Log(i + " update");
-        }
+        Updater?.Invoke();
     }
 
     public float AddItemToConveyor( Inventory inventory )
     {
         if ( _itemLimit > _conveyorItems.Count )
         {
-            Definitions.Items item = inventory.items[ Random.Range( 0 , inventory.items.Count ) ];
-            _conveyorItems.Add( new ConveyorItem( this , Definitions.Item( item ) , inventory.Settings( item ) ) );
+            Definitions.Items item = inventory.items[ UnityEngine.Random.Range( 0 , inventory.items.Count ) ];
+            ConveyorItem toAdd = new ConveyorItem(this, Definitions.Item(item), inventory.Settings(item));
+            _conveyorItems.Add( toAdd);
+            Updater += toAdd.Update;
         }
 
         return Time.time + itemInterval;
+    }
+
+    public void RemoveItemFromConveyor(ConveyorItem toRemove)
+    {
+        Updater -= toRemove.Update;
+        _conveyorItems.Remove(toRemove);
     }
 
     public ConveyorItem GetHoveredItem( Vector3 position )
@@ -52,25 +58,19 @@ public class Conveyor
             _conveyorItems[ _conveyorItems.Count - 1 ].Destroy();
     }
 
-    public void Show() => _quad.SetActive( true );
-    public void Hide() => _quad.SetActive( false );
-
     public void Destroy()
     {
         Clear();
         GameObject.Destroy( _quad );
     }
 
+    public void Show() => _quad.SetActive(true);
+    public void Hide() => _quad.SetActive(false);
     public void SetSpeed( float speed ) => this.speed = speed;
-
     public void SetItemInterval( float itemInterval ) => this.itemInterval = itemInterval;
 
-    public void RemoveItemFromConveyor( ConveyorItem item ) => _conveyorItems.Remove( item );
-
     public bool Contains( Vector3 position ) => _rect.Contains( new Vector2( position.x , position.z ) );
-
     public int IndexOf( ConveyorItem conveyorItem ) => _conveyorItems.IndexOf( conveyorItem );
-
     public ConveyorItem ItemAt( int index ) => _conveyorItems[ index ];
 
     public int itemCount => _conveyorItems.Count;
@@ -92,6 +92,7 @@ public class Conveyor
     private GameObject _quad { get; }
     private MeshRenderer _meshRenderer { get; }
     private List<ConveyorItem> _conveyorItems { get; }
+    private event Action Updater;
 
     public Conveyor( float speed , float width , float height , float itemInterval , int itemLimit , float itemWidthPadding , float itemSpacing , bool hide = false )
     {

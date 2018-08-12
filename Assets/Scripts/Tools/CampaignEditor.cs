@@ -1,7 +1,6 @@
 ﻿#if UNITY_EDITOR
 using System.Collections.Generic;
 using UnityEngine;
-using System;
 
 public class CampaignEditor : Layout
 {
@@ -180,16 +179,15 @@ public class CampaignEditor : Layout
         HideCampaignEditor();
     }
 
-    public Layout campaignSets { get; set; }
-
     public CampaignDefinition selectedCampaign { get; private set; }
     public CampaignSet selectedCampaignSet { get; private set; }
+    public Layout campaignSets { get; set; }
 
     private Editor _editor { get; }
     private Layout _campaigns { get; set; }
     private Layout _campaignEditor { get; set; }
 
-    public CampaignEditor( Editor editor , Vector3 position , GameObject parent ) : base(typeof(CampaignEditor).Name,parent)
+    public CampaignEditor( Editor editor , Vector3 position , GameObject parent ) : base(typeof(CampaignEditor).Name , parent)
     {
         _editor = editor;
     }
