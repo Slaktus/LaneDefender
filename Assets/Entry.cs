@@ -9,7 +9,9 @@ public class Entry : MonoBehaviour
     {
         instance = this;
 #if !UNITY_EDITOR
+        //Definitions.Initialize()
         StartSession( new Player() );
+
 #else
         neoEditor = new Editor(gameObject);
         //missionEditor = new MissionEditor();

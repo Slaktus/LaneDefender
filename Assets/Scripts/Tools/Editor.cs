@@ -253,6 +253,7 @@ public class Editor : Layout
     public Stage stage { get; private set; }
 
     public CampaignData campaignData { get; }
+    public ObjectData objectData { get; }
     public StageData stageData { get; }
     public WaveData waveData { get; }
 
@@ -271,6 +272,7 @@ public class Editor : Layout
     private Level _level { get; set; }
 
     private const string _campaignDataPath = "Assets/AssetBundleSource/Campaigns/";
+    private const string _objectDataPath = "Assets/AssetBundleSource/Objects/";
     private const string _stageDataPath = "Assets/AssetBundleSource/Stages/";
     private const string _waveDataPath = "Assets/AssetBundleSource/Waves/";
 
@@ -278,6 +280,7 @@ public class Editor : Layout
     {
         waveData = Load<WaveData>( _waveDataPath );
         stageData = Load<StageData>( _stageDataPath );
+        objectData = Load<ObjectData>(_objectDataPath);
         campaignData = Load<CampaignData>( _campaignDataPath );
 
         if ( waveData == null )
@@ -285,6 +288,23 @@ public class Editor : Layout
 
         if ( stageData == null )
             stageData = Create<StageData>( _stageDataPath );
+
+        if (objectData == null)
+        {
+            objectData = Create<ObjectData>(_objectDataPath);
+            ScriptableObjects.Add(ScriptableObject.CreateInstance<EnemySet>(), objectData);
+            ScriptableObjects.Add(ScriptableObject.CreateInstance<ItemSet>(), objectData);
+            ScriptableObjects.Add(ScriptableObject.CreateInstance<HeroSet>(), objectData);
+
+            for (int i = 0; (int) Definitions.Enemies.Count > i; i++)
+                ScriptableObjects.Add(ScriptableObject.CreateInstance<EnemyDefinition>().Initialize(((Definitions.Enemies) i).ToString(), 2, 1, 3, (Definitions.Enemies) i), objectData.enemySets[ (int) Assets.ObjectDataSets.Default ]);
+
+            for (int i = 0; (int) Definitions.Heroes.Count > i; i++)
+                ScriptableObjects.Add(ScriptableObject.CreateInstance<HeroDefinition>().Initialize(((Definitions.Heroes) i).ToString(), 2, 1, (Definitions.Heroes) i), objectData.heroSets[ (int) Assets.ObjectDataSets.Default ]);
+
+            for (int i = 0; (int) Definitions.Items.Count > i; i++)
+                ScriptableObjects.Add(ScriptableObject.CreateInstance<ItemDefinition>().Initialize(((Definitions.Items) i).ToString(), 2, 1, (Definitions.Items) i, Definitions.GetEffects((Definitions.Items) i)), objectData.itemSets[ (int) Assets.ObjectDataSets.Default ]);
+        }
 
         if ( campaignData == null )
             campaignData = Create<CampaignData>( _campaignDataPath );

@@ -92,42 +92,6 @@ public class LaneEntity : LaneObject
 
             if (destroy)
                 laneItem.Destroy();
-
-            /*
-            switch ( laneItem.type )
-            {
-                case Definitions.Items.Part:
-                case Definitions.Items.Damage:
-                    Damage( laneItem.damage );
-                    pushBack = PushBack();
-                    laneItem.Destroy();
-                    break;
-
-                case Definitions.Items.Split:
-                    Damage( laneItem.damage );
-                    pushBack = PushBack();
-                    laneItem.Split();
-                    laneItem.Destroy();
-                    break;
-
-                case Definitions.Items.Leap:
-                case Definitions.Items.Wreck:
-                    Damage( laneItem.damage );
-                    pushBack = PushBack();
-                    laneItem.LeapEntity( this );
-                    break;
-
-                case Definitions.Items.LaneDown:
-                    changeLane = ChangeLane( laneItem.heldItem.conveyorItem.level + 1 );
-                    laneItem.Destroy();
-                    break;
-
-                case Definitions.Items.LaneUp:
-                    changeLane = ChangeLane( -laneItem.heldItem.conveyorItem.level - 1 );
-                    laneItem.Destroy();
-                    break;
-            }
-            */
         }
         else
         {

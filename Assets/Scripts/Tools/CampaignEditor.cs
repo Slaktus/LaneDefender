@@ -15,6 +15,7 @@ public class CampaignEditor : Layout
         campaignSets.Add(new List<Button>(
             Button.GetButtons(count,
             (int index) => new Button("Campaign Set", 3, 1, container, "CampaignSet", fontSize: 20,
+                                                            //this condition can probably be simplified
                 Enter: (Button button) => button.SetColor(_campaigns != null && selectedCampaignSet == _editor.campaignData.campaignSets[ index ] ? button.color : Color.green),
                 Stay: (Button button) =>
                 {
@@ -26,6 +27,7 @@ public class CampaignEditor : Layout
                         button.Select();
                     }
                 },
+                                                            //this condition can probably be simplified
                 Exit: (Button button) => button.SetColor(_campaigns != null && selectedCampaignSet == _editor.campaignData.campaignSets[ index ] ? button.color : Color.white),
                 Close: (Button button) =>
                 {

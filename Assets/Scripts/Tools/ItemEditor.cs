@@ -7,26 +7,25 @@ public class ItemEditor : Layout
     public void ShowItems()
     {
         HideItems();
-        int count = ( int ) Definitions.Items.Count;
-        Add(_items = new Layout("Items", 3, count + 1, 0.25f, 0.1f, count + 1, container));
+        int count = _editor.objectData.itemSets[ (int) Assets.ObjectDataSets.Default ].itemDefinitions.Count;
+        Add(_items = new Layout("Items", 3, count, 0.25f, 0.1f, count, container));
         _items.SetViewportPosition(new Vector2(0, 1));
         _items.SetPosition(_items.position + Vector3.up);
 
         _items.Add(new List<Button>(
             Button.GetButtons(count,
             (int index) => new Button(((Definitions.Items) index).ToString(), 3, 1, container, "Item", fontSize: 20,
-                Enter: (Button button) => button.SetColor(_itemLevels != null /*&& _selectedItem == _editor.campaignData.campaignSets[ index ] */? button.color : Color.green),
+                Enter: (Button button) => button.SetColor(button.selected ? button.color : Color.green),
                 Stay: (Button button) =>
                 {
                     if (Input.GetMouseButtonDown(0))
                     {
-                        _selectedItem = null;//_editor.campaignData.campaignSets[ index ];
                         ShowItemLevels(index, button.position + new Vector3(button.width * 0.5f, 0, button.height * 0.5f));
                         button.SetColor(Color.yellow);
                         button.Select();
                     }
                 },
-                Exit: (Button button) => button.SetColor(_itemLevels != null /*&& _selectedItem == _editor.campaignData.campaignSets[ index ]*/ ? button.color : Color.white),
+                Exit: (Button button) => button.SetColor(button.selected ? button.color : Color.white),
                 Close: (Button button) =>
                 {
                     if (button.selected && Input.GetMouseButtonDown(0) && (_itemLevels == null/* || !_itemLevels.containsMouse*/))
@@ -37,20 +36,7 @@ public class ItemEditor : Layout
                         button.SetColor(Color.white);
                     }
                 })
-            ))
-        {
-            new Button("New Item", 4, 1, container, "NewItem", fontSize: 20,
-                Enter: (Button button) => button.SetColor(Color.green),
-                Stay: (Button button) =>
-                {
-                    if (Input.GetMouseButtonDown(0))
-                    {
-                        ScriptableObjects.Add(ScriptableObject.CreateInstance<CampaignSet>(), _editor.campaignData);
-                        ShowItems();
-                    }
-                },
-                Exit: (Button button) => button.SetColor(Color.white))
-        }, true);
+            )), true);
     }
 
     public void HideItems()
@@ -62,8 +48,19 @@ public class ItemEditor : Layout
         _items = null;
     }
 
-    public void ShowItemLevels(int index, Vector3 position) { }
-    public void HideItemLevels() { }
+    public void ShowItemLevels(int index, Vector3 position)
+    {
+
+    }
+
+    public void HideItemLevels()
+    {
+        if (_itemLevels != null)
+            Remove(_itemLevels);
+
+        _itemLevels?.Destroy();
+        _itemLevels = null;
+    }
 
     private Editor _editor { get; }
     private Layout _items { get; set; }

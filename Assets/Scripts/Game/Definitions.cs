@@ -3,11 +3,13 @@ using UnityEngine;
 
 public static class Definitions
 {
-    public static HeroDefinition Hero( Heroes hero ) => heroDefinitions[ ( int ) hero ];
+    public static void Initialize(ObjectData objectData) => Definitions.objectData = objectData;
 
-    public static EnemyDefinition Enemy( Enemies enemy ) => enemyDefinitions[ ( int ) enemy ];
+    public static HeroDefinition Hero( Heroes hero, Assets.ObjectDataSets set = Assets.ObjectDataSets.Default) => objectData.heroSets[ (int) set ].heroDefinitions[ ( int ) hero ];
 
-    public static ItemDefinition Item( Items item ) => itemDefinitions[ ( int ) item ];
+    public static EnemyDefinition Enemy( Enemies enemy, Assets.ObjectDataSets set = Assets.ObjectDataSets.Default) => objectData.enemySets[ (int) set ].enemyDefinitions[ ( int ) enemy ];
+
+    public static ItemDefinition Item( Items item, Assets.ObjectDataSets set = Assets.ObjectDataSets.Default) => objectData.itemSets[ (int) set].itemDefinitions[ ( int ) item ];
 
     public static List<Effects> GetEffects(Items item)
     {
@@ -39,33 +41,7 @@ public static class Definitions
         }
     }
 
-    private static List<HeroDefinition> heroDefinitions { get; }
-    private static List<ItemDefinition> itemDefinitions { get; }
-    private static List<EnemyDefinition> enemyDefinitions { get; }
-
-    static Definitions()
-    {
-        enemyDefinitions = new List<EnemyDefinition>( ( int ) Enemies.Count )
-        {
-            ScriptableObject.CreateInstance<EnemyDefinition>().Initialize( "Enemy" , 5 , 1 , 6 , Enemies.Default )
-        };
-
-        heroDefinitions = new List<HeroDefinition>( ( int ) Heroes.Count )
-        {
-            ScriptableObject.CreateInstance<HeroDefinition>().Initialize( "Hero" , 5 , 1 , Heroes.Default )
-        };
-
-        itemDefinitions = new List<ItemDefinition>((int) Items.Count)
-        {
-            ScriptableObject.CreateInstance<ItemDefinition>().Initialize("Item", 2, 1, Items.LaneUp, GetEffects(Items.LaneUp)),
-            ScriptableObject.CreateInstance<ItemDefinition>().Initialize("Item", 2, 1, Items.LaneDown, GetEffects(Items.LaneDown)),
-            ScriptableObject.CreateInstance<ItemDefinition>().Initialize("Item", 2, 1, Items.Damage, GetEffects(Items.Damage)),
-            ScriptableObject.CreateInstance<ItemDefinition>().Initialize("Item", 2, 1, Items.Split, GetEffects(Items.Split)),
-            ScriptableObject.CreateInstance<ItemDefinition>().Initialize("Item", 2, 1, Items.Leap, GetEffects(Items.Leap)),
-            ScriptableObject.CreateInstance<ItemDefinition>().Initialize("Item", 2, 1, Items.Part, GetEffects(Items.Part)),
-            ScriptableObject.CreateInstance<ItemDefinition>().Initialize("Item", 2, 1, Items.Wreck, GetEffects(Items.Wreck))
-        };
-    }
+    private static ObjectData objectData { get; set; }
 
     public enum Heroes
     {

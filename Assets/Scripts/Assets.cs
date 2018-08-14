@@ -6,6 +6,7 @@ public static class Assets
 {
     public static void Initialize( MonoBehaviour client ) => client.StartCoroutine( LoadAssetBundles() );
     public static CampaignData Get( CampaignDataSets data ) => _campaignData[ ( int ) data ];
+    public static ObjectData Get(ObjectDataSets data) => _objectData[ (int) data ];
     public static StageData Get( StageDataSets data ) => _stageData[ ( int ) data ];
     public static WaveData Get( WaveDataSets data ) => _waveData[ ( int ) data ];
 
@@ -58,12 +59,14 @@ public static class Assets
     public static bool loaded { get; private set; }
 
     private static List<CampaignData> _campaignData { get; set; }
+    private static List<ObjectData> _objectData { get; set; }
     private static List<StageData> _stageData { get; set; }
     private static List<WaveData> _waveData { get; set; }
 
     static Assets()
     {
         _campaignData = new List<CampaignData>();
+        _objectData = new List<ObjectData>();
         _stageData = new List<StageData>();
         _waveData = new List<WaveData>();
         loaded = false;
@@ -82,6 +85,12 @@ public static class Assets
     }
 
     public enum CampaignDataSets
+    {
+        Default = 0,
+        Count = 1
+    }
+
+    public enum ObjectDataSets
     {
         Default = 0,
         Count = 1
