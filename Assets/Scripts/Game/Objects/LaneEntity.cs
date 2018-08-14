@@ -38,7 +38,7 @@ public class LaneEntity : LaneObject
         if ( health == 0 )
         {
             lane.stage.AddCoins( defeatValue );
-            lane.Add( new LaneItem( new Definitions.Effects[] { Definitions.Effects.Damage, Definitions.Effects.Leap, Definitions.Effects.PushBack } , lane , "Wreck" , scale.x , scale.z , position ) );
+            lane.Add( new LaneItem( Definitions.GetEffects(Definitions.Items.Wreck) , lane , "Wreck" , scale.x , scale.z , position ) );
         }
 
         base.Destroy();
@@ -59,7 +59,7 @@ public class LaneEntity : LaneObject
             LaneItem laneItem = laneObject as LaneItem;
             bool destroy = true;
 
-            for ( int i = 0; laneItem.effects.Length > i; i++)
+            for ( int i = 0; laneItem.effects.Count > i; i++)
             {
                 switch (laneItem.effects[ i ])
                 {

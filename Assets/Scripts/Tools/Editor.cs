@@ -261,6 +261,7 @@ public class Editor : Layout
     public MissionEditor missionEditor { get; }
     public StageEditor stageEditor { get; }
     public WaveEditor waveEditor { get; }
+    public ItemEditor itemEditor { get; }
 
     private List<Button> _campaignMapButtons { get; }
     private HeldItem _heldItem { get; set; }
@@ -357,9 +358,11 @@ public class Editor : Layout
         Add(missionEditor = new MissionEditor( this, container));
         Add(stageEditor = new StageEditor( this, container));
         Add(waveEditor = new WaveEditor( this, container));
+        Add(itemEditor = new ItemEditor(this, container));
 
-        campaignEditor.ShowCampaignSets();
-        campaignEditor.ShowCampaignEditor();
+        itemEditor.ShowItems();
+        //campaignEditor.ShowCampaignSets();
+        //campaignEditor.ShowCampaignEditor();
     }
 }
 

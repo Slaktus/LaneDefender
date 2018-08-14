@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 
 public class LaneItem : LaneObject
@@ -74,7 +75,7 @@ public class LaneItem : LaneObject
 
     public Definitions.Items type => heldItem != null ? heldItem.conveyorItem.type : Definitions.Items.Wreck;
     public int damage => heldItem != null ? heldItem.conveyorItem.damage : 1;
-    public Definitions.Effects[] effects { get; }
+    public List<Definitions.Effects> effects { get; }
     public HeldItem heldItem { get; }
 
     public override float front => rect.xMin;
@@ -98,7 +99,7 @@ public class LaneItem : LaneObject
         this.heldItem = heldItem;
     }
 
-    public LaneItem(Definitions.Effects[] effects, Lane lane , string name , float width , float height , Vector3 position ) : base( "Lane" + name , lane )
+    public LaneItem(List<Definitions.Effects> effects, Lane lane , string name , float width , float height , Vector3 position ) : base( "Lane" + name , lane )
     {
         this.effects = effects;
         body.transform.localScale = new Vector3( width , 1 , height );

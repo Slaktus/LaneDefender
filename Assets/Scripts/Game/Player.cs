@@ -34,37 +34,7 @@ public class Inventory
     public void AddItem( Definitions.Items item , int level = 0 )
     {
         items.Add( item );
-        itemSettings.Add(new ItemSettings(level, GetEffects(item)));
-    }
-
-    public static Definitions.Effects[] GetEffects(Definitions.Items item)
-    {
-        switch (item)
-        {
-            case Definitions.Items.Damage:
-                return new Definitions.Effects[] { Definitions.Effects.Damage, Definitions.Effects.PushBack };
-
-            case Definitions.Items.LaneDown:
-                return new Definitions.Effects[] { Definitions.Effects.LaneDown };
-
-            case Definitions.Items.LaneUp:
-                return new Definitions.Effects[] { Definitions.Effects.LaneUp };
-
-            case Definitions.Items.Leap:
-                return new Definitions.Effects[] { Definitions.Effects.Leap, Definitions.Effects.Damage, Definitions.Effects.PushBack };
-
-            case Definitions.Items.Part:
-                return new Definitions.Effects[] { Definitions.Effects.Damage, Definitions.Effects.PushBack };
-
-            case Definitions.Items.Split:
-                return new Definitions.Effects[] { Definitions.Effects.Damage, Definitions.Effects.PushBack, Definitions.Effects.Split };
-
-            case Definitions.Items.Wreck:
-                return new Definitions.Effects[] { Definitions.Effects.Leap, Definitions.Effects.Damage, Definitions.Effects.PushBack };
-
-            default:
-                return new Definitions.Effects[] { };
-        }
+        itemSettings.Add(new ItemSettings(level, Definitions.GetEffects(item)));
     }
 
     public List<HeroSettings> heroSettings { get; }
@@ -93,9 +63,9 @@ public class Inventory
 
         itemSettings = new List<ItemSettings>(items.Count)
         {
-            new ItemSettings( 0 , GetEffects(items[0])) ,
-            new ItemSettings( 0 , GetEffects(items[1])) ,
-            new ItemSettings( 0 , GetEffects(items[2]))
+            new ItemSettings( 0 , Definitions.GetEffects(items[0])) ,
+            new ItemSettings( 0 , Definitions.GetEffects(items[1])) ,
+            new ItemSettings( 0 , Definitions.GetEffects(items[2]))
         };
     }
 
@@ -112,7 +82,7 @@ public class ItemSettings
     public void Upgrade() => level++;
 
     public int level { get; private set; }
-    public Definitions.Effects[] effects { get; private set; }
+    public List<Definitions.Effects> effects { get; private set; }
 
     public int damage
     {
@@ -126,7 +96,7 @@ public class ItemSettings
         }
     }
 
-    public ItemSettings( int level , Definitions.Effects[] effects)
+    public ItemSettings( int level , List<Definitions.Effects> effects)
     {
         this.effects = effects;
         this.level = level;
