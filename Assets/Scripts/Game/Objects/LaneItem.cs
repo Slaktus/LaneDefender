@@ -73,9 +73,9 @@ public class LaneItem : LaneObject
         }
     }
 
+    public List<Definitions.Effects> effects => heldItem != null ? heldItem.conveyorItem.definition.Effects(heldItem.conveyorItem.settings.level) : effectsOverride;
     public Definitions.Items type => heldItem != null ? heldItem.conveyorItem.type : Definitions.Items.Wreck;
     public int damage => heldItem != null ? heldItem.conveyorItem.damage : 1;
-    public List<Definitions.Effects> effects { get; }
     public HeldItem heldItem { get; }
 
     public override float front => rect.xMin;
@@ -85,11 +85,13 @@ public class LaneItem : LaneObject
     protected override float end => lane.start.x;
     protected override float speed => lane.speed;
 
+    private List<Definitions.Effects> effectsOverride { get; }
+
     private IEnumerator leap { get; set; }
 
     public LaneItem( HeldItem heldItem , Lane lane ) : base( "Lane" + heldItem.conveyorItem.type.ToString() , lane )
     {
-        effects = heldItem.conveyorItem.settings.effects;
+        effectsOverride = new List<Definitions.Effects>();
         body.transform.localScale = new Vector3( heldItem.conveyorItem.width , 1 , heldItem.conveyorItem.height );
 
         meshRenderer.material.color = Color.white;
@@ -101,7 +103,7 @@ public class LaneItem : LaneObject
 
     public LaneItem(List<Definitions.Effects> effects, Lane lane , string name , float width , float height , Vector3 position ) : base( "Lane" + name , lane )
     {
-        this.effects = effects;
+        this.effectsOverride = effects;
         body.transform.localScale = new Vector3( width , 1 , height );
 
         meshRenderer.material.color = Color.grey;

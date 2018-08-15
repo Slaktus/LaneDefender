@@ -291,6 +291,8 @@ public class Editor : Layout
 
         if (objectData == null)
         {
+            //wait this is actually kinda stupid and wrong
+
             objectData = Create<ObjectData>(_objectDataPath);
             ScriptableObjects.Add(ScriptableObject.CreateInstance<EnemySet>(), objectData);
             ScriptableObjects.Add(ScriptableObject.CreateInstance<ItemSet>(), objectData);
@@ -303,7 +305,7 @@ public class Editor : Layout
                 ScriptableObjects.Add(ScriptableObject.CreateInstance<HeroDefinition>().Initialize(((Definitions.Heroes) i).ToString(), 2, 1, (Definitions.Heroes) i), objectData.heroSets[ (int) Assets.ObjectDataSets.Default ]);
 
             for (int i = 0; (int) Definitions.Items.Count > i; i++)
-                ScriptableObjects.Add(ScriptableObject.CreateInstance<ItemDefinition>().Initialize(((Definitions.Items) i).ToString(), 2, 1, (Definitions.Items) i, Definitions.GetEffects((Definitions.Items) i)), objectData.itemSets[ (int) Assets.ObjectDataSets.Default ]);
+                ScriptableObjects.Add(ScriptableObject.CreateInstance<ItemDefinition>().Initialize(((Definitions.Items) i).ToString(), 2, 1, (Definitions.Items) i), objectData.itemSets[ (int) Assets.ObjectDataSets.Default ]);
         }
 
         if ( campaignData == null )

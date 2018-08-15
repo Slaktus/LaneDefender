@@ -34,7 +34,7 @@ public class Inventory
     public void AddItem( Definitions.Items item , int level = 0 )
     {
         items.Add( item );
-        itemSettings.Add(new ItemSettings(level, Definitions.GetEffects(item)));
+        itemSettings.Add(new ItemSettings(level));
     }
 
     public List<HeroSettings> heroSettings { get; }
@@ -63,9 +63,9 @@ public class Inventory
 
         itemSettings = new List<ItemSettings>(items.Count)
         {
-            new ItemSettings( 0 , Definitions.GetEffects(items[0])) ,
-            new ItemSettings( 0 , Definitions.GetEffects(items[1])) ,
-            new ItemSettings( 0 , Definitions.GetEffects(items[2]))
+            new ItemSettings(0),
+            new ItemSettings(0),
+            new ItemSettings(0)
         };
     }
 
@@ -82,23 +82,9 @@ public class ItemSettings
     public void Upgrade() => level++;
 
     public int level { get; private set; }
-    public List<Definitions.Effects> effects { get; private set; }
 
-    public int damage
+    public ItemSettings( int level )
     {
-        get
-        {
-            switch ( level )
-            {
-                default:
-                    return 1;
-            }
-        }
-    }
-
-    public ItemSettings( int level , List<Definitions.Effects> effects)
-    {
-        this.effects = effects;
         this.level = level;
     }
 }

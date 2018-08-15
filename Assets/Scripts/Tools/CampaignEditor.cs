@@ -94,7 +94,7 @@ public class CampaignEditor : Layout
                 },
                 Exit: (Button button) => button.SetColor(Color.white))))
         {
-            new Button( "New Campaign" , 4 , 1 , container , "NewCampaign" , fontSize: 20,
+            new Button( "New Campaign" , 3 , 1 , container , "NewCampaign" , fontSize: 20,
                 Enter: ( Button button ) => button.SetColor( Color.green ) ,
                 Stay: ( Button button ) =>
                 {

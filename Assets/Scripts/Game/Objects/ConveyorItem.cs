@@ -25,8 +25,9 @@ public class ConveyorItem : BaseObject
     public ItemSettings settings { get; }
     public int power { get; private set; }
     public bool held { get; private set; }
-    public Definitions.Items type => _definition.type;
-    public int damage => settings.damage;
+    public ItemDefinition definition { get; }
+    public Definitions.Items type => definition.type;
+    public int damage => definition.Damage(level);
     public int level => settings.level;
 
     private float speed => _conveyor.speed;
@@ -35,13 +36,12 @@ public class ConveyorItem : BaseObject
 
     private Conveyor _conveyor { get; }
     private int _maxLevel { get; } = 3;
-    private ItemDefinition _definition { get; }
 
     public ConveyorItem(Conveyor conveyor, ItemDefinition definition, ItemSettings settings) : base("Conveyor" + definition.type.ToString(), GameObject.CreatePrimitive(PrimitiveType.Quad) )
     {
         _conveyor = conveyor;
         this.settings = settings;
-        _definition = definition;
+        this.definition = definition;
         container.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
 
         body.transform.localRotation = Quaternion.identity;
