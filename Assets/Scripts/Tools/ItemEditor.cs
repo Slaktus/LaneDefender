@@ -21,7 +21,6 @@ public class ItemEditor : Layout
                     if (Input.GetMouseButtonDown(0))
                     {
                         _selectedItem = _editor.objectData.itemSets[ (int) Assets.ObjectDataSets.Default ].itemDefinitions[ index ];
-                        Debug.Log(_selectedItem);
                         ShowItemLevels(button.position + new Vector3(button.width * 0.5f, 0, button.height * 0.5f));
                         button.SetColor(Color.yellow);
                         button.Select();
@@ -52,7 +51,7 @@ public class ItemEditor : Layout
     public void ShowItemLevels(Vector3 position)
     {
         HideItemLevels();
-        int count = _selectedItem.levels;
+        int count = _selectedItem.levels.Count;
         Add(_itemLevels = new Layout("ItemLevels", 3, count + 1 , 0.25f, 0.1f, count + 1, container));
         _itemLevels.SetPosition(position + (Vector3.right * _itemLevels.width * 0.5f) + (Vector3.back * _itemLevels.height * 0.5f));
 
@@ -104,16 +103,16 @@ public class ItemEditor : Layout
         {
             int value;
             int.TryParse(field.label.text, out value);
-            _selectedItem.damage[ _selectedLevel ] = value;
+            _selectedItem.Set(_selectedLevel, value);
 
             //need to implement refresh
             Refresh();
         }), true);
 
-        int count = _selectedItem.effects[ _selectedLevel ].Count;
+        int count = _selectedItem.levels[ _selectedLevel ].effects.Count;
         Add(_itemEffects = new Layout("ItemEffects", 3, count + 1, 0.25f, 0.1f, count + 1, container));
         _itemEffects.Add(new List<Button>(Button.GetButtons(count,
-            (int index) => new Button(_selectedItem.effects[ _selectedLevel ][ index ].ToString(), 3, 1, container, "Effect", fontSize: 20,
+            (int index) => new Button(_selectedItem.levels[ _selectedLevel ].effects[ index ].ToString(), 3, 1, container, "Effect", fontSize: 20,
                 Enter: (Button button) => button.SetColor(Color.green),
                 Stay: (Button button) =>
                 {

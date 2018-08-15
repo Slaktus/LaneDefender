@@ -13,9 +13,11 @@ public static class ScriptableObjects
 
     public static void Save() => AssetDatabase.SaveAssets();
 
-    public static void Add<T,Y>( T toAdd , Y addTo ) where T : ScriptableObject where Y : DefinitionBase
+    public static void Add<T,Y>( T toAdd , Y addTo ) where T : ScriptableObject where Y : ScriptableObject
     {
-        addTo.Add( toAdd );
+        if ( addTo is DefinitionBase)
+            ( addTo as DefinitionBase).Add(toAdd);
+        
         AssetDatabase.AddObjectToAsset( toAdd , addTo );
     }
 
