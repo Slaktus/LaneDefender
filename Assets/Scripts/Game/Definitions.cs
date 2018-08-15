@@ -69,11 +69,12 @@ public static class Definitions
 
     public enum Effects
     {
-        PushBack,
-        LaneDown,
-        LaneUp,
-        Damage,
-        Split,
-        Leap,
+        PushBack = 0,
+        LaneDown = 1,
+        LaneUp = 2,
+        Damage = 3,
+        Split = 4,
+        Leap = 5,
+        Count = 6
     }
 }

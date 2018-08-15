@@ -21,6 +21,7 @@ public class ItemEditor : Layout
                     if (Input.GetMouseButtonDown(0))
                     {
                         _selectedItem = _editor.objectData.itemSets[ (int) Assets.ObjectDataSets.Default ].itemDefinitions[ index ];
+                        Debug.Log(_selectedItem);
                         ShowItemLevels(button.position + new Vector3(button.width * 0.5f, 0, button.height * 0.5f));
                         button.SetColor(Color.yellow);
                         button.Select();
@@ -33,7 +34,6 @@ public class ItemEditor : Layout
                     {
                         HideItemLevels();
                         button.Deselect();
-                        _selectedItem = null;
                         button.SetColor(Color.white);
                     }
                 })
@@ -65,6 +65,7 @@ public class ItemEditor : Layout
                     if (Input.GetMouseButtonDown(0))
                     {
                         _selectedLevel = index;
+                        ShowItemEditor();
                         HideItemLevels();
                     }
                 },
@@ -93,11 +94,110 @@ public class ItemEditor : Layout
         _itemLevels = null;
     }
 
+    public void ShowItemEditor()
+    {
+        //just a bit of positioning here and we be rearin' to gaw
+        HideItemEditor();
+        Add(_itemEditor = new Layout("ItemEditor", 3, 1 , 0.25f, 0.1f, 1, container));
+        _itemEditor.Add(new Label("Damage:", Color.black, 1.25f, 0.5f, container, fontSize: 20, anchor: TextAnchor.MiddleCenter));
+        _itemEditor.Add(new Field("Damage", _selectedItem.Damage(_selectedLevel).ToString(), 2, 0.5f, 20, container, Field.ContentMode.Numbers, EndInput: (Field field) =>
+        {
+            int value;
+            int.TryParse(field.label.text, out value);
+            _selectedItem.damage[ _selectedLevel ] = value;
+
+            //need to implement refresh
+            Refresh();
+        }), true);
+
+        int count = _selectedItem.effects[ _selectedLevel ].Count;
+        Add(_itemEffects = new Layout("ItemEffects", 3, count + 1, 0.25f, 0.1f, count + 1, container));
+        _itemEffects.Add(new List<Button>(Button.GetButtons(count,
+            (int index) => new Button(_selectedItem.effects[ _selectedLevel ][ index ].ToString(), 3, 1, container, "Effect", fontSize: 20,
+                Enter: (Button button) => button.SetColor(Color.green),
+                Stay: (Button button) =>
+                {
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                    }
+                },
+                Exit: (Button button) => button.SetColor(Color.white))))
+        {
+            new Button( "Add Effect" , 3 , 1 , container , "AddEffect" , fontSize: 20,
+                Enter: ( Button button ) => button.SetColor( Color.green ) ,
+                Stay: ( Button button ) =>
+                {
+                    if ( Input.GetMouseButtonDown( 0 ) )
+                    {
+                        ShowEffects(button.position + new Vector3(button.width * 0.5f, 0, button.height * 0.5f));
+                    }
+                } ,
+                Exit: ( Button button ) => button.SetColor( Color.white ) ),
+        }, true);
+    }
+
+    public void HideItemEditor()
+    {
+        if (_itemEditor != null)
+            Remove(_itemEditor);
+
+        _itemEditor?.Destroy();
+        _itemEditor = null;
+
+        if (_itemEffects != null)
+            Remove(_itemEffects);
+
+        _itemEffects?.Destroy();
+        _itemEffects = null;
+    }
+
+    public void ShowEffects( Vector3 position)
+    {
+        HideEffects();
+        int count = ( int ) Definitions.Effects.Count;
+        Add(_effects = new Layout("Effects", 3, count, 0.25f, 0.1f, count, container));
+        _effects.SetPosition(position + (Vector3.right * _effects.width * 0.5f) + (Vector3.back * _effects.height * 0.5f));
+
+        _effects.Add(new List<Button>(
+            Button.GetButtons(count,
+            (int index) => new Button((( Definitions.Effects) index ).ToString(), 3, 1, container, "Effect", fontSize: 20,
+                Enter: (Button button) => button.SetColor(button.selected ? button.color : Color.green),
+                Stay: (Button button) =>
+                {
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                        Debug.Log(_selectedItem);
+                        _selectedItem.Add(_selectedLevel, (Definitions.Effects) index);
+                        ShowItemEditor();
+                    }
+                },
+                Exit: (Button button) => button.SetColor(button.selected ? button.color : Color.white),
+                Close: (Button button) =>
+                {
+                    if (Input.GetMouseButtonDown(0) && (_effects == null || !_effects.containsMouse))
+                        HideEffects();
+                })
+            )), true);
+    }
+
+    public void HideEffects()
+    {
+        if (_effects != null)
+            Remove(_effects);
+
+        _effects?.Destroy();
+        _effects = null;
+
+    }
+
     private Editor _editor { get; }
     private Layout _items { get; set; }
+    private Layout _effects { get; set; }
     private Layout _itemLevels { get; set; }
-    private int _selectedLevel { get; set; }
+    private Layout _itemEditor { get; set; }
+    private Layout _itemEffects { get; set; }
     private ItemDefinition _selectedItem { get; set; }
+    private int _selectedLevel { get; set; }
 
     public ItemEditor(Editor editor, GameObject parent) : base(typeof(ItemEditor).Name, parent)
     {
