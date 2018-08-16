@@ -5,20 +5,24 @@ public class HeroDefinition : EntityDefinition
 {
     public void AddLevel()
     {
-        HeroLevel itemLevel = ScriptableObject.CreateInstance<HeroLevel>();
-        ScriptableObjects.Add(itemLevel, this);
-        levels.Add(itemLevel);
+        HeroLevel heroLevel = ScriptableObject.CreateInstance<HeroLevel>();
+        ScriptableObjects.Add(heroLevel, this);
+        levels.Add(heroLevel);
     }
 
     public void RemoveLevel(int index) => levels.RemoveAt(index);
 
     public int Damage(int index) => levels[ index ].damage;
     public int Health(int index) => levels[ index ].health;
+    public int Value(int index) => levels[ index ].value;
+
     public List<Definitions.Effects> Effects(int index) => levels[ index ].effects;
     public void Add(int index, Definitions.Effects effect) => levels[ index ].Add(effect);
     public void Remove(int index, Definitions.Effects effect) => levels[ index ].Remove(effect);
-    public void SetDamage(int index, int damage) => levels[ index ].damage = damage;
-    public void SetHealth (int index, int health) => levels[ index ].health = health;
+
+    public void SetHealth (int index, int health) => levels[ index ].SetHealth( health );
+    public void SetDamage(int index, int damage) => levels[ index ].SetDamage( damage );
+    public void SetValue(int index, int value) => levels[ index ].SetValue(value);
 
     public HeroDefinition Initialize(string name, float width, float laneHeightPadding, Definitions.Heroes type)
     {

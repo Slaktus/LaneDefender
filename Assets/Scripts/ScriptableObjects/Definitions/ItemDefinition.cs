@@ -12,11 +12,15 @@ public class ItemDefinition : EntityDefinition
 
     public void RemoveLevel(int index) => levels.RemoveAt(index);
 
+    public int Value(int index) => levels[ index ].value;
     public int Damage(int index) => levels[ index ].damage;
+
     public List<Definitions.Effects> Effects(int index) => levels[ index ].effects;
     public void Add(int index, Definitions.Effects effect) => levels[ index ].Add(effect);
     public void Remove(int index, Definitions.Effects effect) => levels[ index ].Remove(effect);
-    public void Set(int index, int damage) => levels[ index ].damage = damage;
+
+    public void SetDamage(int index, int damage) => levels[ index ].SetDamage(damage);
+    public void SetValue(int index, int value) => levels[ index ].SetValue(value);
 
     public ItemDefinition Initialize(string name, float width, float laneHeightPadding, Definitions.Items type)
     {

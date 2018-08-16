@@ -25,7 +25,7 @@ public class Stage
                             handled = false;
 
                     if ( handled )
-                        lane.Add( new Enemy( ( waveEvent as SpawnEnemyEvent ).enemyDefinition , new EnemySettings( Color.white , 3 , 8 ) , lane , waveEvent.entryPoint , _container ) );
+                        lane.Add( new Enemy( ( waveEvent as SpawnEnemyEvent ).enemyDefinition , 0 , new EnemySettings( Color.white , 3 , 8 ) , lane , waveEvent.entryPoint , _container ) );
                 }
 
                 return handled;

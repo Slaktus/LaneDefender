@@ -2,26 +2,26 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ItemEditor : Layout
+public class EnemyEditor : Layout
 {
-    public void ShowItems()
+    public void ShowEnemies()
     {
-        HideItems();
-        int count = _editor.objectData.itemSets[ (int) Assets.ObjectDataSets.Default ].itemDefinitions.Count;
-        Add(_items = new Layout("Items", 3, count, 0.25f, 0.1f, count, container));
-        _items.SetViewportPosition(new Vector2(0, 1));
-        _items.SetPosition(_items.position + Vector3.up);
+        HideEnemies();
+        int count = _editor.objectData.enemySets[ (int) Assets.ObjectDataSets.Default ].enemyDefinitions.Count;
+        Add(_enemies = new Layout("Enemies", 3, count, 0.25f, 0.1f, count, container));
+        _enemies.SetViewportPosition(new Vector2(0, 1));
+        _enemies.SetPosition(_enemies.position + Vector3.up);
 
-        _items.Add(new List<Button>(
+        _enemies.Add(new List<Button>(
             Button.GetButtons(count,
-            (int index) => new Button(_editor.objectData.itemSets[ (int) Assets.ObjectDataSets.Default ].itemDefinitions[ index ].name, 3, 1, container, "Item", fontSize: 20,
+            (int index) => new Button(_editor.objectData.enemySets[ (int) Assets.ObjectDataSets.Default ].enemyDefinitions[ index ].name, 3, 1, container, "Enemy", fontSize: 20,
                 Enter: (Button button) => button.SetColor(button.selected ? button.color : Color.green),
                 Stay: (Button button) =>
                 {
                     if (Input.GetMouseButtonDown(0))
                     {
-                        _selectedItem = _editor.objectData.itemSets[ (int) Assets.ObjectDataSets.Default ].itemDefinitions[ index ];
-                        ShowItemLevels(button.position + new Vector3(button.width * 0.5f, 0, button.height * 0.5f));
+                        _selectedEnemy = _editor.objectData.enemySets[ (int) Assets.ObjectDataSets.Default ].enemyDefinitions[ index ];
+                        ShowEnemyLevels(button.position + new Vector3(button.width * 0.5f, 0, button.height * 0.5f));
                         button.SetColor(Color.yellow);
                         button.Select();
                     }
@@ -29,9 +29,9 @@ public class ItemEditor : Layout
                 Exit: (Button button) => button.SetColor(button.selected ? button.color : Color.white),
                 Close: (Button button) =>
                 {
-                    if (button.selected && Input.GetMouseButtonDown(0) && (_itemLevels == null || !_itemLevels.containsMouse))
+                    if (button.selected && Input.GetMouseButtonDown(0) && (_enemyLevels == null || !_enemyLevels.containsMouse))
                     {
-                        HideItemLevels();
+                        HideEnemyLevels();
                         button.Deselect();
                         button.SetColor(Color.white);
                     }
@@ -39,23 +39,23 @@ public class ItemEditor : Layout
             )), true);
     }
 
-    public void HideItems()
+    public void HideEnemies()
     {
-        if (_items != null)
-            Remove(_items);
+        if (_enemies != null)
+            Remove(_enemies);
 
-        _items?.Destroy();
-        _items = null;
+        _enemies?.Destroy();
+        _enemies = null;
     }
 
-    public void ShowItemLevels(Vector3 position)
+    public void ShowEnemyLevels(Vector3 position)
     {
-        HideItemLevels();
-        int count = _selectedItem.levels.Count;
-        Add(_itemLevels = new Layout("ItemLevels", 3, count + 1 , 0.25f, 0.1f, count + 1, container));
-        _itemLevels.SetPosition(position + (Vector3.right * _itemLevels.width * 0.5f) + (Vector3.back * _itemLevels.height * 0.5f));
+        HideEnemyLevels();
+        int count = _selectedEnemy.levels.Count;
+        Add(_enemyLevels = new Layout("HeroLevels", 3, count + 1 , 0.25f, 0.1f, count + 1, container));
+        _enemyLevels.SetPosition(position + (Vector3.right * _enemyLevels.width * 0.5f) + (Vector3.back * _enemyLevels.height * 0.5f));
 
-        _itemLevels.Add(new List<Button>(
+        _enemyLevels.Add(new List<Button>(
             Button.GetButtons(count,
             (int index) => new Button("Level " + index , 3, 1, container, "Item", fontSize: 20,
                 Enter: (Button button) => button.SetColor(button.selected ? button.color : Color.green),
@@ -64,70 +64,80 @@ public class ItemEditor : Layout
                     if (Input.GetMouseButtonDown(0))
                     {
                         _selectedLevel = index;
-                        ShowItemEditor();
-                        HideItemLevels();
+                        ShowEnemyEditor();
+                        HideEnemyLevels();
                     }
                 },
                 Exit: (Button button) => button.SetColor(button.selected ? button.color : Color.white))))
         {
-            new Button( "Add Item Level" , 3 , 1 , container , "AddItemLevel" , fontSize: 20,
+            new Button( "Add Enemy Level" , 3 , 1 , container , "AddEnemyLevel" , fontSize: 20,
                 Enter: ( Button button ) => button.SetColor( Color.green ) ,
                 Stay: ( Button button ) =>
                 {
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
-                        _selectedItem.AddLevel();
-                        ShowItemLevels(position);
+                        _selectedEnemy.AddLevel();
+                        ShowEnemyLevels(position);
                     }
                 } ,
                 Exit: ( Button button ) => button.SetColor( Color.white ) )
         }, true);
     }
 
-    public void HideItemLevels()
+    public void HideEnemyLevels()
     {
-        if (_itemLevels != null)
-            Remove(_itemLevels);
+        if (_enemyLevels != null)
+            Remove(_enemyLevels);
 
-        _itemLevels?.Destroy();
-        _itemLevels = null;
+        _enemyLevels?.Destroy();
+        _enemyLevels = null;
     }
 
-    public void ShowItemEditor()
+    public void ShowEnemyEditor()
     {
         //just a bit of positioning here and we be rearin' to gaw
-        HideItemEditor();
-        Add(_itemEditor = new Layout("ItemEditor", 3, 1 , 0.25f, 0.1f, 1, container));
-        _itemEditor.SetPosition(_items.position + (Vector3.back * _items.height * 0.5f) + Vector3.back);
-        _itemEditor.Add(new List<Element>()
+        HideEnemyEditor();
+        Add(_enemyEditor = new Layout("EnemyEditor", 3, 2 , 0.25f, 0.1f, 3, container));
+        _enemyEditor.SetPosition(_enemies.position + (Vector3.back * (_enemies.height + _enemyEditor.height) * 0.5f));
+        _enemyEditor.Add(new List<Element>()
         {
             new Label("Value:", Color.black, 1.25f, 0.5f, container, fontSize: 20, anchor: TextAnchor.MiddleCenter),
-            new Field("Value", _selectedItem.Damage(_selectedLevel).ToString(), 2, 0.5f, 20, container, Field.ContentMode.Numbers, EndInput: (Field field) =>
+            new Field("Value", _selectedEnemy.Health(_selectedLevel).ToString(), 2, 0.5f, 20, container, Field.ContentMode.Numbers, EndInput: (Field field) =>
             {
                 int value;
                 int.TryParse(field.label.text, out value);
-                _selectedItem.SetValue(_selectedLevel, value);
+                _selectedEnemy.SetValue(_selectedLevel, value);
+                field.label.SetText(value.ToString());
+                //need to implement refresh
+                Refresh();
+            }),
+            new Label("Health:", Color.black, 1.25f, 0.5f, container, fontSize: 20, anchor: TextAnchor.MiddleCenter),
+            new Field("Health", _selectedEnemy.Health(_selectedLevel).ToString(), 2, 0.5f, 20, container, Field.ContentMode.Numbers, EndInput: (Field field) =>
+            {
+                int value;
+                int.TryParse(field.label.text, out value);
+                _selectedEnemy.SetHealth(_selectedLevel, value);
                 field.label.SetText(value.ToString());
                 //need to implement refresh
                 Refresh();
             }),
             new Label("Damage:", Color.black, 1.25f, 0.5f, container, fontSize: 20, anchor: TextAnchor.MiddleCenter),
-            new Field("Damage", _selectedItem.Damage(_selectedLevel).ToString(), 2, 0.5f, 20, container, Field.ContentMode.Numbers, EndInput: (Field field) =>
+            new Field("Damage", _selectedEnemy.Damage(_selectedLevel).ToString(), 2, 0.5f, 20, container, Field.ContentMode.Numbers, EndInput: (Field field) =>
             {
                 int value;
                 int.TryParse(field.label.text, out value);
-                _selectedItem.SetDamage(_selectedLevel, value);
+                _selectedEnemy.SetDamage(_selectedLevel, value);
                 field.label.SetText(value.ToString());
                 //need to implement refresh
                 Refresh();
             })
-        });
+        }, true);
 
-        int count = _selectedItem.levels[ _selectedLevel ].effects.Count;
-        Add(_itemEffects = new Layout("ItemEffects", 3, count + 1, 0.25f, 0.1f, count + 1, container));
-        _itemEffects.SetPosition(_itemEditor.position + (Vector3.back * ( ((_itemEffects.height + _itemEditor.height) * 0.5f))));
-        _itemEffects.Add(new List<Button>(Button.GetButtons(count,
-            (int index) => new Button(_selectedItem.levels[ _selectedLevel ].effects[ index ].ToString(), 3, 1, container, "Effect", fontSize: 20,
+        int count = _selectedEnemy.levels[ _selectedLevel ].effects.Count;
+        Add(_enemyEffects = new Layout("EnemyEffects", 3, count + 1, 0.25f, 0.1f, count + 1, container));
+        _enemyEffects.SetPosition(_enemyEditor.position + (Vector3.back * ( ((_enemyEffects.height + _enemyEditor.height) * 0.5f))));
+        _enemyEffects.Add(new List<Button>(Button.GetButtons(count,
+            (int index) => new Button(_selectedEnemy.levels[ _selectedLevel ].effects[ index ].ToString(), 3, 1, container, "Effect", fontSize: 20,
                 Enter: (Button button) => button.SetColor(Color.green),
                 Stay: (Button button) =>
                 {
@@ -150,19 +160,19 @@ public class ItemEditor : Layout
         }, true);
     }
 
-    public void HideItemEditor()
+    public void HideEnemyEditor()
     {
-        if (_itemEditor != null)
-            Remove(_itemEditor);
+        if (_enemyEditor != null)
+            Remove(_enemyEditor);
 
-        _itemEditor?.Destroy();
-        _itemEditor = null;
+        _enemyEditor?.Destroy();
+        _enemyEditor = null;
 
-        if (_itemEffects != null)
-            Remove(_itemEffects);
+        if (_enemyEffects != null)
+            Remove(_enemyEffects);
 
-        _itemEffects?.Destroy();
-        _itemEffects = null;
+        _enemyEffects?.Destroy();
+        _enemyEffects = null;
     }
 
     public void ShowEffects( Vector3 position)
@@ -180,8 +190,8 @@ public class ItemEditor : Layout
                 {
                     if (Input.GetMouseButtonDown(0))
                     {
-                        _selectedItem.Add(_selectedLevel, (Definitions.Effects) index);
-                        ShowItemEditor();
+                        _selectedEnemy.Add(_selectedLevel, (Definitions.Effects) index);
+                        ShowEnemyEditor();
                     }
                 },
                 Exit: (Button button) => button.SetColor(button.selected ? button.color : Color.white),
@@ -203,15 +213,15 @@ public class ItemEditor : Layout
     }
 
     private Editor _editor { get; }
-    private Layout _items { get; set; }
+    private Layout _enemies { get; set; }
     private Layout _effects { get; set; }
-    private Layout _itemLevels { get; set; }
-    private Layout _itemEditor { get; set; }
-    private Layout _itemEffects { get; set; }
-    private ItemDefinition _selectedItem { get; set; }
+    private Layout _enemyLevels { get; set; }
+    private Layout _enemyEditor { get; set; }
+    private Layout _enemyEffects { get; set; }
+    private EnemyDefinition _selectedEnemy { get; set; }
     private int _selectedLevel { get; set; }
 
-    public ItemEditor(Editor editor, GameObject parent) : base(typeof(ItemEditor).Name, parent)
+    public EnemyEditor(Editor editor, GameObject parent) : base(typeof(HeroEditor).Name, parent)
     {
         _editor = editor;
     }

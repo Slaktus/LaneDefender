@@ -260,10 +260,11 @@ public class Editor : Layout
     public TimelineEditor timelineEditor { get; }
     public CampaignEditor campaignEditor { get; }
     public MissionEditor missionEditor { get; }
-    public HeroEditor heroEditor { get; }
     public StageEditor stageEditor { get; }
-    public WaveEditor waveEditor { get; }
+    public EnemyEditor enemyEditor { get; }
+    public HeroEditor heroEditor { get; }
     public ItemEditor itemEditor { get; }
+    public WaveEditor waveEditor { get; }
 
     private List<Button> _campaignMapButtons { get; }
     private HeldItem _heldItem { get; set; }
@@ -300,7 +301,7 @@ public class Editor : Layout
             ScriptableObjects.Add(ScriptableObject.CreateInstance<HeroSet>(), objectData);
 
             for (int i = 0; (int) Definitions.Enemies.Count > i; i++)
-                ScriptableObjects.Add(ScriptableObject.CreateInstance<EnemyDefinition>().Initialize(((Definitions.Enemies) i).ToString(), 2, 1, 3, (Definitions.Enemies) i), objectData.enemySets[ (int) Assets.ObjectDataSets.Default ]);
+                ScriptableObjects.Add(ScriptableObject.CreateInstance<EnemyDefinition>().Initialize(((Definitions.Enemies) i).ToString(), 2, 1, (Definitions.Enemies) i), objectData.enemySets[ (int) Assets.ObjectDataSets.Default ]);
 
             for (int i = 0; (int) Definitions.Heroes.Count > i; i++)
                 ScriptableObjects.Add(ScriptableObject.CreateInstance<HeroDefinition>().Initialize(((Definitions.Heroes) i).ToString(), 2, 1, (Definitions.Heroes) i), objectData.heroSets[ (int) Assets.ObjectDataSets.Default ]);
@@ -380,11 +381,12 @@ public class Editor : Layout
         Add(timelineEditor = new TimelineEditor(this, container));
         Add(missionEditor = new MissionEditor( this, container));
         Add(stageEditor = new StageEditor( this, container));
+        Add(enemyEditor = new EnemyEditor(this, container));
         Add(waveEditor = new WaveEditor( this, container));
         Add(itemEditor = new ItemEditor(this, container));
         Add(heroEditor = new HeroEditor(this, container));
 
-        heroEditor.ShowHeroes();
+        enemyEditor.ShowEnemies();
         //itemEditor.ShowItems();
         //campaignEditor.ShowCampaignSets();
         //campaignEditor.ShowCampaignEditor();
