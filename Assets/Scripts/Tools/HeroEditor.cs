@@ -2,26 +2,26 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ItemEditor : Layout
+public class HeroEditor : Layout
 {
-    public void ShowItems()
+    public void ShowHeroes()
     {
-        HideItems();
-        int count = _editor.objectData.itemSets[ (int) Assets.ObjectDataSets.Default ].itemDefinitions.Count;
-        Add(_items = new Layout("Items", 3, count, 0.25f, 0.1f, count, container));
-        _items.SetViewportPosition(new Vector2(0, 1));
-        _items.SetPosition(_items.position + Vector3.up);
+        HideHeroes();
+        int count = _editor.objectData.heroSets[ (int) Assets.ObjectDataSets.Default ].heroDefinitions.Count;
+        Add(_heroes = new Layout("Items", 3, count, 0.25f, 0.1f, count, container));
+        _heroes.SetViewportPosition(new Vector2(0, 1));
+        _heroes.SetPosition(_heroes.position + Vector3.up);
 
-        _items.Add(new List<Button>(
+        _heroes.Add(new List<Button>(
             Button.GetButtons(count,
-            (int index) => new Button(_editor.objectData.itemSets[ (int) Assets.ObjectDataSets.Default ].itemDefinitions[ index ].name, 3, 1, container, "Item", fontSize: 20,
+            (int index) => new Button(_editor.objectData.heroSets[ (int) Assets.ObjectDataSets.Default ].heroDefinitions[ index ].name, 3, 1, container, "Hero", fontSize: 20,
                 Enter: (Button button) => button.SetColor(button.selected ? button.color : Color.green),
                 Stay: (Button button) =>
                 {
                     if (Input.GetMouseButtonDown(0))
                     {
-                        _selectedItem = _editor.objectData.itemSets[ (int) Assets.ObjectDataSets.Default ].itemDefinitions[ index ];
-                        ShowItemLevels(button.position + new Vector3(button.width * 0.5f, 0, button.height * 0.5f));
+                        _selectedHero = _editor.objectData.heroSets[ (int) Assets.ObjectDataSets.Default ].heroDefinitions[ index ];
+                        ShowHeroLevels(button.position + new Vector3(button.width * 0.5f, 0, button.height * 0.5f));
                         button.SetColor(Color.yellow);
                         button.Select();
                     }
@@ -29,9 +29,9 @@ public class ItemEditor : Layout
                 Exit: (Button button) => button.SetColor(button.selected ? button.color : Color.white),
                 Close: (Button button) =>
                 {
-                    if (button.selected && Input.GetMouseButtonDown(0) && (_itemLevels == null || !_itemLevels.containsMouse))
+                    if (button.selected && Input.GetMouseButtonDown(0) && (_heroLevels == null || !_heroLevels.containsMouse))
                     {
-                        HideItemLevels();
+                        HideHeroLevels();
                         button.Deselect();
                         button.SetColor(Color.white);
                     }
@@ -39,23 +39,23 @@ public class ItemEditor : Layout
             )), true);
     }
 
-    public void HideItems()
+    public void HideHeroes()
     {
-        if (_items != null)
-            Remove(_items);
+        if (_heroes != null)
+            Remove(_heroes);
 
-        _items?.Destroy();
-        _items = null;
+        _heroes?.Destroy();
+        _heroes = null;
     }
 
-    public void ShowItemLevels(Vector3 position)
+    public void ShowHeroLevels(Vector3 position)
     {
-        HideItemLevels();
-        int count = _selectedItem.levels.Count;
-        Add(_itemLevels = new Layout("ItemLevels", 3, count + 1 , 0.25f, 0.1f, count + 1, container));
-        _itemLevels.SetPosition(position + (Vector3.right * _itemLevels.width * 0.5f) + (Vector3.back * _itemLevels.height * 0.5f));
+        HideHeroLevels();
+        int count = _selectedHero.levels.Count;
+        Add(_heroLevels = new Layout("HeroLevels", 3, count + 1 , 0.25f, 0.1f, count + 1, container));
+        _heroLevels.SetPosition(position + (Vector3.right * _heroLevels.width * 0.5f) + (Vector3.back * _heroLevels.height * 0.5f));
 
-        _itemLevels.Add(new List<Button>(
+        _heroLevels.Add(new List<Button>(
             Button.GetButtons(count,
             (int index) => new Button("Level " + index , 3, 1, container, "Item", fontSize: 20,
                 Enter: (Button button) => button.SetColor(button.selected ? button.color : Color.green),
@@ -64,61 +64,69 @@ public class ItemEditor : Layout
                     if (Input.GetMouseButtonDown(0))
                     {
                         _selectedLevel = index;
-                        ShowItemEditor();
-                        HideItemLevels();
+                        ShowHeroEditor();
+                        HideHeroLevels();
                     }
                 },
                 Exit: (Button button) => button.SetColor(button.selected ? button.color : Color.white))))
         {
-            new Button( "Add Item Level" , 3 , 1 , container , "AddItemLevel" , fontSize: 20,
+            new Button( "Add Hero Level" , 3 , 1 , container , "AddHeroLevel" , fontSize: 20,
                 Enter: ( Button button ) => button.SetColor( Color.green ) ,
                 Stay: ( Button button ) =>
                 {
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
-                        _selectedItem.AddLevel();
-                        ShowItemLevels(position);
+                        _selectedHero.AddLevel();
+                        ShowHeroLevels(position);
                     }
                 } ,
                 Exit: ( Button button ) => button.SetColor( Color.white ) )
         }, true);
     }
 
-    public void HideItemLevels()
+    public void HideHeroLevels()
     {
-        if (_itemLevels != null)
-            Remove(_itemLevels);
+        if (_heroLevels != null)
+            Remove(_heroLevels);
 
-        _itemLevels?.Destroy();
-        _itemLevels = null;
+        _heroLevels?.Destroy();
+        _heroLevels = null;
     }
 
-    public void ShowItemEditor()
+    public void ShowHeroEditor()
     {
         //just a bit of positioning here and we be rearin' to gaw
-        HideItemEditor();
-        Add(_itemEditor = new Layout("ItemEditor", 3, 1 , 0.25f, 0.1f, 1, container));
-        _itemEditor.SetPosition(_items.position + (Vector3.back * _items.height * 0.5f) + Vector3.back);
-        _itemEditor.Add(new List<Element>()
-        {
-            new Label("Damage:", Color.black, 1.25f, 0.5f, container, fontSize: 20, anchor: TextAnchor.MiddleCenter),
-            new Field("Damage", _selectedItem.Damage(_selectedLevel).ToString(), 2, 0.5f, 20, container, Field.ContentMode.Numbers, EndInput: (Field field) =>
+        HideHeroEditor();
+        Add(_heroEditor = new Layout("HeroEditor", 3, 2 , 0.25f, 0.1f, 2, container));
+        _heroEditor.SetPosition(_heroes.position + (Vector3.back * (_heroes.height + _heroEditor.height) * 0.5f));
+        _heroEditor.Add(new List<Element>() {
+            new Label("Health:", Color.black, 1.25f, 0.5f, container, fontSize: 20, anchor: TextAnchor.MiddleCenter),
+            new Field("Health", _selectedHero.Health(_selectedLevel).ToString(), 2, 0.5f, 20, container, Field.ContentMode.Numbers, EndInput: (Field field) =>
             {
                 int value;
                 int.TryParse(field.label.text, out value);
-                _selectedItem.Set(_selectedLevel, value);
+                _selectedHero.SetHealth(_selectedLevel, value);
+                field.label.SetText(value.ToString());
+                //need to implement refresh
+                Refresh();
+            }),
+            new Label("Damage:", Color.black, 1.25f, 0.5f, container, fontSize: 20, anchor: TextAnchor.MiddleCenter),
+            new Field("Damage", _selectedHero.Damage(_selectedLevel).ToString(), 2, 0.5f, 20, container, Field.ContentMode.Numbers, EndInput: (Field field) =>
+            {
+                int value;
+                int.TryParse(field.label.text, out value);
+                _selectedHero.SetDamage(_selectedLevel, value);
                 field.label.SetText(value.ToString());
                 //need to implement refresh
                 Refresh();
             })
-        });
+        }, true);
 
-
-        int count = _selectedItem.levels[ _selectedLevel ].effects.Count;
-        Add(_itemEffects = new Layout("ItemEffects", 3, count + 1, 0.25f, 0.1f, count + 1, container));
-        _itemEffects.SetPosition(_itemEditor.position + (Vector3.back * ( ((_itemEffects.height + _itemEditor.height) * 0.5f))));
-        _itemEffects.Add(new List<Button>(Button.GetButtons(count,
-            (int index) => new Button(_selectedItem.levels[ _selectedLevel ].effects[ index ].ToString(), 3, 1, container, "Effect", fontSize: 20,
+        int count = _selectedHero.levels[ _selectedLevel ].effects.Count;
+        Add(_heroEffects = new Layout("HeroEffects", 3, count + 1, 0.25f, 0.1f, count + 1, container));
+        _heroEffects.SetPosition(_heroEditor.position + (Vector3.back * ( ((_heroEffects.height + _heroEditor.height) * 0.5f))));
+        _heroEffects.Add(new List<Button>(Button.GetButtons(count,
+            (int index) => new Button(_selectedHero.levels[ _selectedLevel ].effects[ index ].ToString(), 3, 1, container, "Effect", fontSize: 20,
                 Enter: (Button button) => button.SetColor(Color.green),
                 Stay: (Button button) =>
                 {
@@ -141,19 +149,19 @@ public class ItemEditor : Layout
         }, true);
     }
 
-    public void HideItemEditor()
+    public void HideHeroEditor()
     {
-        if (_itemEditor != null)
-            Remove(_itemEditor);
+        if (_heroEditor != null)
+            Remove(_heroEditor);
 
-        _itemEditor?.Destroy();
-        _itemEditor = null;
+        _heroEditor?.Destroy();
+        _heroEditor = null;
 
-        if (_itemEffects != null)
-            Remove(_itemEffects);
+        if (_heroEffects != null)
+            Remove(_heroEffects);
 
-        _itemEffects?.Destroy();
-        _itemEffects = null;
+        _heroEffects?.Destroy();
+        _heroEffects = null;
     }
 
     public void ShowEffects( Vector3 position)
@@ -171,8 +179,8 @@ public class ItemEditor : Layout
                 {
                     if (Input.GetMouseButtonDown(0))
                     {
-                        _selectedItem.Add(_selectedLevel, (Definitions.Effects) index);
-                        ShowItemEditor();
+                        _selectedHero.Add(_selectedLevel, (Definitions.Effects) index);
+                        ShowHeroEditor();
                     }
                 },
                 Exit: (Button button) => button.SetColor(button.selected ? button.color : Color.white),
@@ -194,15 +202,15 @@ public class ItemEditor : Layout
     }
 
     private Editor _editor { get; }
-    private Layout _items { get; set; }
+    private Layout _heroes { get; set; }
     private Layout _effects { get; set; }
-    private Layout _itemLevels { get; set; }
-    private Layout _itemEditor { get; set; }
-    private Layout _itemEffects { get; set; }
-    private ItemDefinition _selectedItem { get; set; }
+    private Layout _heroLevels { get; set; }
+    private Layout _heroEditor { get; set; }
+    private Layout _heroEffects { get; set; }
+    private HeroDefinition _selectedHero { get; set; }
     private int _selectedLevel { get; set; }
 
-    public ItemEditor(Editor editor, GameObject parent) : base(typeof(ItemEditor).Name, parent)
+    public HeroEditor(Editor editor, GameObject parent) : base(typeof(HeroEditor).Name, parent)
     {
         _editor = editor;
     }

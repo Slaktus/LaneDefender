@@ -260,6 +260,7 @@ public class Editor : Layout
     public TimelineEditor timelineEditor { get; }
     public CampaignEditor campaignEditor { get; }
     public MissionEditor missionEditor { get; }
+    public HeroEditor heroEditor { get; }
     public StageEditor stageEditor { get; }
     public WaveEditor waveEditor { get; }
     public ItemEditor itemEditor { get; }
@@ -381,8 +382,10 @@ public class Editor : Layout
         Add(stageEditor = new StageEditor( this, container));
         Add(waveEditor = new WaveEditor( this, container));
         Add(itemEditor = new ItemEditor(this, container));
+        Add(heroEditor = new HeroEditor(this, container));
 
-        itemEditor.ShowItems();
+        heroEditor.ShowHeroes();
+        //itemEditor.ShowItems();
         //campaignEditor.ShowCampaignSets();
         //campaignEditor.ShowCampaignEditor();
     }

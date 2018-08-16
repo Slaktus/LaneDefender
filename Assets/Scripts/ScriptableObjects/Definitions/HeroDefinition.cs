@@ -1,11 +1,33 @@
-﻿public class HeroDefinition : EntityDefinition
+﻿using System.Collections.Generic;
+using UnityEngine;
+
+public class HeroDefinition : EntityDefinition
 {
-    public HeroDefinition Initialize( string name , float width , float laneHeightPadding , Definitions.Heroes type )
+    public void AddLevel()
     {
+        HeroLevel itemLevel = ScriptableObject.CreateInstance<HeroLevel>();
+        ScriptableObjects.Add(itemLevel, this);
+        levels.Add(itemLevel);
+    }
+
+    public void RemoveLevel(int index) => levels.RemoveAt(index);
+
+    public int Damage(int index) => levels[ index ].damage;
+    public int Health(int index) => levels[ index ].health;
+    public List<Definitions.Effects> Effects(int index) => levels[ index ].effects;
+    public void Add(int index, Definitions.Effects effect) => levels[ index ].Add(effect);
+    public void Remove(int index, Definitions.Effects effect) => levels[ index ].Remove(effect);
+    public void SetDamage(int index, int damage) => levels[ index ].damage = damage;
+    public void SetHealth (int index, int health) => levels[ index ].health = health;
+
+    public HeroDefinition Initialize(string name, float width, float laneHeightPadding, Definitions.Heroes type)
+    {
+        this.name = name;
         this.type = type;
-        Initialize( name , width , laneHeightPadding );
+        Initialize(name, width, laneHeightPadding);
         return this;
     }
 
     public Definitions.Heroes type;
+    public List<HeroLevel> levels = new List<HeroLevel>();
 }
