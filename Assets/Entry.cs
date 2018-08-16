@@ -13,7 +13,7 @@ public class Entry : MonoBehaviour
         StartSession( new Player() );
 
 #else
-        neoEditor = new Editor(gameObject);
+        editor = new Editor(gameObject);
         //missionEditor = new MissionEditor();
         //campaignEditor = new CampaignEditor();
         //editor = new Editor();
@@ -22,12 +22,9 @@ public class Entry : MonoBehaviour
     }
 
     #if UNITY_EDITOR
-    //Editor editor;
-    CampaignEditor campaignEditor;
-    MissionEditor missionEditor;
-    Editor neoEditor;
+    Editor editor;
 
-    private void Update() => neoEditor?.Update();
+    private void Update() => editor?.Update();
     #endif
 
     void StartSession( Player player ) => StartCoroutine( SessionHandler( new Session( player , width: 25 , height: 15 , spacing: 1 , lanes: 5 ) ) );

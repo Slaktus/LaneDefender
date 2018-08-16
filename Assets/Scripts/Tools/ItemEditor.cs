@@ -98,19 +98,21 @@ public class ItemEditor : Layout
         //just a bit of positioning here and we be rearin' to gaw
         HideItemEditor();
         Add(_itemEditor = new Layout("ItemEditor", 3, 1 , 0.25f, 0.1f, 1, container));
+        _itemEditor.SetPosition(_items.position + (Vector3.back * _items.height * 0.5f) + Vector3.back);
         _itemEditor.Add(new Label("Damage:", Color.black, 1.25f, 0.5f, container, fontSize: 20, anchor: TextAnchor.MiddleCenter));
         _itemEditor.Add(new Field("Damage", _selectedItem.Damage(_selectedLevel).ToString(), 2, 0.5f, 20, container, Field.ContentMode.Numbers, EndInput: (Field field) =>
         {
             int value;
             int.TryParse(field.label.text, out value);
             _selectedItem.Set(_selectedLevel, value);
-
+            field.label.SetText(value.ToString());
             //need to implement refresh
             Refresh();
         }), true);
 
         int count = _selectedItem.levels[ _selectedLevel ].effects.Count;
         Add(_itemEffects = new Layout("ItemEffects", 3, count + 1, 0.25f, 0.1f, count + 1, container));
+        _itemEffects.SetPosition(_itemEditor.position + (Vector3.back * ( ((_itemEffects.height + _itemEditor.height) * 0.5f))));
         _itemEffects.Add(new List<Button>(Button.GetButtons(count,
             (int index) => new Button(_selectedItem.levels[ _selectedLevel ].effects[ index ].ToString(), 3, 1, container, "Effect", fontSize: 20,
                 Enter: (Button button) => button.SetColor(Color.green),
@@ -165,7 +167,6 @@ public class ItemEditor : Layout
                 {
                     if (Input.GetMouseButtonDown(0))
                     {
-                        Debug.Log(_selectedItem);
                         _selectedItem.Add(_selectedLevel, (Definitions.Effects) index);
                         ShowItemEditor();
                     }
@@ -186,7 +187,6 @@ public class ItemEditor : Layout
 
         _effects?.Destroy();
         _effects = null;
-
     }
 
     private Editor _editor { get; }
