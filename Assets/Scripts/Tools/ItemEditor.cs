@@ -33,7 +33,12 @@ public class ItemEditor : Layout
                     {
                         HideItemLevels();
                         button.Deselect();
-                        button.SetColor(Color.white);
+
+                        if (_selectedLevel != index)
+                        {
+                            button.SetColor(Color.white);
+                            _selectedItem = null;
+                        }
                     }
                 })
             )), true);
@@ -214,5 +219,6 @@ public class ItemEditor : Layout
     public ItemEditor(Editor editor, GameObject parent) : base(typeof(ItemEditor).Name, parent)
     {
         _editor = editor;
+        _selectedLevel = -1;
     }
 }

@@ -33,7 +33,12 @@ public class HeroEditor : Layout
                     {
                         HideHeroLevels();
                         button.Deselect();
-                        button.SetColor(Color.white);
+
+                        if (_selectedLevel != index)
+                        {
+                            button.SetColor(Color.white);
+                            _selectedHero = null;
+                        }
                     }
                 })
             )), true);
@@ -224,5 +229,6 @@ public class HeroEditor : Layout
     public HeroEditor(Editor editor, GameObject parent) : base(typeof(HeroEditor).Name, parent)
     {
         _editor = editor;
+        _selectedLevel = -1;
     }
 }

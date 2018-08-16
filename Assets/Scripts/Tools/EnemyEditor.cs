@@ -33,7 +33,12 @@ public class EnemyEditor : Layout
                     {
                         HideEnemyLevels();
                         button.Deselect();
-                        button.SetColor(Color.white);
+
+                        if (_selectedLevel != index)
+                        {
+                            button.SetColor(Color.white);
+                            _selectedEnemy = null;
+                        }
                     }
                 })
             )), true);
@@ -224,5 +229,6 @@ public class EnemyEditor : Layout
     public EnemyEditor(Editor editor, GameObject parent) : base(typeof(HeroEditor).Name, parent)
     {
         _editor = editor;
+        _selectedLevel = -1;
     }
 }
