@@ -13,7 +13,7 @@ public class Entry : MonoBehaviour
         StartSession( new Player() );
 
 #else
-        editor = new Editor(gameObject);
+        Assets.Initialize(this, () => editor = new Editor(gameObject));
         //missionEditor = new MissionEditor();
         //campaignEditor = new CampaignEditor();
         //editor = new Editor();

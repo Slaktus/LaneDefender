@@ -3,12 +3,14 @@ using UnityEngine;
 
 public class EnemyDefinition : EntityDefinition
 {
+    #if UNITY_EDITOR
     public void AddLevel()
     {
         EnemyLevel enemyLevel = ScriptableObject.CreateInstance<EnemyLevel>();
         ScriptableObjects.Add(enemyLevel, this);
         levels.Add(enemyLevel);
     }
+    #endif //UNITY_EDITOR
 
     public void RemoveLevel(int index) => levels.RemoveAt(index);
 

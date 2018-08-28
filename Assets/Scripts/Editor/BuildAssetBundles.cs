@@ -7,8 +7,8 @@ public class CreateAssetBundles
     static void BuildAssetBundles()
     {
         string source = "Assets/AssetBundleSource";
-        string[] extensions = new string[] { "asset" , "asset" , "asset" };
-        string[] sourceDirectories = new string[] { "Stages" , "Waves" , "Campaigns" };
+        string[] extensions = new string[] { "asset" , "asset" , "asset", "asset" };
+        string[] sourceDirectories = new string[] { "Stages" , "Waves" , "Campaigns" , "Objects" };
 
         string assetBundles = Path.Combine( UnityEngine.Application.streamingAssetsPath , "AssetBundles" );
         string pcAssets = Path.Combine( assetBundles , "PC" );
@@ -24,7 +24,7 @@ public class CreateAssetBundles
         LoadAssets( source , sourceDirectories , extensions , builds );
 
         BuildPipeline.BuildAssetBundles( pcAssets , builds , BuildAssetBundleOptions.None , BuildTarget.StandaloneWindows );
-        BuildPipeline.BuildAssetBundles( switchAssets , builds , BuildAssetBundleOptions.None , BuildTarget.Switch );
+        //BuildPipeline.BuildAssetBundles( switchAssets , builds , BuildAssetBundleOptions.None , BuildTarget.Switch );
         AssetDatabase.Refresh();
     }
 

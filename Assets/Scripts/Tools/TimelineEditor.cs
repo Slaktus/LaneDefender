@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿#if UNITY_EDITOR
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -186,3 +187,4 @@ public class TimelineEditor : Layout
         HideIndicator();
     }
 }
+#endif //UNITY_EDITOR

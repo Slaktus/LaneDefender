@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 
 public class MissionEditor : Layout
 {
@@ -157,4 +156,3 @@ public class MissionEditor : Layout
     }
 }
 #endif //UNITY_EDITOR
-

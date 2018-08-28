@@ -3,12 +3,14 @@ using UnityEngine;
 
 public class HeroDefinition : EntityDefinition
 {
+    #if UNITY_EDITOR
     public void AddLevel()
     {
         HeroLevel heroLevel = ScriptableObject.CreateInstance<HeroLevel>();
         ScriptableObjects.Add(heroLevel, this);
         levels.Add(heroLevel);
     }
+    #endif //UNITY_EDITOR
 
     public void RemoveLevel(int index) => levels.RemoveAt(index);
 

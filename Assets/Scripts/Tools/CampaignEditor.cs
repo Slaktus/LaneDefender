@@ -10,7 +10,7 @@ public class CampaignEditor : Layout
         int count = _editor.campaignData.campaignSets.Count;
         Add(campaignSets = new Layout("CampaignSets", 3, count + 1, 0.25f, 0.1f, count + 1, container));
         campaignSets.SetViewportPosition(new Vector2(0, 1));
-        campaignSets.SetPosition(campaignSets.position + Vector3.up);
+        campaignSets.SetPosition(campaignSets.position + Vector3.up + Vector3.back);
 
         campaignSets.Add(new List<Button>(
             Button.GetButtons(count,
@@ -158,7 +158,7 @@ public class CampaignEditor : Layout
                 } )
             };
 
-            Add(_campaignEditor = new Layout("CampaignEditor", 4, 4, 0.25f, 0.1f, campaignEditorButtons.Count / 2, container));
+            Add(_campaignEditor = new Layout("CampaignEditor", 3, 4, 0.25f, 0.1f, campaignEditorButtons.Count / 2, container));
             _campaignEditor.SetPosition( campaignSets.position + ( Vector3.back * ( ( campaignSets.height + _campaignEditor.height ) * 0.5f ) ) );
             _campaignEditor.Add(campaignEditorButtons, true);
             _campaignEditor.SetParent(container);

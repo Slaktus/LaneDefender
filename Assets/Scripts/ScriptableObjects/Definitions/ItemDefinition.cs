@@ -3,12 +3,14 @@ using UnityEngine;
 
 public class ItemDefinition : EntityDefinition
 {
+    #if UNITY_EDITOR
     public void AddLevel()
     {
         ItemLevel itemLevel = ScriptableObject.CreateInstance<ItemLevel>();
         ScriptableObjects.Add(itemLevel, this);
         levels.Add(itemLevel);
     }
+    #endif //UNITY_EDITOR
 
     public void RemoveLevel(int index) => levels.RemoveAt(index);
 

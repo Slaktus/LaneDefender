@@ -241,7 +241,52 @@ public class Editor : Layout
         _campaignMapButtons.Clear();
     }
 
-    public override void Refresh() => ShowCampaignMap();
+    private void ShowCampaignEditor()
+    {
+        _campaignButton.Select();
+        _campaignButton.SetColor(Color.yellow);
+
+        campaignEditor.ShowCampaignSets();
+        campaignEditor.ShowCampaignEditor();
+    }
+
+    private void HideCampaignEditor()
+    {
+        _campaignButton.Deselect();
+        _campaignButton.SetColor(Color.white);
+
+        HideCampaignMap();
+        stageEditor.Hide();
+        missionEditor.Hide();
+        campaignEditor.Hide();
+        timelineEditor.Hide();
+        timelineEditor.HideMissionTimeline();
+        missionEditor.HideMissionEditor();
+    }
+
+    private void ShowObjectEditors()
+    {
+        _objectsButton.Select();
+        _objectsButton.SetColor(Color.yellow);
+
+        enemyEditor.ShowEnemies();
+        heroEditor.ShowHeroes();
+        itemEditor.ShowItems();
+    }
+
+    private void HideObjectsEditor()
+    {
+        _objectsButton.Deselect();
+        _objectsButton.SetColor(Color.white);
+    }
+
+    public override void Refresh()
+    {
+        if (_campaignButton.selected)
+            ShowCampaignMap();
+        else
+            ShowObjectEditors();
+    }
 
     public Button GetMapButton( int index ) => _campaignMapButtons[ index ];
 
@@ -268,6 +313,8 @@ public class Editor : Layout
 
     private List<Button> _campaignMapButtons { get; }
     private HeldItem _heldItem { get; set; }
+    private Button _campaignButton { get; }
+    private Button _objectsButton { get; }
     private float _itemTime { get; set; }
     private Button _testButton { get; }
     private Button _saveButton { get; }
@@ -280,21 +327,22 @@ public class Editor : Layout
 
     public Editor(GameObject parent) : base("Editor", parent)
     {
-        waveData = Load<WaveData>( _waveDataPath );
-        stageData = Load<StageData>( _stageDataPath );
+        waveData = Load<WaveData>(_waveDataPath);
+        stageData = Load<StageData>(_stageDataPath);
         objectData = Load<ObjectData>(_objectDataPath);
-        campaignData = Load<CampaignData>( _campaignDataPath );
+        campaignData = Load<CampaignData>(_campaignDataPath);
 
-        if ( waveData == null )
-            waveData = Create<WaveData>( _waveDataPath );
+        if (waveData == null)
+            waveData = Create<WaveData>(_waveDataPath);
 
-        if ( stageData == null )
-            stageData = Create<StageData>( _stageDataPath );
+        if (stageData == null)
+            stageData = Create<StageData>(_stageDataPath);
+
+        if (campaignData == null)
+            campaignData = Create<CampaignData>(_campaignDataPath);
 
         if (objectData == null)
         {
-            //wait this is actually kinda stupid and wrong
-
             objectData = Create<ObjectData>(_objectDataPath);
             ScriptableObjects.Add(ScriptableObject.CreateInstance<EnemySet>(), objectData);
             ScriptableObjects.Add(ScriptableObject.CreateInstance<ItemSet>(), objectData);
@@ -310,9 +358,7 @@ public class Editor : Layout
                 ScriptableObjects.Add(ScriptableObject.CreateInstance<ItemDefinition>().Initialize(((Definitions.Items) i).ToString(), 2, 1, (Definitions.Items) i), objectData.itemSets[ (int) Assets.ObjectDataSets.Default ]);
         }
 
-        if ( campaignData == null )
-            campaignData = Create<CampaignData>( _campaignDataPath );
-
+        Definitions.Initialize(objectData);
         _campaignMapButtons = new List<Button>();
 
         Add(_testButton = new Button("Test", 1.5f, 0.5f, container, "Test",
@@ -362,10 +408,10 @@ public class Editor : Layout
             },
             Exit: (Button button) => button.SetColor(Color.white)));
 
-        _testButton.SetViewportPosition( new Vector2( 1 , 1 ) );
-        _testButton.SetPosition( _testButton.position + ( Vector3.left * _testButton.width ) + Vector3.up );
+        _testButton.SetViewportPosition(new Vector2(1, 1));
+        _testButton.SetPosition(_testButton.position + (Vector3.left * _testButton.width) + Vector3.up);
 
-        Add( _saveButton = new Button("Save", 1.5f, 0.5f, container, "Save",
+        Add(_saveButton = new Button("Save", 1.5f, 0.5f, container, "Save",
             fontSize: 20,
             Enter: (Button button) => button.SetColor(Color.green),
             Stay: (Button button) =>
@@ -375,22 +421,50 @@ public class Editor : Layout
             },
             Exit: (Button button) => button.SetColor(Color.white)));
 
-        _saveButton.SetPosition( _testButton.position + Vector3.left * ( _saveButton.width ) );
+        _saveButton.SetPosition(_testButton.position + Vector3.left * (_saveButton.width));
 
-        Add(campaignEditor = new CampaignEditor( this , Vector3.zero , container));
+        Add(_campaignButton = new Button("Campaigns", 3, 1, container, "CampaignsButton",
+            fontSize: 20,
+            Enter: (Button button) => button.SetColor( button.selected ? button.color : Color.green),
+            Stay: (Button button) =>
+            {
+                if (!button.selected && Input.GetMouseButtonDown(0))
+                {
+                    HideObjectsEditor();
+                    ShowCampaignEditor();
+                }
+            },
+            Exit: (Button button) => button.SetColor(button.selected ? button.color : Color.white)));
+
+        _campaignButton.SetViewportPosition(new Vector2(0, 1));
+        _campaignButton.SetPosition(_campaignButton.position + Vector3.up);
+
+        Add(_objectsButton = new Button("Objects", 3, 1, container, "ObjectsButton",
+            fontSize: 20,
+            Enter: (Button button) => button.SetColor(button.selected ? button.color : Color.green),
+            Stay: (Button button) => 
+            {
+                if ( !button.selected && Input.GetMouseButtonDown(0))
+                {
+                    HideCampaignEditor();
+                    ShowObjectEditors();
+                }
+            },
+            Exit: (Button button) => button.SetColor(button.selected ? button.color : Color.white)));
+
+        _objectsButton.SetPosition(_campaignButton.position + Vector3.right * (_objectsButton.width));
+
+        Add(campaignEditor = new CampaignEditor(this, Vector3.zero, container));
         Add(timelineEditor = new TimelineEditor(this, container));
-        Add(missionEditor = new MissionEditor( this, container));
-        Add(stageEditor = new StageEditor( this, container));
+        Add(missionEditor = new MissionEditor(this, container));
+        Add(stageEditor = new StageEditor(this, container));
         Add(enemyEditor = new EnemyEditor(this, container));
-        Add(waveEditor = new WaveEditor( this, container));
+        Add(waveEditor = new WaveEditor(this, container));
         Add(itemEditor = new ItemEditor(this, container));
         Add(heroEditor = new HeroEditor(this, container));
 
-        enemyEditor.ShowEnemies();
-        //itemEditor.ShowItems();
-        //campaignEditor.ShowCampaignSets();
-        //campaignEditor.ShowCampaignEditor();
+        ShowCampaignEditor();
     }
-}
 
+}
 #endif //UNITY_EDITOR
