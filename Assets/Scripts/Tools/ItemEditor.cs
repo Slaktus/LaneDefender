@@ -10,8 +10,9 @@ public class ItemEditor : Layout
         HideItems();
         int count = _editor.objectData.itemSets[ (int) Assets.ObjectDataSets.Default ].itemDefinitions.Count;
         Add(_items = new Layout("Items", 3, count, 0.25f, 0.1f, count, container));
-        _items.SetViewportPosition(new Vector2(0, 1));
-        _items.SetPosition(_items.position + Vector3.up);
+
+        _items.SetViewportPosition(new Vector2(0.75f, 1));
+        _items.SetPosition(_items.position + Vector3.up + Vector3.back);
 
         _items.Add(new List<Button>(
             Button.GetButtons(count,
@@ -207,6 +208,15 @@ public class ItemEditor : Layout
 
         _effects?.Destroy();
         _effects = null;
+    }
+
+    public override void Hide()
+    {
+        HideItems();
+        HideEffects();
+        HideItemLevels();
+        HideItemEditor();
+        base.Hide();
     }
 
     private Editor _editor { get; }

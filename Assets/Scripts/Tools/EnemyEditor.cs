@@ -10,8 +10,9 @@ public class EnemyEditor : Layout
         HideEnemies();
         int count = _editor.objectData.enemySets[ (int) Assets.ObjectDataSets.Default ].enemyDefinitions.Count;
         Add(_enemies = new Layout("Enemies", 3, count, 0.25f, 0.1f, count, container));
-        _enemies.SetViewportPosition(new Vector2(0, 1));
-        _enemies.SetPosition(_enemies.position + Vector3.up);
+
+        _enemies.SetViewportPosition(new Vector2(0.25f, 1));
+        _enemies.SetPosition(_enemies.position + Vector3.up + Vector3.back);
 
         _enemies.Add(new List<Button>(
             Button.GetButtons(count,
@@ -216,6 +217,15 @@ public class EnemyEditor : Layout
 
         _effects?.Destroy();
         _effects = null;
+    }
+
+    public override void Hide()
+    {
+        HideEnemies();
+        HideEffects();
+        HideEnemyLevels();
+        HideEnemyEditor();
+        base.Hide();
     }
 
     private Editor _editor { get; }

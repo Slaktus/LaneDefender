@@ -9,6 +9,7 @@ public class CampaignEditor : Layout
         HideCampaignSets();
         int count = _editor.campaignData.campaignSets.Count;
         Add(campaignSets = new Layout("CampaignSets", 3, count + 1, 0.25f, 0.1f, count + 1, container));
+
         campaignSets.SetViewportPosition(new Vector2(0, 1));
         campaignSets.SetPosition(campaignSets.position + Vector3.up + Vector3.back);
 

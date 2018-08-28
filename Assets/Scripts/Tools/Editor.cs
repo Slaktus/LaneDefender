@@ -243,6 +243,8 @@ public class Editor : Layout
 
     private void ShowCampaignEditor()
     {
+        HideObjectsEditor();
+
         _campaignButton.Select();
         _campaignButton.SetColor(Color.yellow);
 
@@ -266,6 +268,8 @@ public class Editor : Layout
 
     private void ShowObjectEditors()
     {
+        HideCampaignEditor();
+
         _objectsButton.Select();
         _objectsButton.SetColor(Color.yellow);
 
@@ -278,12 +282,16 @@ public class Editor : Layout
     {
         _objectsButton.Deselect();
         _objectsButton.SetColor(Color.white);
+
+        enemyEditor.Hide();
+        heroEditor.Hide();
+        itemEditor.Hide();
     }
 
     public override void Refresh()
     {
         if (_campaignButton.selected)
-            ShowCampaignMap();
+            ShowCampaignEditor();
         else
             ShowObjectEditors();
     }
@@ -429,10 +437,7 @@ public class Editor : Layout
             Stay: (Button button) =>
             {
                 if (!button.selected && Input.GetMouseButtonDown(0))
-                {
-                    HideObjectsEditor();
                     ShowCampaignEditor();
-                }
             },
             Exit: (Button button) => button.SetColor(button.selected ? button.color : Color.white)));
 
@@ -445,10 +450,7 @@ public class Editor : Layout
             Stay: (Button button) => 
             {
                 if ( !button.selected && Input.GetMouseButtonDown(0))
-                {
-                    HideCampaignEditor();
                     ShowObjectEditors();
-                }
             },
             Exit: (Button button) => button.SetColor(button.selected ? button.color : Color.white)));
 

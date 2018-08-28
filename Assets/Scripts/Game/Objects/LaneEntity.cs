@@ -59,6 +59,9 @@ public class LaneEntity : LaneObject
             LaneItem laneItem = laneObject as LaneItem;
             bool destroy = true;
 
+            Debug.Log(laneItem);
+            Debug.Log(laneItem.effects);
+
             for ( int i = 0; laneItem.effects.Count > i; i++)
             {
                 switch (laneItem.effects[ i ])

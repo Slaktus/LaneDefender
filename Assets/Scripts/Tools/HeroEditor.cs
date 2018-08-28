@@ -10,8 +10,9 @@ public class HeroEditor : Layout
         HideHeroes();
         int count = _editor.objectData.heroSets[ (int) Assets.ObjectDataSets.Default ].heroDefinitions.Count;
         Add(_heroes = new Layout("Heroes", 3, count, 0.25f, 0.1f, count, container));
-        _heroes.SetViewportPosition(new Vector2(0, 1));
-        _heroes.SetPosition(_heroes.position + Vector3.up);
+
+        _heroes.SetViewportPosition(new Vector2(0.5f, 1));
+        _heroes.SetPosition(_heroes.position + Vector3.up + Vector3.back);
 
         _heroes.Add(new List<Button>(
             Button.GetButtons(count,
@@ -216,6 +217,15 @@ public class HeroEditor : Layout
 
         _effects?.Destroy();
         _effects = null;
+    }
+
+    public override void Hide()
+    {
+        HideHeroes();
+        HideEffects();
+        HideHeroLevels();
+        HideHeroEditor();
+        base.Hide();
     }
 
     private Editor _editor { get; }
