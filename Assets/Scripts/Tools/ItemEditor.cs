@@ -82,7 +82,7 @@ public class ItemEditor : Layout
                 {
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
-                        _selectedItem.AddLevel();
+                        definition.AddLevel();
                         ShowItemLevels(definition,position);
                     }
                 } ,

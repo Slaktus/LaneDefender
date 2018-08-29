@@ -36,10 +36,7 @@ public class EnemyEditor : Layout
                         button.Deselect();
 
                         if (_selectedLevel != index)
-                        {
                             button.SetColor(Color.white);
-                            _selectedEnemy = null;
-                        }
                     }
                 })
             )), true);
@@ -83,7 +80,7 @@ public class EnemyEditor : Layout
                 {
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
-                        _selectedEnemy.AddLevel();
+                        definition.AddLevel();
                         ShowEnemyLevels(definition,position);
                     }
                 } ,

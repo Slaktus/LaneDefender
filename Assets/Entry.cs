@@ -11,8 +11,8 @@ public class Entry : MonoBehaviour
 #if !UNITY_EDITOR
         //Assets.Initialize(this, () => StartSession(new Player()));
 #else
-        Assets.Initialize(this, () => StartSession(new Player()));
-        //Assets.Initialize(this, () => editor = new Editor(gameObject));
+        //Assets.Initialize(this, () => StartSession(new Player()));
+        editor = new Editor(gameObject);
 #endif
     }
 

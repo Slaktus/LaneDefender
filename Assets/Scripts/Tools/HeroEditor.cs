@@ -36,10 +36,7 @@ public class HeroEditor : Layout
                         button.Deselect();
 
                         if (_selectedLevel != index)
-                        {
                             button.SetColor(Color.white);
-                            _selectedHero = null;
-                        }
                     }
                 })
             )), true);
@@ -83,7 +80,7 @@ public class HeroEditor : Layout
                 {
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
-                        _selectedHero.AddLevel();
+                        definition.AddLevel();
                         ShowHeroLevels(definition, position);
                     }
                 } ,
