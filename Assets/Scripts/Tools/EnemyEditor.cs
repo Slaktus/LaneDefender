@@ -22,8 +22,7 @@ public class EnemyEditor : Layout
                 {
                     if (Input.GetMouseButtonDown(0))
                     {
-                        _selectedEnemy = _editor.objectData.enemySets[ (int) Assets.ObjectDataSets.Default ].enemyDefinitions[ index ];
-                        ShowEnemyLevels(button.position + new Vector3(button.width * 0.5f, 0, button.height * 0.5f));
+                        ShowEnemyLevels(_editor.objectData.enemySets[ (int) Assets.ObjectDataSets.Default ].enemyDefinitions[ index ], button.position + new Vector3(button.width * 0.5f, 0, button.height * 0.5f));
                         button.SetColor(Color.yellow);
                         button.Select();
                     }
@@ -55,10 +54,10 @@ public class EnemyEditor : Layout
         _enemies = null;
     }
 
-    public void ShowEnemyLevels(Vector3 position)
+    public void ShowEnemyLevels(EnemyDefinition definition, Vector3 position)
     {
         HideEnemyLevels();
-        int count = _selectedEnemy.levels.Count;
+        int count = definition.levels.Count;
         Add(_enemyLevels = new Layout("HeroLevels", 3, count + 1 , 0.25f, 0.1f, count + 1, container));
         _enemyLevels.SetPosition(position + (Vector3.right * _enemyLevels.width * 0.5f) + (Vector3.back * _enemyLevels.height * 0.5f));
 
@@ -70,6 +69,7 @@ public class EnemyEditor : Layout
                 {
                     if (Input.GetMouseButtonDown(0))
                     {
+                        _selectedEnemy = definition;
                         _selectedLevel = index;
                         ShowEnemyEditor();
                         HideEnemyLevels();
@@ -84,7 +84,7 @@ public class EnemyEditor : Layout
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
                         _selectedEnemy.AddLevel();
-                        ShowEnemyLevels(position);
+                        ShowEnemyLevels(definition,position);
                     }
                 } ,
                 Exit: ( Button button ) => button.SetColor( Color.white ) )
@@ -104,7 +104,7 @@ public class EnemyEditor : Layout
     {
         //just a bit of positioning here and we be rearin' to gaw
         HideEnemyEditor();
-        Add(_enemyEditor = new Layout("EnemyEditor", 3, 4 , 0.25f, 0.1f, 4, container));
+        Add(_enemyEditor = new Layout("EnemyEditor", 3, 6 , 0.25f, 0.1f, 6, container));
         _enemyEditor.SetPosition(_enemies.position + (Vector3.back * (_enemies.height + _enemyEditor.height) * 0.5f));
         _enemyEditor.Add(new List<Element>()
         {
@@ -147,7 +147,28 @@ public class EnemyEditor : Layout
                 field.label.SetText(value.ToString());
                 //need to implement refresh
                 Refresh();
+            }),
+            new Label("Width:", Color.black, 1.25f, 0.5f, container, fontSize: 20, anchor: TextAnchor.MiddleCenter),
+            new Field("Width", _selectedEnemy.width.ToString(), 2, 0.5f, 20, container, Field.ContentMode.Numbers, EndInput: (Field field) =>
+            {
+                float value;
+                float.TryParse(field.label.text, out value);
+                _selectedEnemy.width = value;
+                field.label.SetText(value.ToString());
+                //need to implement refresh
+                Refresh();
+            }),
+            new Label("Padding:", Color.black, 1.25f, 0.5f, container, fontSize: 20, anchor: TextAnchor.MiddleCenter),
+            new Field("Padding", _selectedEnemy.laneHeightPadding.ToString(), 2, 0.5f, 20, container, Field.ContentMode.Numbers, EndInput: (Field field) =>
+            {
+                float value;
+                float.TryParse(field.label.text, out value);
+                _selectedEnemy.laneHeightPadding = value;
+                field.label.SetText(value.ToString());
+                //need to implement refresh
+                Refresh();
             })
+
         }, true);
 
         int count = _selectedEnemy.levels[ _selectedLevel ].effects.Count;

@@ -27,6 +27,8 @@ public class EnemyDefinition : EntityDefinition
     public void SetHealth(int index, int health) => levels[ index ].SetHealth(health);
     public void SetValue(int index, int value) => levels[ index ].SetValue(value);
     public void SetSpeed(int index, int speed) => levels[ index ].SetSpeed(speed);
+    public void SetWidth(float width) => this.width = width;
+    public void SetLaneHeightPadding(float laneHeightPadding) => this.laneHeightPadding = laneHeightPadding;
 
     public EnemyDefinition Initialize(string name, float width, float laneHeightPadding, Definitions.Enemies type)
     {

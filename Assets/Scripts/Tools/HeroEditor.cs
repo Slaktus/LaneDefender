@@ -22,8 +22,7 @@ public class HeroEditor : Layout
                 {
                     if (Input.GetMouseButtonDown(0))
                     {
-                        _selectedHero = _editor.objectData.heroSets[ (int) Assets.ObjectDataSets.Default ].heroDefinitions[ index ];
-                        ShowHeroLevels(button.position + new Vector3(button.width * 0.5f, 0, button.height * 0.5f));
+                        ShowHeroLevels(_editor.objectData.heroSets[ (int) Assets.ObjectDataSets.Default ].heroDefinitions[ index ], button.position + new Vector3(button.width * 0.5f, 0, button.height * 0.5f));
                         button.SetColor(Color.yellow);
                         button.Select();
                     }
@@ -55,10 +54,10 @@ public class HeroEditor : Layout
         _heroes = null;
     }
 
-    public void ShowHeroLevels(Vector3 position)
+    public void ShowHeroLevels( HeroDefinition definition , Vector3 position)
     {
         HideHeroLevels();
-        int count = _selectedHero.levels.Count;
+        int count = definition.levels.Count;
         Add(_heroLevels = new Layout("HeroLevels", 3, count + 1 , 0.25f, 0.1f, count + 1, container));
         _heroLevels.SetPosition(position + (Vector3.right * _heroLevels.width * 0.5f) + (Vector3.back * _heroLevels.height * 0.5f));
 
@@ -70,6 +69,7 @@ public class HeroEditor : Layout
                 {
                     if (Input.GetMouseButtonDown(0))
                     {
+                        _selectedHero = definition;
                         _selectedLevel = index;
                         ShowHeroEditor();
                         HideHeroLevels();
@@ -84,7 +84,7 @@ public class HeroEditor : Layout
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
                         _selectedHero.AddLevel();
-                        ShowHeroLevels(position);
+                        ShowHeroLevels(definition, position);
                     }
                 } ,
                 Exit: ( Button button ) => button.SetColor( Color.white ) )
@@ -104,7 +104,7 @@ public class HeroEditor : Layout
     {
         //just a bit of positioning here and we be rearin' to gaw
         HideHeroEditor();
-        Add(_heroEditor = new Layout("HeroEditor", 3, 3 , 0.25f, 0.1f, 3, container));
+        Add(_heroEditor = new Layout("HeroEditor", 3, 5 , 0.25f, 0.1f, 5, container));
         _heroEditor.SetPosition(_heroes.position + (Vector3.back * (_heroes.height + _heroEditor.height) * 0.5f));
         _heroEditor.Add(new List<Element>()
         {
@@ -134,6 +134,26 @@ public class HeroEditor : Layout
                 int value;
                 int.TryParse(field.label.text, out value);
                 _selectedHero.SetDamage(_selectedLevel, value);
+                field.label.SetText(value.ToString());
+                //need to implement refresh
+                Refresh();
+            }),
+            new Label("Width:", Color.black, 1.25f, 0.5f, container, fontSize: 20, anchor: TextAnchor.MiddleCenter),
+            new Field("Width", _selectedHero.width.ToString(), 2, 0.5f, 20, container, Field.ContentMode.Numbers, EndInput: (Field field) =>
+            {
+                float value;
+                float.TryParse(field.label.text, out value);
+                _selectedHero.width = value;
+                field.label.SetText(value.ToString());
+                //need to implement refresh
+                Refresh();
+            }),
+            new Label("Padding:", Color.black, 1.25f, 0.5f, container, fontSize: 20, anchor: TextAnchor.MiddleCenter),
+            new Field("Padding", _selectedHero.laneHeightPadding.ToString(), 2, 0.5f, 20, container, Field.ContentMode.Numbers, EndInput: (Field field) =>
+            {
+                float value;
+                float.TryParse(field.label.text, out value);
+                _selectedHero.laneHeightPadding = value;
                 field.label.SetText(value.ToString());
                 //need to implement refresh
                 Refresh();

@@ -22,8 +22,7 @@ public class ItemEditor : Layout
                 {
                     if (Input.GetMouseButtonDown(0))
                     {
-                        _selectedItem = _editor.objectData.itemSets[ (int) Assets.ObjectDataSets.Default ].itemDefinitions[ index ];
-                        ShowItemLevels(button.position + new Vector3(button.width * 0.5f, 0, button.height * 0.5f));
+                        ShowItemLevels(_editor.objectData.itemSets[ (int) Assets.ObjectDataSets.Default ].itemDefinitions[ index ], button.position + new Vector3(button.width * 0.5f, 0, button.height * 0.5f));
                         button.SetColor(Color.yellow);
                         button.Select();
                     }
@@ -54,10 +53,10 @@ public class ItemEditor : Layout
         _items = null;
     }
 
-    public void ShowItemLevels(Vector3 position)
+    public void ShowItemLevels(ItemDefinition definition, Vector3 position)
     {
         HideItemLevels();
-        int count = _selectedItem.levels.Count;
+        int count = definition.levels.Count;
         Add(_itemLevels = new Layout("ItemLevels", 3, count + 1 , 0.25f, 0.1f, count + 1, container));
         _itemLevels.SetPosition(position + (Vector3.right * _itemLevels.width * 0.5f) + (Vector3.back * _itemLevels.height * 0.5f));
 
@@ -69,6 +68,7 @@ public class ItemEditor : Layout
                 {
                     if (Input.GetMouseButtonDown(0))
                     {
+                        _selectedItem = definition;
                         _selectedLevel = index;
                         ShowItemEditor();
                         HideItemLevels();
@@ -83,7 +83,7 @@ public class ItemEditor : Layout
                     if ( Input.GetMouseButtonDown( 0 ) )
                     {
                         _selectedItem.AddLevel();
-                        ShowItemLevels(position);
+                        ShowItemLevels(definition,position);
                     }
                 } ,
                 Exit: ( Button button ) => button.SetColor( Color.white ) )

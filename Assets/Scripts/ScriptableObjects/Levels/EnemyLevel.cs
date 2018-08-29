@@ -14,5 +14,6 @@ public class EnemyLevel : ScriptableObject
     public int health;
     public int damage;
     public float speed;
+    public float width;
     public List<Definitions.Effects> effects = new List<Definitions.Effects>();
 }

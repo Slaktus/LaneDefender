@@ -25,6 +25,8 @@ public class HeroDefinition : EntityDefinition
     public void SetHealth (int index, int health) => levels[ index ].SetHealth( health );
     public void SetDamage(int index, int damage) => levels[ index ].SetDamage( damage );
     public void SetValue(int index, int value) => levels[ index ].SetValue(value);
+    public void SetWidth(float width) => this.width = width;
+    public void SetLaneHeightPadding(float laneHeightPadding) => this.laneHeightPadding = laneHeightPadding;
 
     public HeroDefinition Initialize(string name, float width, float laneHeightPadding, Definitions.Heroes type)
     {
