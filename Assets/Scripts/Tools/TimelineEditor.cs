@@ -7,7 +7,7 @@ public class TimelineEditor : Layout
 {
     public override void Update()
     {
-        _indicator.transform.position = _editor.mousePosition + Vector3.up;
+        _indicator.transform.position = mousePos + Vector3.up;
         base.Update();
     }
 
@@ -40,7 +40,19 @@ public class TimelineEditor : Layout
                     b.Select();
                 }
             },
-            Exit: (Button b) => b.SetColor(b.selected ? b.color : Color.white));
+            Exit: (Button b) =>
+            {
+                if (_editor.stage.conveyor == null || !_editor.stage.conveyor.showing)
+                {
+                    if (_editor.waveEditor.heldWaveEvent == null && heldWave == null && Input.GetMouseButton(0))
+                    {
+                        heldWave = new HeldWave(b.rect.position, waveDefinition);
+                        heldWave.SetText("Wave");
+                    }
+
+                    b.SetColor(b.selected ? b.color : Color.white);
+                }
+            });
 
         _editor.waveEditor.SetSelectedWaveDefinition(waveDefinition);
         _editor.waveEditor.HideWaveEventButtons();
@@ -55,7 +67,7 @@ public class TimelineEditor : Layout
         _buttons.Add(button);
         Add(button);
 
-        button.SetPosition(new Vector3(_missionTimeline.rect.xMin + (timelinePosition * _missionTimeline.rect.xMax), 0, _missionTimeline.rect.yMin + 0.5f) + Vector3.up);
+        button.SetPosition(new Vector3(missionTimeline.rect.xMin + (timelinePosition * missionTimeline.rect.xMax), 0, missionTimeline.rect.yMin + 0.5f) + Vector3.up);
         button.SetColor(Color.yellow);
         button.Select();
     }
@@ -97,12 +109,28 @@ public class TimelineEditor : Layout
             Exit: (Button b) =>
             {
                 if (_editor.stage.conveyor == null || !_editor.stage.conveyor.showing)
+                {
+                    if ( _editor.waveEditor.heldWaveEvent == null && heldWave == null && Input.GetMouseButton(0))
+                    {
+                        heldWave = new HeldWave(b.rect.position, waveDefinition);
+                        heldWave.SetText("Wave");
+                    }
+
                     b.SetColor(b.selected ? b.color : Color.white);
+                }
             });
 
-        button.SetPosition(new Vector3(_missionTimeline.rect.xMin + (timelinePosition * _missionTimeline.rect.xMax), 0, _missionTimeline.rect.yMin + 0.5f) + (Vector3.up * (_missionTimeline.position.y + 1)));
+        button.SetPosition(new Vector3(missionTimeline.rect.xMin + (timelinePosition * missionTimeline.rect.xMax), 0, missionTimeline.rect.yMin + 0.5f) + (Vector3.up * (missionTimeline.position.y + 1)));
         _buttons.Add(button);
         Add(button);
+    }
+
+    public void RemoveWaveFromTimeline(WaveDefinition waveDefinition)
+    {
+        int index = _editor.missionEditor.selectedMission.waveDefinitions.IndexOf(waveDefinition);
+        Remove(_buttons[ index ]);
+        _buttons[ index ].Destroy();
+        _buttons.RemoveAt(index);
     }
 
     public void ShowMissionTimeline()
@@ -111,7 +139,7 @@ public class TimelineEditor : Layout
 
         if (_editor.stage != null)
         {
-            Add(_missionTimeline = new Button(string.Empty, _editor.stage.width, 1, container, "MissionTimeline",
+            Add(missionTimeline = new Button(string.Empty, _editor.stage.width, 1, container, "MissionTimeline",
                 Stay: (Button button) =>
                 {
                     bool overlappingWave = false;
@@ -119,9 +147,9 @@ public class TimelineEditor : Layout
                     for (int i = 0; _buttons.Count > i && !overlappingWave; i++)
                         overlappingWave = _buttons[ i ].containsMouse;
 
-                    if (overlappingWave || _editor.waveEditor.waveSets != null || (_editor.stage.conveyor != null && _editor.stage.conveyor.showing))
+                    if (overlappingWave || heldWave != null || _editor.waveEditor.waveSets != null || (_editor.stage.conveyor != null && _editor.stage.conveyor.showing))
                         HideIndicator();
-                    else if (_editor.waveEditor.waveSets == null)
+                    else if (_editor.waveEditor.waveSets == null )
                     {
                         ShowIndicator();
 
@@ -134,7 +162,7 @@ public class TimelineEditor : Layout
                 },
                 Exit: (Button button) => HideIndicator()));
 
-            _missionTimeline.SetPosition(new Vector3(_editor.stage.start + (_editor.stage.width * 0.5f), 0, Camera.main.ViewportToWorldPoint(new Vector3(0, 1, Camera.main.transform.position.y)).z) + (Vector3.back * _missionTimeline.height * 0.5f) + Vector3.up);
+            missionTimeline.SetPosition(new Vector3(_editor.stage.start + (_editor.stage.width * 0.5f), 0, Camera.main.ViewportToWorldPoint(new Vector3(0, 1, Camera.main.transform.position.y)).z) + (Vector3.back * missionTimeline.height * 0.5f) + Vector3.up);
 
             if (_editor.missionEditor.selectedMission != null)
                 for (int i = 0; _editor.missionEditor.selectedMission.waveDefinitions.Count > i; i++)
@@ -152,11 +180,11 @@ public class TimelineEditor : Layout
 
         _buttons.Clear();
 
-        if (_missionTimeline != null)
-            Remove(_missionTimeline);
+        if (missionTimeline != null)
+            Remove(missionTimeline);
 
-        _missionTimeline?.Destroy();
-        _missionTimeline = null;
+        missionTimeline?.Destroy();
+        missionTimeline = null;
     }
 
     public override void Hide()
@@ -167,14 +195,15 @@ public class TimelineEditor : Layout
     private void ShowIndicator() => _indicator.enabled = true;
     private void HideIndicator() => _indicator.enabled = false;
 
-    public Vector3 indicatorPosition => new Vector3(_indicator.transform.position.x, 0, _missionTimeline.rect.yMin);
+    public Vector3 indicatorPosition => new Vector3(_indicator.transform.position.x, 0, missionTimeline.rect.yMin);
 
     public float timelinePosition { get; private set; }
+    public Button missionTimeline { get; set; }
+    public HeldWave heldWave { get; set; }
 
     private Editor _editor { get; }
     private MeshRenderer _indicator { get; }
     private List<Button> _buttons { get; set; }
-    private Button _missionTimeline { get; set; }
 
     public TimelineEditor(Editor editor, GameObject parent = null) : base(typeof(TimelineEditor).Name, parent)
     {

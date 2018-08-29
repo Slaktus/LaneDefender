@@ -173,7 +173,7 @@ public class WaveEditor : Layout
                     },
                     Exit: (Button butt) =>
                     {
-                        if (heldWaveEvent == null && Input.GetMouseButton(0))
+                        if ( _editor.timelineEditor.heldWave == null && heldWaveEvent == null && Input.GetMouseButton(0))
                         {
                             heldWaveEvent = new HeldEvent(butt.rect.position, waveEvent, laneIndex);
                             heldWaveEvent.SetText(index.ToString());

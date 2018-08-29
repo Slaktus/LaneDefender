@@ -7,65 +7,66 @@ public class Editor : Layout
 {
     public override void Update()
     {
+        HandleTimelineHover();
         HandleLaneHover();
 
         _level?.Update();
         stage?.Update();
         stage?.conveyor?.Update();
 
-        if ( stage != null && stage.conveyor != null && stage.conveyor.showing )
+        if (stage != null && stage.conveyor != null && stage.conveyor.showing)
         {
-            Ray mouseRay = Camera.main.ScreenPointToRay( Input.mousePosition );
+            Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 
             //The actual raycast returns an array with all the targets the ray passed through
             //Note that we don't pass in the ray itself -- that's because the method taking a ray as argument flat-out doesn't work
             //We don't bother constraining the raycast by layer mask just yet, since the ground plane is the only collider in the scene
-            RaycastHit[] hits = Physics.RaycastAll( mouseRay.origin , mouseRay.direction , float.PositiveInfinity );
+            RaycastHit[] hits = Physics.RaycastAll(mouseRay.origin, mouseRay.direction, float.PositiveInfinity);
 
             //These references might be populated later
             Lane hoveredLane = null;
             ConveyorItem hoveredItem = null;
 
             //Proceed if we hit the ground plane
-            if ( hits.Length > 0 )
+            if (hits.Length > 0)
             {
                 //Get the mouse position on the ground plane
                 Vector3 mousePosition = hits[ 0 ].point;
 
                 //See if the mouse is hovering any lanes
-                hoveredLane = stage.GetHoveredLane( mousePosition );
+                hoveredLane = stage.GetHoveredLane(mousePosition);
 
                 //Proceed if the mouse is hovering the conveyor
-                if ( stage.conveyor.Contains( mousePosition ) )
+                if (stage.conveyor.Contains(mousePosition))
                 {
                     //Try to get a hovered conveyor item
-                    hoveredItem = stage.conveyor.GetHoveredItem( mousePosition );
+                    hoveredItem = stage.conveyor.GetHoveredItem(mousePosition);
 
                     //Proceed if an item is hovered and no item is held
-                    if ( hoveredItem != null && _heldItem == null )
+                    if (hoveredItem != null && _heldItem == null)
                     {
                         //Instantiate a new HeldItem if no item is held and the left mouse button is pressed
                         //Otherwise, change the color of the item to indicate hover
-                        if ( _heldItem == null && Input.GetMouseButtonDown( 0 ) )
-                            _heldItem = new HeldItem( hoveredItem );
+                        if (_heldItem == null && Input.GetMouseButtonDown(0))
+                            _heldItem = new HeldItem(hoveredItem);
                         else
                             hoveredItem.color = Color.yellow;
                     }
                 }
 
                 //Reset lane colors
-                stage.SetLaneColor( Color.black );
+                stage.SetLaneColor(Color.black);
 
                 //Proceed if a lane is hovered and an item is held
-                if ( _heldItem != null && hoveredLane != null )
+                if (_heldItem != null && hoveredLane != null)
                 {
                     hoveredLane.color = Color.yellow;
 
                     //Proceed if the left mouse button is not held
                     //This will only happen if the left mouse button is released
-                    if ( !Input.GetMouseButton( 0 ) )
+                    if (!Input.GetMouseButton(0))
                     {
-                        hoveredLane.Add( new LaneItem( _heldItem , hoveredLane ) );
+                        hoveredLane.Add(new LaneItem(_heldItem, hoveredLane));
                         _heldItem.conveyorItem.Destroy();
                         _heldItem.Destroy();
                         _heldItem = null;
@@ -73,13 +74,13 @@ public class Editor : Layout
                 }
 
                 //Proceed if an item is held
-                if ( _heldItem != null )
+                if (_heldItem != null)
                 {
                     //Position the held item at the world-space mouse position
-                    _heldItem.SetPosition( mousePosition );
+                    _heldItem.SetPosition(mousePosition);
 
                     //Proceed if the left mouse button is released or the right mouse button is pressed
-                    if ( !Input.GetMouseButton( 0 ) || Input.GetMouseButtonDown( 1 ) )
+                    if (!Input.GetMouseButton(0) || Input.GetMouseButtonDown(1))
                     {
                         //Reset the held conveyor item's color and clean up the held item
                         _heldItem.conveyorItem.color = Color.white;
@@ -90,20 +91,40 @@ public class Editor : Layout
             }
 
             //Reset the color of any item not currently hovered
-            stage.conveyor.SetItemColor( Color.white , _heldItem != null ? _heldItem.conveyorItem : hoveredItem );
+            stage.conveyor.SetItemColor(Color.white, _heldItem != null ? _heldItem.conveyorItem : hoveredItem);
 
-            if ( Time.time > _itemTime && ( 1 > _level.progress || stage.enemies > 0 ) )
-                _itemTime = stage.conveyor.AddItemToConveyor( new Inventory() );
+            if (Time.time > _itemTime && (1 > _level.progress || stage.enemies > 0))
+                _itemTime = stage.conveyor.AddItemToConveyor(new Inventory());
         }
 
         base.Update();
     }
 
+    private void HandleTimelineHover()
+    {
+        if (timelineEditor.heldWave != null)
+        {
+            timelineEditor.heldWave.SetPosition(mousePos + (Vector3.up * 2));
+
+            if (Input.GetMouseButtonUp(0))
+            {
+                if (timelineEditor.containsMouse)
+                {
+                    missionEditor.selectedMission.waveTimes[ missionEditor.selectedMission.waveDefinitions.IndexOf(timelineEditor.heldWave.waveDefinition) ] = Helpers.Normalize(mousePos.x, timelineEditor.missionTimeline.rect.xMax, timelineEditor.missionTimeline.rect.xMin);
+                    timelineEditor.ShowMissionTimeline();
+                }
+
+                timelineEditor.heldWave.Destroy();
+                timelineEditor.heldWave = null;
+            }
+        }
+    }
+
     private void HandleLaneHover()
     {
-        if ( stage != null && ( stage.conveyor == null || !stage.conveyor.showing ) && waveEditor.selectedWaveDefinition != null && waveEditor.waveSets == null && waveEditor.waveEventEditor == null )
+        if ( timelineEditor.heldWave == null && stage != null && ( stage.conveyor == null || !stage.conveyor.showing ) && waveEditor.selectedWaveDefinition != null && waveEditor.waveSets == null && waveEditor.waveEventEditor == null )
         {
-            Lane hoveredLane = stage.GetHoveredLane( mousePosition );
+            Lane hoveredLane = stage.GetHoveredLane( mousePos );
             stage.SetLaneColor( Color.black );
 
             if ( hoveredLane != null )
@@ -114,7 +135,7 @@ public class Editor : Layout
                 {
                     int index = stage.IndexOf( hoveredLane );
                     WaveEventDefinition waveEventDefinition = ScriptableObject.CreateInstance<WaveEventDefinition>();
-                    waveEventDefinition.Initialize( 0 , index , WaveEvent.Type.SpawnEnemy , Helpers.Normalize( mousePosition.x , hoveredLane.width , hoveredLane.start.x ) );
+                    waveEventDefinition.Initialize( 0 , index , WaveEvent.Type.SpawnEnemy , Helpers.Normalize( mousePos.x , hoveredLane.width , hoveredLane.start.x ) );
                     ScriptableObjects.Add( waveEventDefinition , waveEditor.selectedWaveDefinition );
                     waveEditor.HideWaveEventButtons();
                     waveEditor.ShowWaveEventButtons();
@@ -123,14 +144,14 @@ public class Editor : Layout
 
             if ( waveEditor.heldWaveEvent != null )
             {
-                waveEditor.heldWaveEvent.SetPosition( mousePosition );
+                waveEditor.heldWaveEvent.SetPosition( mousePos );
 
                 if ( Input.GetMouseButtonUp( 0 ) )
                 {
                     if ( hoveredLane != null )
                     {
                         waveEditor.heldWaveEvent.waveEventDefinition.SetLane( stage.IndexOf( hoveredLane ) );
-                        waveEditor.heldWaveEvent.waveEventDefinition.entryPoint = Helpers.Normalize( mousePosition.x , hoveredLane.end.x , hoveredLane.start.x );
+                        waveEditor.heldWaveEvent.waveEventDefinition.entryPoint = Helpers.Normalize( mousePos.x , hoveredLane.end.x , hoveredLane.start.x );
                         waveEditor.HideWaveEventButtons();
                         waveEditor.ShowWaveEventButtons();
                     }
@@ -262,8 +283,9 @@ public class Editor : Layout
         missionEditor.Hide();
         campaignEditor.Hide();
         timelineEditor.Hide();
-        timelineEditor.HideMissionTimeline();
+        waveEditor.HideWaveEventButtons();
         missionEditor.HideMissionEditor();
+        timelineEditor.HideMissionTimeline();
     }
 
     private void ShowObjectEditors()
@@ -301,7 +323,6 @@ public class Editor : Layout
     public T Load<T>( string path ) where T : ScriptableObject => AssetDatabase.LoadAssetAtPath<T>( path + typeof( T ) + ".asset" );
     private T Create<T>( string path ) where T : ScriptableObject => ScriptableObjects.Create<T>( path + typeof( T ) + ".asset" );
 
-    public Vector3 mousePosition => Camera.main.ScreenToWorldPoint( new Vector3( Input.mousePosition.x , Input.mousePosition.y , Camera.main.transform.position.y ) );
     public CampaignMap campaignMap { get; private set; }
     public Stage stage { get; private set; }
 
