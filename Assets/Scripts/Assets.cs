@@ -3,22 +3,55 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 public static class Assets
 {
     public static void Initialize( MonoBehaviour client , Action Callback ) => client.StartCoroutine( LoadAssetBundles(Callback) );
-    public static CampaignData Get( CampaignDataSets data ) => _campaignData[ ( int ) data ];
-    public static ObjectData Get(ObjectDataSets data) => _objectData[ (int) data ];
-    public static StageData Get( StageDataSets data ) => _stageData[ ( int ) data ];
-    public static WaveData Get( WaveDataSets data ) => _waveData[ ( int ) data ];
+    public static CampaignData Get( CampaignDataSets data ) => _campaignData.Count > 0 ? _campaignData[ ( int ) data ] : null;
+    public static ObjectData Get(ObjectDataSets data) => _objectData.Count > 0 ? _objectData[ (int) data ] : null;
+    public static StageData Get( StageDataSets data ) => _stageData.Count > 0 ? _stageData[ ( int ) data ] : null;
+    public static WaveData Get( WaveDataSets data ) => _waveData.Count > 0 ? _waveData[ ( int ) data ] : null;
+        
+    private static void Add<T>( string[] paths, List<T> target ) where T : DefinitionBase
+    {
+        T[] assets = new T[ paths.Length ];
+
+        for (int i = 0; paths.Length > i; i++)
+            assets[ i ] = AssetDatabase.LoadAssetAtPath<T>(paths[ i ]);
+
+        Add(assets, target);
+    }
+
+    private static void Add<T>(T[] assets, List<T> target) where T : DefinitionBase => target.AddRange(assets);
+
+    #if UNITY_EDITOR
+    public static T Create<T>(string path) where T : DefinitionBase => ScriptableObjects.Create<T>(path + typeof(T) + ".asset");
+    #endif
+
+    public const string campaignDataPath = "Assets/AssetBundleSource/Campaigns/";
+    public const string objectDataPath = "Assets/AssetBundleSource/Objects/";
+    public const string stageDataPath = "Assets/AssetBundleSource/Stages/";
+    public const string waveDataPath = "Assets/AssetBundleSource/Waves/";
 
     private static IEnumerator LoadAssetBundles( Action Callback )
     {
+        #if UNITY_EDITOR
+
+        Add(System.IO.Directory.GetFiles(campaignDataPath), _campaignData);
+        Add(System.IO.Directory.GetFiles(objectDataPath), _objectData);
+        Add(System.IO.Directory.GetFiles(stageDataPath), _stageData);
+        Add(System.IO.Directory.GetFiles(waveDataPath), _waveData);
+        yield return null;
+
+        #else
+        
         string assetBundles = System.IO.Path.Combine( Application.streamingAssetsPath , "AssetBundles" );
         string platform = string.Empty;
 
-        #if UNITY_EDITOR
-            platform = System.IO.Path.Combine( assetBundles , "PC" );
-        #elif UNITY_STANDALONE_WIN
+        #if UNITY_STANDALONE_WIN
             platform = System.IO.Path.Combine( assetBundles , "PC" );
         #elif UNITY_SWITCH
             platform = System.IO.Path.Combine( assetBundles , "Switch" );
@@ -65,6 +98,9 @@ public static class Assets
             _objectData.Add(objectData.assetBundle.LoadAsset<ObjectData>(objectDataNames[ i ]));
 
         loaded = true;
+
+        #endif //UNITY_EDITOR
+
         Callback?.Invoke();
     }
 

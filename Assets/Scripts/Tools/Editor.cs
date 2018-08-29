@@ -320,9 +320,6 @@ public class Editor : Layout
 
     public Button GetMapButton( int index ) => _campaignMapButtons[ index ];
 
-    public T Load<T>( string path ) where T : ScriptableObject => AssetDatabase.LoadAssetAtPath<T>( path + typeof( T ) + ".asset" );
-    private T Create<T>( string path ) where T : ScriptableObject => ScriptableObjects.Create<T>( path + typeof( T ) + ".asset" );
-
     public CampaignMap campaignMap { get; private set; }
     public Stage stage { get; private set; }
 
@@ -349,30 +346,26 @@ public class Editor : Layout
     private Button _saveButton { get; }
     private Level _level { get; set; }
 
-    private const string _campaignDataPath = "Assets/AssetBundleSource/Campaigns/";
-    private const string _objectDataPath = "Assets/AssetBundleSource/Objects/";
-    private const string _stageDataPath = "Assets/AssetBundleSource/Stages/";
-    private const string _waveDataPath = "Assets/AssetBundleSource/Waves/";
 
     public Editor(GameObject parent) : base("Editor", parent)
     {
-        waveData = Load<WaveData>(_waveDataPath);
-        stageData = Load<StageData>(_stageDataPath);
-        objectData = Load<ObjectData>(_objectDataPath);
-        campaignData = Load<CampaignData>(_campaignDataPath);
+        waveData = Assets.Get(Assets.WaveDataSets.Default);
+        stageData = Assets.Get(Assets.StageDataSets.Default);
+        objectData = Assets.Get(Assets.ObjectDataSets.Default);
+        campaignData = Assets.Get(Assets.CampaignDataSets.Default);
 
         if (waveData == null)
-            waveData = Create<WaveData>(_waveDataPath);
+            waveData = Assets.Create<WaveData>(Assets.waveDataPath);
 
         if (stageData == null)
-            stageData = Create<StageData>(_stageDataPath);
+            stageData = Assets.Create<StageData>(Assets.stageDataPath);
 
         if (campaignData == null)
-            campaignData = Create<CampaignData>(_campaignDataPath);
+            campaignData = Assets.Create<CampaignData>(Assets.campaignDataPath);
 
         if (objectData == null)
         {
-            objectData = Create<ObjectData>(_objectDataPath);
+            objectData = Assets.Create<ObjectData>(Assets.objectDataPath);
             ScriptableObjects.Add(ScriptableObject.CreateInstance<EnemySet>(), objectData);
             ScriptableObjects.Add(ScriptableObject.CreateInstance<ItemSet>(), objectData);
             ScriptableObjects.Add(ScriptableObject.CreateInstance<HeroSet>(), objectData);

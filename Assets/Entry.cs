@@ -8,15 +8,15 @@ public class Entry : MonoBehaviour
 	void Awake()
     {
         instance = this;
-#if !UNITY_EDITOR
+        #if !UNITY_EDITOR
         //Assets.Initialize(this, () => StartSession(new Player()));
-#else
+        #else
         //Assets.Initialize(this, () => StartSession(new Player()));
-        editor = new Editor(gameObject);
-#endif
+        Assets.Initialize(this, () => editor = new Editor(gameObject));
+        #endif
     }
 
-#if UNITY_EDITOR
+    #if UNITY_EDITOR
     Editor editor;
 
     private void Update() => editor?.Update();
