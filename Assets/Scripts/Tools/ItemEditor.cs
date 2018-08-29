@@ -34,12 +34,11 @@ public class ItemEditor : Layout
                     if (button.selected && Input.GetMouseButtonDown(0) && (_itemLevels == null || !_itemLevels.containsMouse))
                     {
                         HideItemLevels();
-                        button.Deselect();
 
-                        if (_selectedLevel != index)
+                        if ( 0 > _selectedLevel || index == _editor.objectData.itemSets[ (int) Assets.ObjectDataSets.Default ].itemDefinitions.IndexOf(_selectedItem))
                         {
                             button.SetColor(Color.white);
-                            _selectedItem = null;
+                            button.Deselect();
                         }
                     }
                 })
@@ -103,14 +102,16 @@ public class ItemEditor : Layout
     public void ShowItemEditor()
     {
         HideItemEditor();
-        Add(_itemEditor = new Layout("ItemEditor", 3, 1 , 0.25f, 0.1f, 2, container));
+        Add(_itemEditor = new Layout("ItemEditor", 3, 2 , 0.25f, 0.1f, 2, container));
         _itemEditor.SetPosition(_items.position + (Vector3.back * _items.height * 0.5f) + Vector3.back);
 
         _itemEditor.Add(new List<Element>()
         {
             new Label("Value:", Color.black, 1.25f, 0.5f, container, fontSize: 20, anchor: TextAnchor.MiddleCenter),
-            new Field("Value", _selectedItem.Damage(_selectedLevel).ToString(), 2, 0.5f, 20, container, Field.ContentMode.Numbers, EndInput: (Field field) =>
+            new Field("Value", _selectedItem.Value(_selectedLevel).ToString(), 2, 0.5f, 20, container, Field.ContentMode.Numbers, EndInput: (Field field) =>
             {
+                Debug.Log(_selectedItem.type);
+
                 int value;
                 int.TryParse(field.label.text, out value);
                 _selectedItem.SetValue(_selectedLevel, value);
@@ -121,6 +122,8 @@ public class ItemEditor : Layout
             new Label("Damage:", Color.black, 1.25f, 0.5f, container, fontSize: 20, anchor: TextAnchor.MiddleCenter),
             new Field("Damage", _selectedItem.Damage(_selectedLevel).ToString(), 2, 0.5f, 20, container, Field.ContentMode.Numbers, EndInput: (Field field) =>
             {
+                Debug.Log(_selectedItem.type);
+
                 int value;
                 int.TryParse(field.label.text, out value);
                 _selectedItem.SetDamage(_selectedLevel, value);
@@ -150,9 +153,7 @@ public class ItemEditor : Layout
                 Stay: ( Button button ) =>
                 {
                     if ( Input.GetMouseButtonDown( 0 ) )
-                    {
                         ShowEffects(button.position + new Vector3(button.width * 0.5f, 0, button.height * 0.5f));
-                    }
                 } ,
                 Exit: ( Button button ) => button.SetColor( Color.white ) ),
         }, true);

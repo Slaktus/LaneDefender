@@ -431,7 +431,7 @@ public class Editor : Layout
 
         _saveButton.SetPosition(_testButton.position + Vector3.left * (_saveButton.width));
 
-        Add(_campaignButton = new Button("Campaigns", 3, 1, container, "CampaignsButton",
+        Add(_campaignButton = new Button("Campaigns", 2, 0.5f, container, "CampaignsButton",
             fontSize: 20,
             Enter: (Button button) => button.SetColor( button.selected ? button.color : Color.green),
             Stay: (Button button) =>
@@ -444,7 +444,7 @@ public class Editor : Layout
         _campaignButton.SetViewportPosition(new Vector2(0, 1));
         _campaignButton.SetPosition(_campaignButton.position + Vector3.up);
 
-        Add(_objectsButton = new Button("Objects", 3, 1, container, "ObjectsButton",
+        Add(_objectsButton = new Button("Objects", 2, 0.5f, container, "ObjectsButton",
             fontSize: 20,
             Enter: (Button button) => button.SetColor(button.selected ? button.color : Color.green),
             Stay: (Button button) => 
@@ -455,7 +455,6 @@ public class Editor : Layout
             Exit: (Button button) => button.SetColor(button.selected ? button.color : Color.white)));
 
         _objectsButton.SetPosition(_campaignButton.position + Vector3.right * (_objectsButton.width));
-
         Add(campaignEditor = new CampaignEditor(this, Vector3.zero, container));
         Add(timelineEditor = new TimelineEditor(this, container));
         Add(missionEditor = new MissionEditor(this, container));
@@ -464,9 +463,7 @@ public class Editor : Layout
         Add(waveEditor = new WaveEditor(this, container));
         Add(itemEditor = new ItemEditor(this, container));
         Add(heroEditor = new HeroEditor(this, container));
-
         ShowCampaignEditor();
     }
-
 }
 #endif //UNITY_EDITOR

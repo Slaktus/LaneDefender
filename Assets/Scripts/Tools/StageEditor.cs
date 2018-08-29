@@ -23,7 +23,7 @@ public class StageEditor : Layout
         int count = _editor.stageData.stageSets.Count;
         Add(stageSets = new Layout( "StageSetButtons" , 3, (count + 2), 0.25f, 0.1f, count + 2, container ));
         stageSets.SetViewportPosition(new Vector2(0, 1));
-        stageSets.SetPosition(stageSets.position + Vector3.up);
+        stageSets.SetPosition(stageSets.position + Vector3.up + Vector3.back);
 
         stageSets.Add(new List<Button>(Button.GetButtons(count, (int index) => new Button("Stage Set", 3, 1, container, "StageSet",
             fontSize: 20,

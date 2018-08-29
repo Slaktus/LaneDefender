@@ -104,12 +104,12 @@ public class HeroEditor : Layout
     {
         //just a bit of positioning here and we be rearin' to gaw
         HideHeroEditor();
-        Add(_heroEditor = new Layout("HeroEditor", 3, 2 , 0.25f, 0.1f, 3, container));
+        Add(_heroEditor = new Layout("HeroEditor", 3, 3 , 0.25f, 0.1f, 3, container));
         _heroEditor.SetPosition(_heroes.position + (Vector3.back * (_heroes.height + _heroEditor.height) * 0.5f));
         _heroEditor.Add(new List<Element>()
         {
             new Label("Value:", Color.black, 1.25f, 0.5f, container, fontSize: 20, anchor: TextAnchor.MiddleCenter),
-            new Field("Value", _selectedHero.Health(_selectedLevel).ToString(), 2, 0.5f, 20, container, Field.ContentMode.Numbers, EndInput: (Field field) =>
+            new Field("Value", _selectedHero.Value(_selectedLevel).ToString(), 2, 0.5f, 20, container, Field.ContentMode.Numbers, EndInput: (Field field) =>
             {
                 int value;
                 int.TryParse(field.label.text, out value);
