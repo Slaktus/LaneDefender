@@ -155,6 +155,9 @@ public class Session
             conveyor: conveyor ,
             player: player );
 
+        if (!Definitions.initialized)
+            Definitions.Initialize(Assets.Get(Assets.ObjectDataSets.Default));
+
         EnemyDefinition enemyDefinition = Definitions.Enemy( Definitions.Enemies.Default );
 
         level = new Level( 15 );

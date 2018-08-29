@@ -8,52 +8,52 @@ public class LaneItem : LaneObject
     {
         bool move = true;
 
-        if ( changeLane != null )
+        if (changeLane != null)
             move = !changeLane.MoveNext();
 
-        float x = position.x - ( ( speed * Time.deltaTime ) * ( move ? 1 : 0 ) );
-        bool destroy = end + ( body.transform.localScale.x * 0.5f ) > x;
-        position = new Vector3( Mathf.Clamp( x , end + ( scale.x * 0.5f ) , start - ( scale.x * 0.5f ) ) , position.y , position.z );
-        Debug.DrawLine( new Vector3( rect.xMin , 0 , rect.yMin ) , new Vector3( rect.xMax , 0 , rect.yMax ) , Color.yellow );
+        float x = position.x - ((speed * Time.deltaTime) * (move ? 1 : 0));
+        bool destroy = end + (body.transform.localScale.x * 0.5f) > x;
+        position = new Vector3(Mathf.Clamp(x, end + (scale.x * 0.5f), start - (scale.x * 0.5f)), position.y, position.z);
+        Debug.DrawLine(new Vector3(rect.xMin, 0, rect.yMin), new Vector3(rect.xMax, 0, rect.yMax), Color.yellow);
 
-        if ( leap != null )
+        if (leap != null)
             leap.MoveNext();
 
-        if ( overlap )
-            overlapping.Interaction( this );
+        if (overlap)
+            overlapping.Interaction(this);
 
-        if ( destroy )
+        if (destroy)
             Destroy();
     }
 
     public void Split()
     {
-        HeldItem upHeldItem = new HeldItem( new ConveyorItem( lane.stage.conveyor , Definitions.Item( Definitions.Items.Part ) , heldItem.conveyorItem.settings ) );
-        LaneItem upItem = new LaneItem( upHeldItem , lane );
+        HeldItem upHeldItem = new HeldItem(new ConveyorItem(lane.stage.conveyor, Definitions.Item(Definitions.Items.Part), heldItem.conveyorItem.settings));
+        LaneItem upItem = new LaneItem(upHeldItem, lane);
         upHeldItem.conveyorItem.Destroy();
         upHeldItem.Destroy();
-        lane.Add( upItem );
-        upItem.SetPosition( new Vector3( position.x , upItem.position.y , upItem.position.z ) );
-        upItem.changeLane = upItem.ChangeLane( -1 );
+        lane.Add(upItem);
+        upItem.SetPosition(new Vector3(position.x, upItem.position.y, upItem.position.z));
+        upItem.changeLane = upItem.ChangeLane(-1);
 
-        HeldItem downHeldItem = new HeldItem( new ConveyorItem( lane.stage.conveyor , Definitions.Item( Definitions.Items.Part ) , heldItem.conveyorItem.settings ) );
-        LaneItem downItem = new LaneItem( downHeldItem , lane );
+        HeldItem downHeldItem = new HeldItem(new ConveyorItem(lane.stage.conveyor, Definitions.Item(Definitions.Items.Part), heldItem.conveyorItem.settings));
+        LaneItem downItem = new LaneItem(downHeldItem, lane);
         downHeldItem.conveyorItem.Destroy();
         downHeldItem.Destroy();
-        lane.Add( downItem );
-        downItem.SetPosition( new Vector3( position.x , downItem.position.y , downItem.position.z ) );
-        downItem.changeLane = downItem.ChangeLane( 1 );
+        lane.Add(downItem);
+        downItem.SetPosition(new Vector3(position.x, downItem.position.y, downItem.position.z));
+        downItem.changeLane = downItem.ChangeLane(1);
     }
 
-    public void LeapEntity( LaneEntity laneEntity ) => leap = Leap( laneEntity );
+    public void LeapEntity(LaneEntity laneEntity) => leap = Leap(laneEntity);
 
-    public void SetPosition( Vector3 position ) => this.position = position;
+    public void SetPosition(Vector3 position) => this.position = position;
 
-    private IEnumerator Leap( LaneEntity laneEntity )
+    private IEnumerator Leap(LaneEntity laneEntity)
     {
         body.transform.localPosition = Vector3.up;
 
-        while ( laneEntity.valid && back > laneEntity.back )
+        while (laneEntity.valid && back > laneEntity.back)
             yield return null;
 
         body.transform.localPosition = Vector3.zero;
@@ -65,8 +65,8 @@ public class LaneItem : LaneObject
         {
             bool collide = false;
 
-            for ( int i = 0 ; lane.objects.Count > i && !collide ; i++ )
-                if ( lane.objects[ i ] is LaneEntity && ( lane.objects[ i ].Contains( frontPoint ) || lane.objects[ i ].Contains( frontPoint + ( Vector3.forward * scale.z * 0.5f ) ) || lane.objects[ i ].Contains( frontPoint + ( Vector3.back * scale.z * 0.5f ) ) ) )
+            for (int i = 0; lane.objects.Count > i && !collide; i++)
+                if (lane.objects[ i ] is LaneEntity && (lane.objects[ i ].Contains(frontPoint) || lane.objects[ i ].Contains(frontPoint + (Vector3.forward * scale.z * 0.5f)) || lane.objects[ i ].Contains(frontPoint + (Vector3.back * scale.z * 0.5f))))
                     return lane.objects[ i ] as LaneEntity;
 
             return null;

@@ -3,13 +3,17 @@ using UnityEngine;
 
 public static class Definitions
 {
-    public static void Initialize(ObjectData objectData) => Definitions.objectData = objectData;
+    public static void Initialize(ObjectData objectData)
+    {
+        Definitions.objectData = objectData;
+        initialized = true;
+    }
 
-    public static HeroDefinition Hero( Heroes hero, Assets.ObjectDataSets set = Assets.ObjectDataSets.Default) => objectData.heroSets[ (int) set ].heroDefinitions[ ( int ) hero ];
+    public static HeroDefinition Hero(Heroes hero, Assets.ObjectDataSets set = Assets.ObjectDataSets.Default) => objectData.heroSets[ (int) set ].heroDefinitions[ (int) hero ];
 
-    public static EnemyDefinition Enemy( Enemies enemy, Assets.ObjectDataSets set = Assets.ObjectDataSets.Default) => objectData.enemySets[ (int) set ].enemyDefinitions[ ( int ) enemy ];
+    public static EnemyDefinition Enemy(Enemies enemy, Assets.ObjectDataSets set = Assets.ObjectDataSets.Default) => objectData.enemySets[ (int) set ].enemyDefinitions[ (int) enemy ];
 
-    public static ItemDefinition Item( Items item, Assets.ObjectDataSets set = Assets.ObjectDataSets.Default) => objectData.itemSets[ (int) set].itemDefinitions[ ( int ) item ];
+    public static ItemDefinition Item(Items item, Assets.ObjectDataSets set = Assets.ObjectDataSets.Default) => objectData.itemSets[ (int) set ].itemDefinitions[ (int) item ];
 
     public static List<Effects> GetEffects(Items item)
     {
@@ -41,6 +45,7 @@ public static class Definitions
         }
     }
 
+    public static bool initialized { get; private set; }
     private static ObjectData objectData { get; set; }
 
     public enum Heroes

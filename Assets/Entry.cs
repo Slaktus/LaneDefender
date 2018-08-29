@@ -9,19 +9,14 @@ public class Entry : MonoBehaviour
     {
         instance = this;
 #if !UNITY_EDITOR
-        //Definitions.Initialize()
-        StartSession( new Player() );
-
+        //Assets.Initialize(this, () => StartSession(new Player()));
 #else
-        Assets.Initialize(this, () => editor = new Editor(gameObject));
-        //missionEditor = new MissionEditor();
-        //campaignEditor = new CampaignEditor();
-        //editor = new Editor();
-        //shop = new Shop( new Player() );
-        #endif
+        Assets.Initialize(this, () => StartSession(new Player()));
+        //Assets.Initialize(this, () => editor = new Editor(gameObject));
+#endif
     }
 
-    #if UNITY_EDITOR
+#if UNITY_EDITOR
     Editor editor;
 
     private void Update() => editor?.Update();

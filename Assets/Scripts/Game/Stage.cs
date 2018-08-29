@@ -198,15 +198,16 @@ public class Stage
         Vector3 bottomLeft = Camera.main.ScreenToWorldPoint( new Vector3( 0 , 0 , Camera.main.transform.position.y ) );
         Vector3 topRight = Camera.main.ScreenToWorldPoint( new Vector3( Screen.width , Screen.height , Camera.main.transform.position.y ) );
 
-        //Transforms give GameObjects' positions, rotations and scales
+        //Transforms give GameObjects' parents, positions, rotations and scales
+        ground.transform.SetParent(_container.transform);
         ground.transform.localScale = new Vector3( topRight.x - bottomLeft.x , 1 , topRight.z - bottomLeft.z );
-        ground.transform.position = new Vector3( width * 0.5f , -1 , ( -height * 0.5f ) - laneSpacing * 0.5f );
+        ground.transform.position = new Vector3( width * 0.5f , -0.5f , ( -height * 0.5f ) - laneSpacing * 0.5f );
         ground.name = "Ground";
 
-        //Disable the ground mesh renderer -- we don't want to see the cube
-        //GetComponent lets us fetch references to components attached to GameObjects in a scene
         ground.GetComponent<MeshRenderer>().enabled = false;
-        ground.transform.SetParent( _container.transform );
+        BoxCollider collider = ground.GetComponent<BoxCollider>();
+        collider.size = new Vector3(1, 0, 1);
+        collider.isTrigger = false;
     }
 
     public Stage( StageDefinition stageDefinition , Player player , Conveyor conveyor ) : this( stageDefinition.speed , stageDefinition.width , stageDefinition.height , stageDefinition.laneSpacing , stageDefinition.laneCount , conveyor , player ) { }

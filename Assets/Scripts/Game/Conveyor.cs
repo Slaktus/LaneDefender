@@ -113,7 +113,8 @@ public class Conveyor
         _quad.transform.position = worldPosition;
         _quad.transform.name = "Conveyor";
 
-        _quad.GetComponent<MeshCollider>().enabled = false;
+        GameObject.Destroy(_quad.GetComponent<MeshCollider>());
+        _quad.AddComponent<BoxCollider>().isTrigger = true;
 
         _meshRenderer = _quad.GetComponent<MeshRenderer>();
         _meshRenderer.material = Entry.instance.unlitColor;
