@@ -154,12 +154,12 @@ public class WaveEditor : Layout
                                 new Field( "Delay" , waveEvent.delay.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) => float.TryParse( field.label.text , out selectedWaveDefinition.waveEvents[ index ].delay ) ) ,
 
                                 new Label("Entry:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
-                                new Field( "Entry" , waveEvent.entryPoint.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers , EndInput: ( Field field ) => float.TryParse( field.label.text , out selectedWaveDefinition.waveEvents[ index ].entryPoint ) )
+                                new Field( "Entry" , waveEvent.entryPoint.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers , StartInput: ( Field field ) => Debug.Log("hello"), EndInput: ( Field field ) => float.TryParse( field.label.text , out selectedWaveDefinition.waveEvents[ index ].entryPoint ) )
                             };
 
-                            waveEventEditor = new Layout("WaveEventEditor", 3.5f, 3, 0.25f, 0.1f, waveEventEditorButtons.Count / 2, container);
+                            Add( waveEventEditor = new Layout("WaveEventEditor", 3.5f, 3, 0.25f, 0.1f, waveEventEditorButtons.Count / 2, container) );
                             waveEventEditor.Add(waveEventEditorButtons, true);
-                            waveEventEditor.SetPosition(butt.position);
+                            waveEventEditor.SetPosition(butt.position + Vector3.up);
 
                             for (int j = 0; waveEventButtons[ laneIndex ].Count > j; j++)
                                 waveEventButtons[ laneIndex ][ j ].Hide();
@@ -185,6 +185,7 @@ public class WaveEditor : Layout
                     {
                         if (Input.GetMouseButtonDown(0) && butt.selected && (waveEventEditor == null || !waveEventEditor.containsMouse))
                         {
+                            Remove(waveEventEditor);
                             waveEventEditor?.Destroy();
                             waveEventEditor = null;
                             butt.Deselect();

@@ -15,36 +15,6 @@ public static class Definitions
 
     public static ItemDefinition Item(Items item, Assets.ObjectDataSets set = Assets.ObjectDataSets.Default) => objectData.itemSets[ (int) set ].itemDefinitions[ (int) item ];
 
-    public static List<Effects> GetEffects(Items item)
-    {
-        switch (item)
-        {
-            case Items.Damage:
-                return new List<Effects>() { Effects.Damage, Effects.PushBack };
-
-            case Items.LaneDown:
-                return new List<Effects>() { Effects.LaneDown };
-
-            case Items.LaneUp:
-                return new List<Effects>() { Effects.LaneUp };
-
-            case Items.Leap:
-                return new List<Effects>() { Effects.Leap, Effects.Damage, Effects.PushBack };
-
-            case Items.Part:
-                return new List<Effects>() { Effects.Damage, Effects.PushBack };
-
-            case Items.Split:
-                return new List<Effects>() { Effects.Damage, Effects.PushBack, Effects.Split };
-
-            case Items.Wreck:
-                return new List<Effects>() { Effects.Leap, Effects.Damage, Effects.PushBack };
-
-            default:
-                return new List<Effects>() { };
-        }
-    }
-
     public static bool initialized { get; private set; }
     private static ObjectData objectData { get; set; }
 

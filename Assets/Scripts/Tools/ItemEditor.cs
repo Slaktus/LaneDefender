@@ -110,8 +110,6 @@ public class ItemEditor : Layout
             new Label("Value:", Color.black, 1.25f, 0.5f, container, fontSize: 20, anchor: TextAnchor.MiddleCenter),
             new Field("Value", _selectedItem.Value(_selectedLevel).ToString(), 2, 0.5f, 20, container, Field.ContentMode.Numbers, EndInput: (Field field) =>
             {
-                Debug.Log(_selectedItem.type);
-
                 int value;
                 int.TryParse(field.label.text, out value);
                 _selectedItem.SetValue(_selectedLevel, value);
@@ -122,8 +120,6 @@ public class ItemEditor : Layout
             new Label("Damage:", Color.black, 1.25f, 0.5f, container, fontSize: 20, anchor: TextAnchor.MiddleCenter),
             new Field("Damage", _selectedItem.Damage(_selectedLevel).ToString(), 2, 0.5f, 20, container, Field.ContentMode.Numbers, EndInput: (Field field) =>
             {
-                Debug.Log(_selectedItem.type);
-
                 int value;
                 int.TryParse(field.label.text, out value);
                 _selectedItem.SetDamage(_selectedLevel, value);

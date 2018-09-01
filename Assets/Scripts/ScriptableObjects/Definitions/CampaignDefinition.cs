@@ -15,7 +15,8 @@ public class CampaignDefinition : DefinitionBase
     }
 
     public bool Has( int index ) => missionIndices.Contains( index );
-    public MissionDefinition Get( int index ) => Has( index ) ? missionDefinitions[ missionIndices.IndexOf( index ) ] : null;
+    public MissionDefinition GetMissionDefinition( int index ) => Has( index ) ? missionDefinitions[ missionIndices.IndexOf( index ) ] : null;
+    public Connection GetConnection(int index) => connections[ index ];
 
     public void Add( ScriptableObject toAdd , int index )
     {
@@ -23,16 +24,32 @@ public class CampaignDefinition : DefinitionBase
         missionIndices.Add( index );
     }
 
-    public override void Add( ScriptableObject toAdd ) => missionDefinitions.Add( toAdd as MissionDefinition );
+    public override void Add(ScriptableObject toAdd)
+    {
+        if (toAdd is MissionDefinition)
+            missionDefinitions.Add(toAdd as MissionDefinition);
+        else
+            connections.Add(toAdd as Connection);
+    }
 
     public override void Remove( ScriptableObject toRemove )
     {
-        MissionDefinition missionDefinition = toRemove as MissionDefinition;
-        missionIndices.RemoveAt( missionDefinitions.IndexOf( missionDefinition ) );
-        missionDefinitions.Remove( missionDefinition );
+        if ( toRemove is MissionDefinition)
+        {
+            MissionDefinition missionDefinition = toRemove as MissionDefinition;
+            missionIndices.RemoveAt(missionDefinitions.IndexOf(missionDefinition));
+            missionDefinitions.Remove(missionDefinition);
+        }
+        else
+        {
+            Connection connection = toRemove as Connection;
+            connections.Remove(connection);
+        }
+        
     }
 
     public List<MissionDefinition> missionDefinitions = new List<MissionDefinition>();
+    public List<Connection> connections = new List<Connection>();
     public List<int> missionIndices = new List<int>();
     public float height;
     public float width;

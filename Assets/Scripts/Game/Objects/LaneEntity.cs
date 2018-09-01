@@ -38,7 +38,7 @@ public class LaneEntity : LaneObject
         if ( health == 0 )
         {
             lane.stage.AddCoins( defeatValue );
-            lane.Add( new LaneItem( Definitions.GetEffects(Definitions.Items.Wreck) , lane , "Wreck" , scale.x , scale.z , position ) );
+            lane.Add( new LaneItem( Definitions.Item(Definitions.Items.Wreck).Effects(0) , lane , "Wreck" , scale.x , scale.z , position ) );
         }
 
         base.Destroy();
