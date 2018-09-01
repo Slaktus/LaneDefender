@@ -45,7 +45,6 @@ public class CampaignDefinition : DefinitionBase
             Connection connection = toRemove as Connection;
             connections.Remove(connection);
         }
-        
     }
 
     public List<MissionDefinition> missionDefinitions = new List<MissionDefinition>();

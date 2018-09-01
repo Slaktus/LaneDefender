@@ -239,6 +239,15 @@ public class Editor : Layout
                             //some kind of double bookkeeping required that I'm too tired to handle now
                             //but at least hey, that's it -- when looking up the index and removing the instance, it finds the other identical instance, because it's the same in both
                             //duh
+
+                            for ( int j = 0; campaignEditor.selectedCampaign.connections.Count > j; j++)
+                            {
+                                Connection connection = campaignEditor.selectedCampaign.connections[ j ];
+
+                                if ( connection.fromIndex == index || connection.toIndex == index)
+                                    campaignEditor.selectedCampaign.Remove(connection);
+                            }
+
                             campaignEditor.selectedCampaign.Remove(campaignEditor.selectedCampaign.GetMissionDefinition(index));
                             ShowCampaignMap();
                         }
@@ -300,13 +309,12 @@ public class Editor : Layout
                     Enter: (Button butt) => butt.SetColor(_selectedConnectorIndex >= 0 ? Color.yellow : Color.green),
                     Stay: (Button butt) =>
                     {
-                        if (Input.GetMouseButtonUp(0) && _selectedConnectorIndex != index)
+                        if (_selectedConnectorIndex >= 0 && _selectedConnectorIndex != index && Input.GetMouseButtonUp(0))
                         {
                             ScriptableObjects.Add(ScriptableObject.CreateInstance<Connection>().Initialize(_selectedConnectorIndex, index), campaignEditor.selectedCampaign);
                             _selectedConnectorIndex = -1;
                             butt.SetColor(Color.white);
                             ShowConnectors();
-
                         }
                     },
                     Exit: (Button butt) => butt.SetColor(Color.white));
