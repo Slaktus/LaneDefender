@@ -270,64 +270,10 @@ public class Editor : Layout
             Add(button);
 
             if (campaignEditor.selectedCampaign.Has(index))
-            {
-                Button connector = new Button("+", 0.5f, 0.5f, container, "Connector+",
-                    Enter: (Button butt) => butt.SetColor(butt.selected ? butt.color : Color.green),
-                    Stay: (Button butt) =>
-                     {
-                         if (Input.GetMouseButtonDown(0))
-                         {
-                             butt.Select();
-                             butt.SetColor(Color.yellow);
-                             _selectedConnectorIndex = index;
-                             _dummyContainer = new GameObject("DummyContainer");
-                             _dummyConnector = GameObject.CreatePrimitive(PrimitiveType.Quad);
-                             _dummyConnector.transform.SetParent(_dummyContainer.transform);
-                             _dummyConnector.transform.localPosition += Vector3.up * 0.5f;
-                             _dummyContainer.transform.position = butt.position + Vector3.up;
-                         }
-                     },
-                    Exit: (Button butt) => butt.SetColor(butt.selected ? butt.color : Color.white),
-                    Close: (Button butt) =>
-                    {
-                        if (Input.GetMouseButtonUp(0))
-                        {
-                            butt.Deselect();
-                            butt.SetColor(Color.white);
-
-                            if (_dummyContainer != null)
-                            {
-                                butt.Deselect();
-                                GameObject.Destroy(_dummyContainer);
-                                _dummyContainer = null;
-                                _dummyConnector = null;
-                            }
-                        }
-                    });
-
-                Button terminator = new Button("-", 0.5f, 0.5f, container, "Terminator-",
-                    Enter: (Button butt) => butt.SetColor(_selectedConnectorIndex >= 0 ? Color.yellow : Color.green),
-                    Stay: (Button butt) =>
-                    {
-                        if (_selectedConnectorIndex >= 0 && _selectedConnectorIndex != index && Input.GetMouseButtonUp(0))
-                        {
-                            ScriptableObjects.Add(ScriptableObject.CreateInstance<Connection>().Initialize(_selectedConnectorIndex, index), campaignEditor.selectedCampaign);
-                            _selectedConnectorIndex = -1;
-                            butt.SetColor(Color.white);
-                            ShowConnectors();
-                        }
-                    },
-                    Exit: (Button butt) => butt.SetColor(Color.white));
-
-                Add(connector);
-                Add(terminator);
-
-                connector.SetPosition(new Vector3(button.rect.xMax + 0.25f, button.position.y, button.rect.center.y));
-                terminator.SetPosition(new Vector3(button.rect.xMin - 0.25f, button.position.y, button.rect.center.y));
-            }
+                ShowConnectorAndTerminal(index, button);
         }
 
-        ShowConnectors();
+        ShowConnections();
     }
 
     public void HideCampaignMap()
@@ -339,8 +285,78 @@ public class Editor : Layout
         }
 
         _campaignMapButtons.Clear();
+        HideConnectorsAndTerminals();
     }
 
+    private void ShowConnectorAndTerminal(int index, Button button)
+    {
+        Button connector = new Button("+", 0.5f, 0.5f, container, "Connector+",
+            Enter: (Button butt) => butt.SetColor(butt.selected ? butt.color : Color.green),
+            Stay: (Button butt) =>
+            {
+                if (Input.GetMouseButtonDown(0))
+                {
+                    butt.Select();
+                    butt.SetColor(Color.yellow);
+                    _selectedConnectorIndex = index;
+                    _dummyContainer = new GameObject("DummyContainer");
+                    _dummyConnector = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                    _dummyConnector.transform.SetParent(_dummyContainer.transform);
+                    _dummyConnector.transform.localPosition += Vector3.up * 0.5f;
+                    _dummyContainer.transform.position = butt.position + Vector3.up;
+                }
+            },
+            Exit: (Button butt) => butt.SetColor(butt.selected ? butt.color : Color.white),
+            Close: (Button butt) =>
+            {
+                if (Input.GetMouseButtonUp(0))
+                {
+                    butt.Deselect();
+                    butt.SetColor(Color.white);
+
+                    if (_dummyContainer != null)
+                    {
+                        butt.Deselect();
+                        GameObject.Destroy(_dummyContainer);
+                        _dummyContainer = null;
+                        _dummyConnector = null;
+                    }
+                }
+            });
+
+        Button terminator = new Button("-", 0.5f, 0.5f, container, "Terminator-",
+            Enter: (Button butt) => butt.SetColor(_selectedConnectorIndex >= 0 ? Color.yellow : Color.green),
+            Stay: (Button butt) =>
+            {
+                if (_selectedConnectorIndex >= 0 && _selectedConnectorIndex != index && Input.GetMouseButtonUp(0))
+                {
+                    ScriptableObjects.Add(ScriptableObject.CreateInstance<Connection>().Initialize(_selectedConnectorIndex, index), campaignEditor.selectedCampaign);
+                    _selectedConnectorIndex = -1;
+                    butt.SetColor(Color.white);
+                    ShowConnections();
+                }
+            },
+            Exit: (Button butt) => butt.SetColor(Color.white));
+
+        Add(connector);
+        Add(terminator);
+        _connectorsAndTerminators.Add(connector);
+        _connectorsAndTerminators.Add(terminator);
+
+        connector.SetPosition(new Vector3(button.rect.xMax + 0.25f, button.position.y, button.rect.center.y));
+        terminator.SetPosition(new Vector3(button.rect.xMin - 0.25f, button.position.y, button.rect.center.y));
+    }
+
+    public void HideConnectorsAndTerminals()
+    {
+        for (int i = 0; _connectorsAndTerminators.Count > i; i++)
+        {
+            Remove(_connectorsAndTerminators[ i ]);
+            _connectorsAndTerminators[ i ].Destroy();
+        }
+
+        _connectorsAndTerminators.Clear();
+    }
     private void ShowCampaignEditor()
     {
         HideObjectsEditor();
@@ -389,7 +405,7 @@ public class Editor : Layout
         itemEditor.Hide();
     }
 
-    private void ShowConnectors()
+    private void ShowConnections()
     {
         HideConnectors();
 
@@ -449,6 +465,7 @@ public class Editor : Layout
     public ItemEditor itemEditor { get; }
     public WaveEditor waveEditor { get; }
 
+    private List<Button> _connectorsAndTerminators { get; }
     private List<Button> _campaignMapButtons { get; }
     private List<GameObject> _connectors { get; }
     private HeldItem _heldItem { get; set; }
@@ -500,6 +517,7 @@ public class Editor : Layout
         Definitions.Initialize(objectData);
         _connectors = new List<GameObject>();
         _campaignMapButtons = new List<Button>();
+        _connectorsAndTerminators = new List<Button>();
 
         Add(_testButton = new Button("Test", 1.5f, 0.5f, container, "Test",
             fontSize: 20,
