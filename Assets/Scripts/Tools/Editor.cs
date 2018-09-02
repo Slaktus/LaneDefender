@@ -286,6 +286,7 @@ public class Editor : Layout
 
         _campaignMapButtons.Clear();
         HideConnectorsAndTerminals();
+        HideConnections();
     }
 
     private void ShowConnectorAndTerminal(int index, Button button)
@@ -407,7 +408,7 @@ public class Editor : Layout
 
     private void ShowConnections()
     {
-        HideConnectors();
+        HideConnections();
 
         for ( int i = 0; campaignEditor.selectedCampaign.connections.Count > i; i++)
         {
@@ -430,7 +431,7 @@ public class Editor : Layout
         }
     }
 
-    private void HideConnectors()
+    private void HideConnections()
     {
         for (int i = 0; _connectors.Count > i; i++)
             GameObject.Destroy(_connectors[ i ]);
