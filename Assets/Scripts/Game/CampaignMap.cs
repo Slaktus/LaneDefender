@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class CampaignMap
 {
@@ -11,9 +12,9 @@ public class CampaignMap
     public TileMap tileMap { get; }
     public List<Mission> missions { get; }
 
-    public CampaignMap( float width , float height , int columns , int rows )
+    public CampaignMap( float width , float height , int columns , int rows , Vector3 offset )
     {
-        tileMap = new TileMap( width , height , columns , rows );
+        tileMap = new TileMap( width , height , columns , rows , offset );
         missions = new List<Mission>();
     }
 }

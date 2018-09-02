@@ -190,7 +190,8 @@ public class Editor : Layout
     public void ShowCampaignMap()
     {
         HideCampaignMap();
-        campaignMap = new CampaignMap(campaignEditor.selectedCampaign.width, campaignEditor.selectedCampaign.height, campaignEditor.selectedCampaign.columns, campaignEditor.selectedCampaign.rows);
+        Vector3 offset = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, Camera.main.transform.position.y)) + ( Vector3.left * campaignEditor.selectedCampaign.width * 0.5f ) + (Vector3.forward * campaignEditor.selectedCampaign.height * 0.5f);
+        campaignMap = new CampaignMap(campaignEditor.selectedCampaign.width, campaignEditor.selectedCampaign.height, campaignEditor.selectedCampaign.columns, campaignEditor.selectedCampaign.rows, offset );
 
         for (int i = 0; campaignMap.tileMap.count > i; i++)
         {
