@@ -8,11 +8,13 @@ public class Entry : MonoBehaviour
 
 	void Awake()
     {
+        string progress = PlayerPrefs.GetString("Player");
+
         instance = this;
         #if !UNITY_EDITOR
         //Assets.Initialize(this, () => StartSession(new Player()));
         #else
-        Assets.Initialize(this, () => StartSession(new Player()));
+        Assets.Initialize(this, () => ShowTitleScreen(string.IsNullOrEmpty(progress) ? new Player() : new Player(JsonUtility.FromJson<Progress>(progress))));
         //Assets.Initialize(this, () => editor = new Editor(gameObject));
         #endif
     }
@@ -23,20 +25,16 @@ public class Entry : MonoBehaviour
     private void Update() => editor?.Update();
     #endif
 
-    void StartSession( Player player ) => StartCoroutine( SessionHandler( new Session( player ) ) );
+    void ShowTitleScreen(Player player) => StartCoroutine(TitleScreen(player));
+    void StartSession( Player player , CampaignDefinition selectedCampaign ) => StartCoroutine( SessionHandler( new Session( player ), selectedCampaign) );
 
-    public IEnumerator SessionHandler( Session session )
+    public IEnumerator TitleScreen(Player player)
     {
-        if (!Definitions.initialized)
-            Definitions.Initialize(Assets.Get(Assets.ObjectDataSets.Default));
-
-        session.Hide();
-
         TitleScreen titleScreen = new TitleScreen(gameObject);
         titleScreen.ShowCampaigns();
         titleScreen.ShowTitle();
 
-        while (titleScreen.selectedCampaign == null )
+        while (titleScreen.selectedCampaign == null)
         {
             titleScreen.Update();
             yield return null;
@@ -46,51 +44,55 @@ public class Entry : MonoBehaviour
         titleScreen.HideTitle();
         titleScreen.Hide();
 
-        Vector3 offset = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, Camera.main.transform.position.y)) + (Vector3.left * titleScreen.selectedCampaign.width * 0.5f) + (Vector3.forward * titleScreen.selectedCampaign.height * 0.5f);
-        CampaignMap campaignMap = new CampaignMap(titleScreen.selectedCampaign.width, titleScreen.selectedCampaign.height, titleScreen.selectedCampaign.columns, titleScreen.selectedCampaign.rows, offset);
-        Layout campaignLayout = new Layout("Campaign", gameObject);
+        if ( titleScreen.selectedCampaign != null )
+            StartSession(player, titleScreen.selectedCampaign);
+    }
 
-        for (int i = 0; campaignMap.tileMap.count > i; i++)
+    public IEnumerator SessionHandler( Session session , CampaignDefinition selectedCampaign )
+    {
+        if (!Definitions.initialized)
+            Definitions.Initialize(Assets.Get(Assets.ObjectDataSets.Default));
+
+        session.Hide();
+
+        MissionDefinition missionDefinition = 0 > session.player.progress.campaignProgress ? selectedCampaign.GetMissionDefinition(selectedCampaign.firstMissionIndex) : null;
+
+        if (missionDefinition == null)
         {
-            int index = i;
+            Vector3 offset = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, Camera.main.transform.position.y)) + (Vector3.left * selectedCampaign.width * 0.5f) + (Vector3.forward * selectedCampaign.height * 0.5f);
+            CampaignMap campaignMap = new CampaignMap(selectedCampaign.width, selectedCampaign.height, selectedCampaign.columns, selectedCampaign.rows, offset);
+            Layout campaignLayout = new Layout("Campaign", gameObject);
 
-            if (titleScreen.selectedCampaign.Has(index))
+            for (int i = 0; campaignMap.tileMap.count > i; i++)
             {
-                Button button = new Button(titleScreen.selectedCampaign.GetMissionDefinition(index).name, campaignMap.tileMap.tileWidth - 1, campaignMap.tileMap.tileHeight * 0.5f, gameObject, "CampaignMap" + index,
-                fontSize: 20,
-                Enter: (Button b) => b.SetColor(Color.green),
-                Stay: (Button b) =>
+                int index = i;
+
+                if (selectedCampaign.Has(index))
                 {
-                    if (Input.GetMouseButtonDown(0))
+                    Button button = new Button(selectedCampaign.GetMissionDefinition(index).name, campaignMap.tileMap.tileWidth - 1, campaignMap.tileMap.tileHeight * 0.5f, gameObject, "CampaignMap" + index,
+                    fontSize: 20,
+                    Enter: (Button b) => b.SetColor(Color.green),
+                    Stay: (Button b) =>
                     {
-                        //
-                    }
-                },
-                Exit: (Button b) => b.SetColor(Color.white),
-                Close: (Button b) =>
-                {
-                    //
-                });
+                        if (Input.GetMouseButtonDown(0))
+                            missionDefinition = selectedCampaign.GetMissionDefinition(index);
+                    },
+                    Exit: (Button b) => b.SetColor(Color.white));
 
-                campaignLayout.Add(button);
-                button.SetPosition(campaignMap.tileMap.PositionOf(index));
+                    campaignLayout.Add(button);
+                    button.SetPosition(campaignMap.tileMap.PositionOf(index));
+                }
             }
-        }
 
-        while (Input.GetMouseButton(0))
-        {
-            campaignLayout.Update();
-            yield return null;
-        }
+            while (missionDefinition == null)
+            {
+                campaignLayout.Update();
+                yield return null;
+            }
 
-        while (!Input.GetMouseButton(0))
-        {
-            campaignLayout.Update();
-            yield return null;
+            campaignLayout.Hide();
+            campaignLayout.Destroy();
         }
-
-        campaignLayout.Hide();
-        campaignLayout.Destroy();
 
         GameObject quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
         quad.transform.rotation = Quaternion.Euler(90, 0, 0);
@@ -115,7 +117,6 @@ public class Entry : MonoBehaviour
         quad.SetActive(false);
         textMesh.gameObject.SetActive(false);
 
-        MissionDefinition missionDefinition = titleScreen.selectedCampaign.GetMissionDefinition(titleScreen.selectedCampaign.firstMissionIndex);
         StageDefinition stageDefinition = missionDefinition.stageDefinition;
 
         session.SetConveyor(new Conveyor(
@@ -144,7 +145,6 @@ public class Entry : MonoBehaviour
                         break;
                 }
         }
-
 
         session.SetLevel(level);
         session.Show();
@@ -199,6 +199,8 @@ public class Entry : MonoBehaviour
 
         //end of level fanfare
 
+        session.player.progress.SetCampaignProgress(selectedCampaign.missionDefinitions.IndexOf(missionDefinition));
+
         Shop shop = new Shop();
         shop.Show( session.player );
 
@@ -209,7 +211,11 @@ public class Entry : MonoBehaviour
         }
 
         shop.Hide();
-        StartSession( session.player );
+
+        PlayerPrefs.SetString(session.player.name, JsonUtility.ToJson(session.player.progress));
+        PlayerPrefs.Save();
+
+        StartSession( session.player, selectedCampaign );
     }
 
     public static Entry instance { get; private set; }

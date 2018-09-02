@@ -5,10 +5,12 @@ public class Player
 {
     public string name { get; private set; }
     public Inventory inventory { get; }
+    public Progress progress { get; }
 
     public Player()
     {
         name = "Player";
+        progress = new Progress();
         inventory = new Inventory();
     }
 
@@ -16,6 +18,14 @@ public class Player
     {
         name = player.name;
         inventory = new Inventory( player.inventory );
+        progress = new Progress(player.progress);
+    }
+
+    public Player(Progress progress)
+    {
+        name = "Player";
+        this.progress = progress;
+        inventory = new Inventory();
     }
 }
 
@@ -74,6 +84,24 @@ public class Inventory
         coins = inventory.coins;
         heroes = new List<Definitions.Heroes>( inventory.heroes );
         items = new List<Definitions.Items>( inventory.items );
+    }
+}
+
+[System.Serializable]
+public class Progress
+{
+    public void SetCampaignProgress(int campaignProgress) => this.campaignProgress = campaignProgress;
+
+    public int campaignProgress;
+
+    public Progress( Progress progress)
+    {
+        campaignProgress = progress.campaignProgress;
+    }
+
+    public Progress()
+    {
+        campaignProgress = -1;
     }
 }
 
