@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 
 public class Entry : MonoBehaviour
@@ -45,14 +46,60 @@ public class Entry : MonoBehaviour
         titleScreen.HideTitle();
         titleScreen.Hide();
 
-        GameObject quad = GameObject.CreatePrimitive( PrimitiveType.Quad );
-        quad.transform.rotation = Quaternion.Euler( 90 , 0 , 0 );
-        quad.transform.position = Camera.main.ViewportToWorldPoint( new Vector3( 0.5f , 0.5f , Camera.main.transform.position.y ) );
-        quad.transform.localScale = new Vector3( 12 , 4 , 1 );
+        Vector3 offset = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, Camera.main.transform.position.y)) + (Vector3.left * titleScreen.selectedCampaign.width * 0.5f) + (Vector3.forward * titleScreen.selectedCampaign.height * 0.5f);
+        CampaignMap campaignMap = new CampaignMap(titleScreen.selectedCampaign.width, titleScreen.selectedCampaign.height, titleScreen.selectedCampaign.columns, titleScreen.selectedCampaign.rows, offset);
+        Layout campaignLayout = new Layout("Campaign", gameObject);
 
-        TextMesh textMesh = new GameObject( "StartText" ).AddComponent<TextMesh>();
+        for (int i = 0; campaignMap.tileMap.count > i; i++)
+        {
+            int index = i;
+
+            if (titleScreen.selectedCampaign.Has(index))
+            {
+                Button button = new Button(titleScreen.selectedCampaign.GetMissionDefinition(index).name, campaignMap.tileMap.tileWidth - 1, campaignMap.tileMap.tileHeight * 0.5f, gameObject, "CampaignMap" + index,
+                fontSize: 20,
+                Enter: (Button b) => b.SetColor(Color.green),
+                Stay: (Button b) =>
+                {
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                        //
+                    }
+                },
+                Exit: (Button b) => b.SetColor(Color.white),
+                Close: (Button b) =>
+                {
+                    //
+                });
+
+                campaignLayout.Add(button);
+                button.SetPosition(campaignMap.tileMap.PositionOf(index));
+            }
+        }
+
+        while (Input.GetMouseButton(0))
+        {
+            campaignLayout.Update();
+            yield return null;
+        }
+
+        while (!Input.GetMouseButton(0))
+        {
+            campaignLayout.Update();
+            yield return null;
+        }
+
+        campaignLayout.Hide();
+        campaignLayout.Destroy();
+
+        GameObject quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+        quad.transform.rotation = Quaternion.Euler(90, 0, 0);
+        quad.transform.position = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, Camera.main.transform.position.y));
+        quad.transform.localScale = new Vector3(12, 4, 1);
+
+        TextMesh textMesh = new GameObject("StartText").AddComponent<TextMesh>();
         textMesh.transform.localRotation = quad.transform.rotation;
-        textMesh.transform.SetPositionAndRotation( quad.transform.position + Vector3.up , quad.transform.rotation );
+        textMesh.transform.SetPositionAndRotation(quad.transform.position + Vector3.up, quad.transform.rotation);
         textMesh.fontSize = 200;
         textMesh.color = Color.black;
         textMesh.characterSize = 0.15f;
@@ -62,13 +109,13 @@ public class Entry : MonoBehaviour
 
         float wait = Time.time + 3;
 
-        while ( wait > Time.time )
+        while (wait > Time.time)
             yield return null;
 
-        quad.SetActive( false );
-        textMesh.gameObject.SetActive( false );
+        quad.SetActive(false);
+        textMesh.gameObject.SetActive(false);
 
-        MissionDefinition missionDefinition = titleScreen.selectedCampaign.GetMissionDefinition(titleScreen.selectedCampaign.missionIndices[ 0 ]);
+        MissionDefinition missionDefinition = titleScreen.selectedCampaign.GetMissionDefinition(titleScreen.selectedCampaign.firstMissionIndex);
         StageDefinition stageDefinition = missionDefinition.stageDefinition;
 
         session.SetConveyor(new Conveyor(

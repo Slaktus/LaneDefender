@@ -271,7 +271,10 @@ public class Editor : Layout
             Add(button);
 
             if (campaignEditor.selectedCampaign.Has(index))
+            {
                 ShowConnectorAndTerminal(index, button);
+                ShowFirstMissionButton(index, button);
+            }
         }
 
         ShowConnections();
@@ -287,6 +290,7 @@ public class Editor : Layout
 
         _campaignMapButtons.Clear();
         HideConnectorsAndTerminals();
+        HideFirstMissionButtons();
         HideConnections();
     }
 
@@ -359,6 +363,54 @@ public class Editor : Layout
 
         _connectorsAndTerminators.Clear();
     }
+
+    public void ShowFirstMissionButton(int index, Button button)
+    {
+        Button butt = new Button("1st", 1, 0.5f, container, "First",
+            fontSize: 20,
+            Enter: (Button b) => b.SetColor(b.selected ? b.color : Color.green),
+            Stay: (Button b) =>
+            {
+                if (Input.GetMouseButtonDown(0))
+                {
+                    b.Select();
+                    b.SetColor(Color.yellow);
+                    campaignEditor.selectedCampaign.firstMissionIndex = index;
+                }
+            },
+            Exit: (Button b) => b.SetColor(b.selected ? b.color : Color.white),
+            Close: (Button b) =>
+            {
+                if (Input.GetMouseButtonDown(0) && index != campaignEditor.selectedCampaign.firstMissionIndex)
+                {
+                    b.Deselect();
+                    b.SetColor(Color.white);
+                }
+            });
+
+        if ( index == campaignEditor.selectedCampaign.firstMissionIndex)
+        {
+            butt.Select();
+            butt.SetColor(Color.yellow);
+
+        }
+
+        Add(butt);
+        _firstMissionButtons.Add(butt);
+        butt.SetPosition(new Vector3(button.rect.center.x , button.position.y, button.rect.yMax + 0.25f));
+    }
+
+    public void HideFirstMissionButtons()
+    {
+        for (int i = 0; _firstMissionButtons.Count > i; i++)
+        {
+            Remove(_firstMissionButtons[ i ]);
+            _firstMissionButtons[ i ].Destroy();
+        }
+
+        _firstMissionButtons.Clear();
+    }
+
     private void ShowCampaignEditor()
     {
         HideObjectsEditor();
@@ -468,6 +520,7 @@ public class Editor : Layout
     public WaveEditor waveEditor { get; }
 
     private List<Button> _connectorsAndTerminators { get; }
+    private List<Button> _firstMissionButtons { get; }
     private List<Button> _campaignMapButtons { get; }
     private List<GameObject> _connectors { get; }
     private HeldItem _heldItem { get; set; }
@@ -519,6 +572,7 @@ public class Editor : Layout
         Definitions.Initialize(objectData);
         _connectors = new List<GameObject>();
         _campaignMapButtons = new List<Button>();
+        _firstMissionButtons = new List<Button>();
         _connectorsAndTerminators = new List<Button>();
 
         Add(_testButton = new Button("Test", 1.5f, 0.5f, container, "Test",

@@ -50,6 +50,7 @@ public class CampaignDefinition : DefinitionBase
     public List<MissionDefinition> missionDefinitions = new List<MissionDefinition>();
     public List<Connection> connections = new List<Connection>();
     public List<int> missionIndices = new List<int>();
+    public int firstMissionIndex;
     public float height;
     public float width;
     public int columns;
