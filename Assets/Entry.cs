@@ -11,8 +11,8 @@ public class Entry : MonoBehaviour
         #if !UNITY_EDITOR
         //Assets.Initialize(this, () => StartSession(new Player()));
         #else
-        //Assets.Initialize(this, () => StartSession(new Player()));
-        Assets.Initialize(this, () => editor = new Editor(gameObject));
+        Assets.Initialize(this, () => StartSession(new Player()));
+        //Assets.Initialize(this, () => editor = new Editor(gameObject));
         #endif
     }
 
@@ -22,11 +22,28 @@ public class Entry : MonoBehaviour
     private void Update() => editor?.Update();
     #endif
 
-    void StartSession( Player player ) => StartCoroutine( SessionHandler( new Session( player , width: 25 , height: 15 , spacing: 1 , lanes: 5 ) ) );
+    void StartSession( Player player ) => StartCoroutine( SessionHandler( new Session( player ) ) );
 
     public IEnumerator SessionHandler( Session session )
     {
+        if (!Definitions.initialized)
+            Definitions.Initialize(Assets.Get(Assets.ObjectDataSets.Default));
+
         session.Hide();
+
+        TitleScreen titleScreen = new TitleScreen(gameObject);
+        titleScreen.ShowCampaigns();
+        titleScreen.ShowTitle();
+
+        while (titleScreen.selectedCampaign == null )
+        {
+            titleScreen.Update();
+            yield return null;
+        }
+
+        titleScreen.HideCampaigns();
+        titleScreen.HideTitle();
+        titleScreen.Hide();
 
         GameObject quad = GameObject.CreatePrimitive( PrimitiveType.Quad );
         quad.transform.rotation = Quaternion.Euler( 90 , 0 , 0 );
@@ -50,6 +67,39 @@ public class Entry : MonoBehaviour
 
         quad.SetActive( false );
         textMesh.gameObject.SetActive( false );
+
+        MissionDefinition missionDefinition = titleScreen.selectedCampaign.GetMissionDefinition(titleScreen.selectedCampaign.missionIndices[ 0 ]);
+        StageDefinition stageDefinition = missionDefinition.stageDefinition;
+
+        session.SetConveyor(new Conveyor(
+            speed: 5,
+            width: 5,
+            height: 15 + (1 * (stageDefinition.laneCount - 1)),
+            itemInterval: 3,
+            itemLimit: 8,
+            itemWidthPadding: 2,
+            itemSpacing: 0.1f));
+
+        session.SetStage(new Stage(stageDefinition, session.player, session.conveyor));
+
+        Level level = new Level(missionDefinition.duration);
+
+        for (int i = 0; missionDefinition.waveDefinitions.Count > i; i++)
+        {
+            Wave wave = new Wave(missionDefinition.waveTimes[ i ] * missionDefinition.duration, session.stage);
+            level.Add(wave);
+
+            for (int j = 0; missionDefinition.waveDefinitions[ i ].waveEvents.Count > j; j++)
+                switch ((WaveEvent.Type) missionDefinition.waveDefinitions[ i ].waveEvents[ j ].type)
+                {
+                    case WaveEvent.Type.SpawnEnemy:
+                        wave.Add(new SpawnEnemyEvent(Definitions.Enemy(Definitions.Enemies.Default), missionDefinition.waveDefinitions[ i ].waveEvents[ j ]));
+                        break;
+                }
+        }
+
+
+        session.SetLevel(level);
         session.Show();
 
         int heroCount = session.player.inventory.heroes.Count;

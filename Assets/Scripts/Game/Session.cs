@@ -102,79 +102,44 @@ public class Session
 
     public void Destroy()
     {
-        stage.Destroy();
-        coinCounter.Destroy();
-        level.DestroyProgress();
+        stage?.Destroy();
+        coinCounter?.Destroy();
+        level?.DestroyProgress();
     }
 
     public void Show()
     {
-        level.ShowProgress();
-        coinCounter.Show();
-        stage.ShowLanes();
-        conveyor.Show();
+        level?.ShowProgress();
+        coinCounter?.Show();
+        stage?.ShowLanes();
+        conveyor?.Show();
     }
 
     public void Hide()
     {
-        level.HideProgress();
-        coinCounter.Hide();
-        stage.HideLanes();
-        conveyor.Hide();
+        level?.HideProgress();
+        coinCounter?.Hide();
+        stage?.HideLanes();
+        conveyor?.Hide();
     }
 
-    public Stage stage { get; }
+    public void SetConveyor(Conveyor conveyor) => this.conveyor = conveyor;
+    public void SetStage(Stage stage) => this.stage = stage;
+    public void SetLevel(Level level) => this.level = level;
+
     public Player player { get; }
-    public Level level { get; set; }
-    public Conveyor conveyor { get; }
     public CoinCounter coinCounter { get; }
+    public Level level { get; private set; }
+    public Stage stage { get; private set; }
+    public Conveyor conveyor { get; private set; }
     public HeldItem heldItem { get; private set; }
 
     private Camera camera => Camera.main;
     private float itemTime { get; set; }
 
-    public Session( Player player , float width , float height , float spacing , int lanes )
+    public Session( Player player )
     {
         this.player = player;
-
-        conveyor = new Conveyor(
-            speed: 5 ,
-            width: 5 ,
-            height: height + ( spacing * ( lanes - 1 ) ) ,
-            itemInterval: 3 ,
-            itemLimit: 8 ,
-            itemWidthPadding: 2 ,
-            itemSpacing: 0.1f );
-
-        stage = new Stage(
-            speed: 5 ,
-            width: width ,
-            height: height ,
-            laneSpacing: spacing ,
-            laneCount: lanes ,
-            conveyor: conveyor ,
-            player: player );
-
-        if (!Definitions.initialized)
-            Definitions.Initialize(Assets.Get(Assets.ObjectDataSets.Default));
-
-        EnemyDefinition enemyDefinition = Definitions.Enemy( Definitions.Enemies.Default );
-
-        level = new Level( 15 );
-        Wave wave1 = new Wave( 1 , stage );
-        wave1.Add( new SpawnEnemyEvent( enemyDefinition , delay: 0 , lane: 0 ) );
-        wave1.Add( new SpawnEnemyEvent( enemyDefinition , delay: 1 , lane: 1 ) );
-        wave1.Add( new SpawnEnemyEvent( enemyDefinition , delay: 1 , lane: 0 ) );
-        wave1.Add( new SpawnEnemyEvent( enemyDefinition , delay: 1 , lane: 3 ) );
-        wave1.Add( new SpawnEnemyEvent( enemyDefinition , delay: 5 , lane: 2 ) );
-        wave1.Add( new SpawnEnemyEvent( enemyDefinition , delay: 0 , lane: 3 ) );
-        wave1.Add( new SpawnEnemyEvent( enemyDefinition , delay: 2 , lane: 4 ) );
-        level.Add( wave1 );
-
-        Wave wave2 = new Wave( 8 , stage );
-        wave2.Add( new SpawnEnemyEvent( enemyDefinition , delay: 0 , lane: 2 ) );
-        level.Add( wave2 );
-
         coinCounter = new CoinCounter();
     }
 }
