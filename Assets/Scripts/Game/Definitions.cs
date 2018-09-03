@@ -27,7 +27,8 @@ public static class Definitions
     public enum Enemies
     {
         Default = 0,
-        Count = 1
+        Test = 1,
+        Count = 2
     }
 
     public enum Items

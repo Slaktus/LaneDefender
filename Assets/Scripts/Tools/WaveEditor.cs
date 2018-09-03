@@ -143,9 +143,12 @@ public class WaveEditor : Layout
                     {
                         if (Input.GetMouseButtonUp(0))
                         {
+                            for (int j = 0; waveEventButtons[ laneIndex ].Count > j; j++)
+                                waveEventButtons[ laneIndex ][ j ].Hide();
+
                             butt.Select();
                             _selectedWaveEvent = waveEvent;
-                            ShowWaveEventEditor(butt, waveEventButtons, index, laneIndex, waveEvent);
+                            ShowWaveEventEditor(butt, index);
                         }
 
                         if (Input.GetMouseButtonDown(1))
@@ -166,7 +169,7 @@ public class WaveEditor : Layout
                     },
                     Close: (Button butt) =>
                     {
-                        if (Input.GetMouseButtonDown(0) && butt.selected && _waveTypes == null && _enemyTypes == null && (waveEventEditor == null || !waveEventEditor.containsMouse))
+                        if (Input.GetMouseButtonDown(0) && butt.selected && _waveTypes == null && _enemyTypes == null && _itemTypes == null && (waveEventEditor == null || !waveEventEditor.containsMouse))
                         {
                             HideWaveEventEditor();
                             butt.Deselect();
@@ -194,53 +197,78 @@ public class WaveEditor : Layout
         waveEventLayouts.Clear();
     }
 
-    private void ShowWaveEventEditor(Button button, List<List<Button>> waveEventButtons, int index, int laneIndex, WaveEventDefinition waveEvent)
+    private Button SubTypeButton( Button butt, int index , WaveEvent.Type type , int subType )
     {
+        switch (type)
+        {
+            case WaveEvent.Type.SpawnEnemy:
+                return new Button(((Definitions.Enemies) subType).ToString(), 2, 0.5f, container, "Enemy",
+                    fontSize: 20,
+                    Enter: (Button b) => b.SetColor(Color.green),
+                    Stay: (Button b) =>
+                    {
+                        if (Input.GetMouseButtonDown(0))
+                        {
+                            ShowEnemyTypes(butt, index, b.position + new Vector3(b.width * 0.5f, 0, b.height * 0.5f));
+                            b.SetColor(Color.yellow);
+                            b.Select();
+                        }
+                    },
+                    Exit: (Button b) => b.SetColor(Color.white));
+
+            default:
+                return null;
+
+            case WaveEvent.Type.SpawnItem:
+                return new Button(((Definitions.Items) subType).ToString(), 2, 0.5f, container, "Item",
+                    fontSize: 20,
+                    Enter: (Button b) => b.SetColor(Color.green),
+                    Stay: (Button b) =>
+                    {
+                        if (Input.GetMouseButtonDown(0))
+                        {
+                            ShowItemTypes(butt, index, b.position + new Vector3(b.width * 0.5f, 0, b.height * 0.5f));
+                            b.SetColor(Color.yellow);
+                            b.Select();
+                        }
+                    },
+                    Exit: (Button b) => b.SetColor(Color.white));
+        }
+    }
+
+    private void ShowWaveEventEditor(Button button, int index)
+    {
+        HideWaveEventEditor();
         List<Element> waveEventEditorButtons = new List<Element>()
         {
             new Label("Type:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
-            new Button( WaveEvent.Type.SpawnEnemy.ToString() , 2 , 0.5f , container , "Type" ,
+            new Button( ((WaveEvent.Type)_selectedWaveEvent.type).ToString() , 2 , 0.5f , container , "Type" ,
                 fontSize: 20 ,
                 Enter: ( Button b ) => b.SetColor( Color.green ) ,
                 Stay: ( Button b ) =>
                 {
                     if (Input.GetMouseButtonDown(0))
                     {
-                        ShowWaveTypes(b.position + new Vector3(b.width * 0.5f, 0, b.height * 0.5f));
+                        ShowWaveTypes(button,index, b.position + new Vector3(b.width * 0.5f, 0, b.height * 0.5f));
                         b.SetColor(Color.yellow);
                         b.Select();
                     }
                 } ,
                 Exit: ( Button b ) => b.SetColor( Color.white ) ) ,
 
-            new Label("Enemy:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
-            new Button( Definitions.Enemies.Default.ToString() , 2 , 0.5f , container , "Enemy" ,
-                fontSize: 20 ,
-                Enter: ( Button b ) => b.SetColor( Color.green ) ,
-                Stay: ( Button b ) =>
-                {
-                    if (Input.GetMouseButtonDown(0))
-                    {
-                        ShowEnemyTypes(b.position + new Vector3(b.width * 0.5f, 0, b.height * 0.5f));
-                        b.SetColor(Color.yellow);
-                        b.Select();
-                    }
-                } ,
-                Exit: ( Button b ) => b.SetColor( Color.white ) ) ,
+            new Label("SubType:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
+            SubTypeButton(button, index, (WaveEvent.Type)_selectedWaveEvent.type, _selectedWaveEvent.subType ),
 
             new Label( "Delay:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
-            new Field( "Delay" , waveEvent.delay.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) => float.TryParse( field.label.text , out selectedWaveDefinition.waveEvents[ index ].delay ) ) ,
+            new Field( "Delay" , _selectedWaveEvent.delay.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) => float.TryParse( field.label.text , out selectedWaveDefinition.waveEvents[ index ].delay ) ) ,
 
             new Label("Entry:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
-            new Field( "Entry" , waveEvent.entryPoint.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers , StartInput: ( Field field ) => Debug.Log("hello"), EndInput: ( Field field ) => float.TryParse( field.label.text , out selectedWaveDefinition.waveEvents[ index ].entryPoint ) )
+            new Field( "Entry" , _selectedWaveEvent.entryPoint.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers , StartInput: ( Field field ) => Debug.Log("hello"), EndInput: ( Field field ) => float.TryParse( field.label.text , out selectedWaveDefinition.waveEvents[ index ].entryPoint ) )
         };
 
         Add(waveEventEditor = new Layout("WaveEventEditor", 4, 3, 0.1f, 0.1f, waveEventEditorButtons.Count / 2, container));
         waveEventEditor.Add(waveEventEditorButtons, true);
         waveEventEditor.SetPosition(button.position + Vector3.up);
-
-        for (int j = 0; waveEventButtons[ laneIndex ].Count > j; j++)
-            waveEventButtons[ laneIndex ][ j ].Hide();
     }
 
     private void HideWaveEventEditor()
@@ -252,7 +280,7 @@ public class WaveEditor : Layout
         waveEventEditor = null;
     }
 
-    private void ShowWaveTypes(Vector3 position)
+    private void ShowWaveTypes(Button butt , int index , Vector3 position)
     {
         HideWaveTypes();
         int count = ( int ) WaveEvent.Type.Count;
@@ -268,6 +296,7 @@ public class WaveEditor : Layout
                     if (Input.GetMouseButtonDown(0))
                     {
                         _selectedWaveEvent.type = capturedIndex;
+                        ShowWaveEventEditor(butt, index);
                         HideWaveTypes();
                     }
                 },
@@ -275,9 +304,7 @@ public class WaveEditor : Layout
                 Close: (Button button) =>
                 {
                     if (Input.GetMouseButtonDown(0))
-                    {
                         HideWaveTypes();
-                    }
                 }))), true);
     }
 
@@ -290,7 +317,7 @@ public class WaveEditor : Layout
         _waveTypes = null;
     }
 
-    private void ShowEnemyTypes(Vector3 position)
+    private void ShowEnemyTypes(Button butt, int index , Vector3 position)
     {
         HideEnemyTypes();
         int count = (int) Definitions.Enemies.Count;
@@ -299,23 +326,22 @@ public class WaveEditor : Layout
 
         _enemyTypes.Add(new List<Button>(
             Button.GetButtons(count,
-            (int capturedIndex) => new Button(((Definitions.Enemies) capturedIndex).ToString(), 3, 1, container, "WaveType", fontSize: 20,
+            (int capturedIndex) => new Button(((Definitions.Enemies) capturedIndex).ToString(), 3, 1, container, "EnemyType", fontSize: 20,
                 Enter: (Button button) => button.SetColor(Color.green),
                 Stay: (Button button) =>
                 {
                     if (Input.GetMouseButtonDown(0))
                     {
                         _selectedWaveEvent.subType = capturedIndex;
+                        ShowWaveEventEditor(butt, index);
                         HideEnemyTypes();
                     }
                 },
                 Exit: (Button button) => button.SetColor(Color.white),
-                Close: (Button butt) =>
+                Close: (Button button) =>
                 {
                     if (Input.GetMouseButtonDown(0))
-                    {
                         HideEnemyTypes();
-                    }
                 }))), true);
     }
 
@@ -328,7 +354,42 @@ public class WaveEditor : Layout
         _enemyTypes = null;
     }
 
-    private Layout _enemyTypes;
+    private void ShowItemTypes(Button butt, int index, Vector3 position)
+    {
+        HideItemTypes();
+        int count = (int) Definitions.Items.Count;
+        Add(_itemTypes = new Layout("ItemTypeLayout", 3, count, 0.25f, 0.1f, count, container));
+        _itemTypes.SetPosition(position + (Vector3.right * _itemTypes.width * 0.5f) + (Vector3.back * _itemTypes.height * 0.5f));
+
+        _itemTypes.Add(new List<Button>(
+            Button.GetButtons(count,
+            (int capturedIndex) => new Button(((Definitions.Items) capturedIndex).ToString(), 3, 1, container, "ItemType", fontSize: 20,
+                Enter: (Button button) => button.SetColor(Color.green),
+                Stay: (Button button) =>
+                {
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                        _selectedWaveEvent.subType = capturedIndex;
+                        ShowWaveEventEditor(butt, index);
+                        HideItemTypes();
+                    }
+                },
+                Exit: (Button button) => button.SetColor(Color.white),
+                Close: (Button button) =>
+                {
+                    if (Input.GetMouseButtonDown(0))
+                        HideItemTypes();
+                }))), true);
+    }
+
+    private void HideItemTypes()
+    {
+        if (_itemTypes != null)
+            Remove(_itemTypes);
+
+        _itemTypes?.Destroy();
+        _itemTypes = null;
+    }
 
     public override void Hide()
     {
@@ -355,6 +416,8 @@ public class WaveEditor : Layout
 
     private Layout _waveEventEditorLayout { get; set; }
     private Layout _waveDefinitionLayout { get; set; }
+    private Layout _enemyTypes { get; set; }
+    private Layout _itemTypes { get; set; }
     private Layout _waveTypes { get; set; }
     private Editor _editor { get; }
 

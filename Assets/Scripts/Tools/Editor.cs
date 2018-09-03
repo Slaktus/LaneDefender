@@ -596,7 +596,7 @@ public class Editor : Layout
                                 switch ((WaveEvent.Type) missionEditor.selectedMission.waveDefinitions[ i ].waveEvents[ j ].type)
                                 {
                                     case WaveEvent.Type.SpawnEnemy:
-                                        wave.Add(new SpawnEnemyEvent(Definitions.Enemy(Definitions.Enemies.Default), missionEditor.selectedMission.waveDefinitions[ i ].waveEvents[ j ]));
+                                        wave.Add(new SpawnEnemyEvent(Definitions.Enemy((Definitions.Enemies) missionEditor.selectedMission.waveDefinitions[ i ].waveEvents[ j ].subType), missionEditor.selectedMission.waveDefinitions[ i ].waveEvents[ j ]));
                                         break;
                                 }
                         }

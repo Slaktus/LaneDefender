@@ -40,11 +40,6 @@ public class SpawnEnemyEvent : WaveEvent
 {
     public EnemyDefinition enemyDefinition { get; }
 
-    public SpawnEnemyEvent( EnemyDefinition enemyDefinition , float delay , int lane ) : base( delay , lane , Type.SpawnEnemy )
-    {
-        this.enemyDefinition = enemyDefinition;
-    }
-
     public SpawnEnemyEvent( EnemyDefinition enemyDefinition , WaveEventDefinition waveEventDefinition ) : base( waveEventDefinition )
     {
         this.enemyDefinition = enemyDefinition;
@@ -55,22 +50,25 @@ public abstract class WaveEvent
 {
     public float entryPoint { get; }
     public float delay { get; }
+    public int subType { get; }
     public Type type { get; }
     public int lane { get; }
 
-    public WaveEvent( float delay , int lane , Type type , float entryPoint = 0 )
+    public WaveEvent( float delay , int lane , Type type , int subType , float entryPoint = 0 )
     {
         this.entryPoint = entryPoint;
+        this.subType = subType;
         this.delay = delay;
         this.lane = lane;
         this.type = type;
     }
 
-    public WaveEvent( WaveEventDefinition waveEventDefinition ) : this( waveEventDefinition.delay , waveEventDefinition.lane , ( Type ) waveEventDefinition.type , waveEventDefinition.entryPoint ) { }
+    public WaveEvent( WaveEventDefinition waveEventDefinition ) : this( waveEventDefinition.delay , waveEventDefinition.lane , ( Type ) waveEventDefinition.type , waveEventDefinition.subType, waveEventDefinition.entryPoint ) { }
 
     public enum Type
     {
         SpawnEnemy = 0,
-        Count = 1
+        SpawnItem = 1,
+        Count = 2
     }
 }
