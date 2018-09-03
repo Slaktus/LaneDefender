@@ -142,7 +142,7 @@ public class Editor : Layout
                 {
                     int index = stage.IndexOf(hoveredLane);
                     WaveEventDefinition waveEventDefinition = ScriptableObject.CreateInstance<WaveEventDefinition>();
-                    waveEventDefinition.Initialize(0, index, WaveEvent.Type.SpawnEnemy, Helpers.Normalize(mousePos.x, hoveredLane.width, hoveredLane.start.x));
+                    waveEventDefinition.Initialize(0, index, WaveEvent.Type.SpawnEnemy, 0 , Helpers.Normalize(mousePos.x, hoveredLane.width, hoveredLane.start.x));
                     ScriptableObjects.Add(waveEventDefinition, waveEditor.selectedWaveDefinition);
                     waveEditor.HideWaveEventButtons();
                     waveEditor.ShowWaveEventButtons();

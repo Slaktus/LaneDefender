@@ -70,6 +70,7 @@ public abstract class WaveEvent
 
     public enum Type
     {
-        SpawnEnemy = 0
+        SpawnEnemy = 0,
+        Count = 1
     }
 }

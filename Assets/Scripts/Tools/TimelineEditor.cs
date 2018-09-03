@@ -74,7 +74,9 @@ public class TimelineEditor : Layout
 
     public void AddWaveToTimeline(WaveDefinition waveDefinition, float timelinePosition)
     {
-        Button button = new Button("Wave", 2, 1, container, "Wave",
+
+        Button button = new Button("Wave", 1, 1, container, "Wave",
+            fontSize: 20,
             Enter: (Button b) =>
             {
                 if (_editor.stage.conveyor == null || !_editor.stage.conveyor.showing)

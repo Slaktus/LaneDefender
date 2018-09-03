@@ -14,8 +14,8 @@ public class Entry : MonoBehaviour
         #if !UNITY_EDITOR
         //Assets.Initialize(this, () => StartSession(new Player()));
         #else
-        Assets.Initialize(this, () => ShowTitleScreen(string.IsNullOrEmpty(player) ? new Player() : new Player(JsonUtility.FromJson<Player>(player))));
-        //Assets.Initialize(this, () => editor = new Editor(gameObject));
+        //Assets.Initialize(this, () => ShowTitleScreen(string.IsNullOrEmpty(player) ? new Player() : new Player(JsonUtility.FromJson<Player>(player))));
+        Assets.Initialize(this, () => editor = new Editor(gameObject));
         #endif
     }
 
