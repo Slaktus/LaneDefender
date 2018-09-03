@@ -90,18 +90,36 @@ public class Inventory
 [System.Serializable]
 public class Progress
 {
-    public void SetCampaignProgress(int campaignProgress) => this.campaignProgress = campaignProgress;
+    public void AddCampaignProgress() => campaignProgress.Add(new CampaignProgress());
+    public void AddCompleted(int campaign, int mission) => campaignProgress[ campaign ].AddCompleted(mission);
+    public bool HasCompleted(int campaign, int mission) => campaignProgress[ campaign ].HasCompleted(mission);
+    public bool IsNewGame(int campaign) => campaignProgress[ campaign ].completed.Count == 0;
+    public bool HasCampaignProgress(int index) => campaignProgress.Count > index;
 
-    public int campaignProgress;
+    public List<CampaignProgress> campaignProgress { get; }
+
+    public Progress()
+    {
+        campaignProgress = new List<CampaignProgress>();
+    }
 
     public Progress( Progress progress)
     {
         campaignProgress = progress.campaignProgress;
     }
+}
 
-    public Progress()
+[System.Serializable]
+public class CampaignProgress
+{
+    public bool HasCompleted(int index) => completed.Contains(index);
+    public void AddCompleted(int index) => completed.Add(index);
+
+    public List<int> completed { get; }
+
+    public CampaignProgress()
     {
-        campaignProgress = -1;
+        completed = new List<int>();
     }
 }
 

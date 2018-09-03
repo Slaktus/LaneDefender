@@ -8,6 +8,7 @@ public class Entry : MonoBehaviour
 
 	void Awake()
     {
+        PlayerPrefs.DeleteAll();
         string progress = PlayerPrefs.GetString("Player");
 
         instance = this;
@@ -26,7 +27,7 @@ public class Entry : MonoBehaviour
     #endif
 
     void ShowTitleScreen(Player player) => StartCoroutine(TitleScreen(player));
-    void StartSession( Player player , CampaignDefinition selectedCampaign ) => StartCoroutine( SessionHandler( new Session( player ), selectedCampaign) );
+    void StartSession(Player player, CampaignDefinition selectedCampaign, int selectedCampaignIndex) => StartCoroutine(SessionHandler(new Session(player), selectedCampaign, selectedCampaignIndex));
 
     public IEnumerator TitleScreen(Player player)
     {
@@ -45,17 +46,20 @@ public class Entry : MonoBehaviour
         titleScreen.Hide();
 
         if ( titleScreen.selectedCampaign != null )
-            StartSession(player, titleScreen.selectedCampaign);
+            StartSession(player, titleScreen.selectedCampaign, titleScreen.selectedCampaignIndex );
     }
 
-    public IEnumerator SessionHandler( Session session , CampaignDefinition selectedCampaign )
+    public IEnumerator SessionHandler( Session session , CampaignDefinition selectedCampaign , int selectedCampaignIndex )
     {
         if (!Definitions.initialized)
             Definitions.Initialize(Assets.Get(Assets.ObjectDataSets.Default));
 
         session.Hide();
 
-        MissionDefinition missionDefinition = 0 > session.player.progress.campaignProgress ? selectedCampaign.GetMissionDefinition(selectedCampaign.firstMissionIndex) : null;
+        while (!session.player.progress.HasCampaignProgress(selectedCampaignIndex))
+            session.player.progress.AddCampaignProgress();
+
+        MissionDefinition missionDefinition = session.player.progress.IsNewGame(selectedCampaignIndex) ? selectedCampaign.GetMissionDefinition(selectedCampaign.firstMissionIndex) : null;
 
         if (missionDefinition == null)
         {
@@ -65,22 +69,46 @@ public class Entry : MonoBehaviour
 
             for (int i = 0; campaignMap.tileMap.count > i; i++)
             {
-                int index = i;
+                int iIndex = i;
 
-                if (selectedCampaign.Has(index))
+                if (selectedCampaign.Has(i) && session.player.progress.HasCompleted(selectedCampaignIndex, i))
                 {
-                    Button button = new Button(selectedCampaign.GetMissionDefinition(index).name, campaignMap.tileMap.tileWidth - 1, campaignMap.tileMap.tileHeight * 0.5f, gameObject, "CampaignMap" + index,
+                    Button button = new Button(selectedCampaign.GetMissionDefinition(i).name, campaignMap.tileMap.tileWidth - 1, campaignMap.tileMap.tileHeight * 0.5f, gameObject, "CampaignMap" + i,
                     fontSize: 20,
                     Enter: (Button b) => b.SetColor(Color.green),
                     Stay: (Button b) =>
                     {
                         if (Input.GetMouseButtonDown(0))
-                            missionDefinition = selectedCampaign.GetMissionDefinition(index);
+                            missionDefinition = selectedCampaign.GetMissionDefinition(iIndex);
                     },
                     Exit: (Button b) => b.SetColor(Color.white));
 
                     campaignLayout.Add(button);
-                    button.SetPosition(campaignMap.tileMap.PositionOf(index));
+                    button.SetPosition(campaignMap.tileMap.PositionOf(i));
+
+                    for ( int j = 0; selectedCampaign.connections.Count > j; j++)
+                    {
+                        int jIndex = j;
+
+                        if ( selectedCampaign.connections[ j ].fromIndex == i )
+                        {
+                            if (!session.player.progress.HasCompleted(selectedCampaignIndex, selectedCampaign.connections[ j ].toIndex))
+                            {
+                                Button butt = new Button(selectedCampaign.GetMissionDefinition(selectedCampaign.connections[ j ].toIndex).name, campaignMap.tileMap.tileWidth - 1, campaignMap.tileMap.tileHeight * 0.5f, gameObject, "CampaignMap" + selectedCampaign.connections[ j ].toIndex,
+                                fontSize: 20,
+                                Enter: (Button b) => b.SetColor(Color.green),
+                                Stay: (Button b) =>
+                                {
+                                    if (Input.GetMouseButtonDown(0))
+                                        missionDefinition = selectedCampaign.GetMissionDefinition(jIndex);
+                                },
+                                Exit: (Button b) => b.SetColor(Color.white));
+
+                                campaignLayout.Add(butt);
+                                butt.SetPosition(campaignMap.tileMap.PositionOf(selectedCampaign.connections[ j ].toIndex));
+                            }
+                        }
+                    }
                 }
             }
 
@@ -199,7 +227,10 @@ public class Entry : MonoBehaviour
 
         //end of level fanfare
 
-        session.player.progress.SetCampaignProgress(selectedCampaign.missionDefinitions.IndexOf(missionDefinition));
+        int missionIndex = selectedCampaign.GetMissionIndex(missionDefinition);
+
+        if ( !session.player.progress.HasCompleted(selectedCampaignIndex, missionIndex))
+            session.player.progress.AddCompleted(selectedCampaignIndex, missionIndex);
 
         Shop shop = new Shop();
         shop.Show( session.player );
@@ -215,7 +246,7 @@ public class Entry : MonoBehaviour
         PlayerPrefs.SetString(session.player.name, JsonUtility.ToJson(session.player.progress));
         PlayerPrefs.Save();
 
-        StartSession( session.player, selectedCampaign );
+        StartSession( session.player, selectedCampaign, selectedCampaignIndex );
     }
 
     public static Entry instance { get; private set; }

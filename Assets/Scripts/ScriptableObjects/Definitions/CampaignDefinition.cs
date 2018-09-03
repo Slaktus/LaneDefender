@@ -16,6 +16,7 @@ public class CampaignDefinition : DefinitionBase
 
     public bool Has( int index ) => missionIndices.Contains( index );
     public MissionDefinition GetMissionDefinition( int index ) => Has( index ) ? missionDefinitions[ missionIndices.IndexOf( index ) ] : null;
+    public int GetMissionIndex(MissionDefinition missionDefinition ) => missionIndices[ missionDefinitions.IndexOf(missionDefinition) ];
     public Connection GetConnection(int index) => connections[ index ];
 
     public void Add( ScriptableObject toAdd , int index )

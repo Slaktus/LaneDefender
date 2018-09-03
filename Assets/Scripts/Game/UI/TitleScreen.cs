@@ -43,7 +43,10 @@ public class TitleScreen : Layout
                     Stay: (Button butt) =>
                     {
                         if (Input.GetMouseButtonDown(0))
+                        {
                             selectedCampaign = campaignData.campaignSets[ iIndex ].campaignDefinitions[ jIndex ];
+                            selectedCampaignIndex = buttons.IndexOf(butt);
+                        }
                     },
                     Exit: (Button butt) => butt.SetColor(Color.white)));
 
@@ -68,12 +71,10 @@ public class TitleScreen : Layout
     }
 
     public CampaignDefinition selectedCampaign { get; private set; }
+    public int selectedCampaignIndex { get; private set; }
 
     private Layout _title;
     private Layout _campaigns;
 
-    public TitleScreen(GameObject parent) : base(typeof(TitleScreen).Name, parent)
-    {
-
-    }
+    public TitleScreen(GameObject parent) : base(typeof(TitleScreen).Name, parent) {}
 }
