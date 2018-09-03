@@ -8,14 +8,13 @@ public class Entry : MonoBehaviour
 
 	void Awake()
     {
-        PlayerPrefs.DeleteAll();
-        string progress = PlayerPrefs.GetString("Player");
+        string player = PlayerPrefs.GetString("Player");
 
         instance = this;
         #if !UNITY_EDITOR
         //Assets.Initialize(this, () => StartSession(new Player()));
         #else
-        Assets.Initialize(this, () => ShowTitleScreen(string.IsNullOrEmpty(progress) ? new Player() : new Player(JsonUtility.FromJson<Progress>(progress))));
+        Assets.Initialize(this, () => ShowTitleScreen(string.IsNullOrEmpty(player) ? new Player() : new Player(JsonUtility.FromJson<Player>(player))));
         //Assets.Initialize(this, () => editor = new Editor(gameObject));
         #endif
     }
@@ -243,7 +242,7 @@ public class Entry : MonoBehaviour
 
         shop.Hide();
 
-        PlayerPrefs.SetString(session.player.name, JsonUtility.ToJson(session.player.progress));
+        PlayerPrefs.SetString(session.player.name, JsonUtility.ToJson(session.player));
         PlayerPrefs.Save();
 
         StartSession( session.player, selectedCampaign, selectedCampaignIndex );

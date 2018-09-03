@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public class Player
 {
-    public string name { get; private set; }
-    public Inventory inventory { get; }
-    public Progress progress { get; }
+    public string name;
+    public Inventory inventory;
+    public Progress progress;
 
     public Player()
     {
@@ -29,6 +30,7 @@ public class Player
     }
 }
 
+[System.Serializable]
 public class Inventory
 {
     public HeroSettings Settings( Definitions.Heroes hero ) => heroSettings[ heroes.IndexOf( hero ) ];
@@ -47,11 +49,11 @@ public class Inventory
         itemSettings.Add(new ItemSettings(level));
     }
 
-    public List<HeroSettings> heroSettings { get; }
-    public List<ItemSettings> itemSettings { get; }
-    public List<Definitions.Heroes> heroes { get; }
-    public List<Definitions.Items> items { get; }
-    public int coins { get; private set; }
+    public List<HeroSettings> heroSettings;
+    public List<ItemSettings> itemSettings;
+    public List<Definitions.Heroes> heroes;
+    public List<Definitions.Items> items;
+    public int coins;
 
     public Inventory()
     {
@@ -96,7 +98,7 @@ public class Progress
     public bool IsNewGame(int campaign) => campaignProgress[ campaign ].completed.Count == 0;
     public bool HasCampaignProgress(int index) => campaignProgress.Count > index;
 
-    public List<CampaignProgress> campaignProgress { get; }
+    public List<CampaignProgress> campaignProgress;
 
     public Progress()
     {
@@ -115,7 +117,7 @@ public class CampaignProgress
     public bool HasCompleted(int index) => completed.Contains(index);
     public void AddCompleted(int index) => completed.Add(index);
 
-    public List<int> completed { get; }
+    public List<int> completed;
 
     public CampaignProgress()
     {
@@ -123,11 +125,12 @@ public class CampaignProgress
     }
 }
 
+[System.Serializable]
 public class ItemSettings
 {
     public void Upgrade() => level++;
 
-    public int level { get; private set; }
+    public int level;
 
     public ItemSettings( int level )
     {
@@ -135,6 +138,7 @@ public class ItemSettings
     }
 }
 
+[System.Serializable]
 public class HeroSettings
 {
     public void Upgrade() => level++;
@@ -151,8 +155,8 @@ public class HeroSettings
         }
     }
 
-    public Color color { get; }
-    public int level { get; private set; }
+    public Color color;
+    public int level;
 
     public HeroSettings( Color color , int level = 0 )
     {
