@@ -1,5 +1,4 @@
 ﻿#if UNITY_EDITOR
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -77,7 +76,7 @@ public class MissionEditor : Layout
                 {
                     selectedMission = selectedMissionSet.missionDefinitions[ capturedIndex ];
                     _editor.campaignEditor.selectedCampaign.Add(selectedMission, index);
-                    _editor.ShowCampaignMap();
+                    _editor.campaignMapEditor.ShowCampaignMap();
                     HideMissionSets();
                     HideMissions();
                 }

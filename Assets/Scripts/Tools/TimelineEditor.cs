@@ -8,7 +8,28 @@ public class TimelineEditor : Layout
     public override void Update()
     {
         _indicator.transform.position = mousePos + Vector3.up;
+        HandleTimelineHover();
         base.Update();
+    }
+
+    public void HandleTimelineHover()
+    {
+        if (heldWave != null)
+        {
+            heldWave.SetPosition(mousePos + (Vector3.up * 2));
+
+            if (Input.GetMouseButtonUp(0))
+            {
+                if (containsMouse)
+                {
+                    _editor.missionEditor.selectedMission.waveTimes[ _editor.missionEditor.selectedMission.waveDefinitions.IndexOf(heldWave.waveDefinition) ] = Helpers.Normalize(mousePos.x, missionTimeline.rect.xMax, missionTimeline.rect.xMin);
+                    ShowMissionTimeline();
+                }
+
+                heldWave.Destroy();
+                heldWave = null;
+            }
+        }
     }
 
     public void AddWaveToTimeline(WaveDefinition waveDefinition)

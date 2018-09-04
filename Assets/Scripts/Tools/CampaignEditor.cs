@@ -90,7 +90,7 @@ public class CampaignEditor : Layout
                         HideCampaignSets();
                         ShowCampaignSets();
                         ShowCampaignEditor();
-                        _editor.ShowCampaignMap();
+                        _editor.campaignMapEditor.ShowCampaignMap();
                     }
                 },
                 Exit: (Button button) => button.SetColor(Color.white))))

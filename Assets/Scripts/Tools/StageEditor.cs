@@ -81,7 +81,7 @@ public class StageEditor : Layout
 
                     _editor.campaignEditor.ShowCampaignSets();
                     _editor.campaignEditor.ShowCampaignEditor();
-                    _editor.ShowCampaignMap();
+                    _editor.campaignMapEditor.ShowCampaignMap();
                 }
             } ,
             Exit: ( Button button ) => button.SetColor( Color.white ) )

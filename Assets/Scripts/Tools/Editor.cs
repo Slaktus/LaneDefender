@@ -1,13 +1,11 @@
 ﻿#if UNITY_EDITOR
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 
 public class Editor : Layout
 {
     public override void Update()
     {
-        HandleTimelineHover();
         HandleLaneHover();
 
         _level?.Update();
@@ -97,34 +95,7 @@ public class Editor : Layout
                 _itemTime = stage.conveyor.AddItemToConveyor(new Inventory());
         }
 
-        if (_dummyContainer != null)
-        {
-            _dummyContainer.transform.localScale = new Vector3(0.2f, Vector3.Distance(_dummyContainer.transform.position, mousePos), 0.2f);
-            Quaternion rotation = Quaternion.LookRotation(Vector3.down, (mousePos - _dummyContainer.transform.position).normalized);
-            _dummyContainer.transform.rotation = rotation;
-        }
-
         base.Update();
-    }
-
-    private void HandleTimelineHover()
-    {
-        if (timelineEditor.heldWave != null)
-        {
-            timelineEditor.heldWave.SetPosition(mousePos + (Vector3.up * 2));
-
-            if (Input.GetMouseButtonUp(0))
-            {
-                if (timelineEditor.containsMouse)
-                {
-                    missionEditor.selectedMission.waveTimes[ missionEditor.selectedMission.waveDefinitions.IndexOf(timelineEditor.heldWave.waveDefinition) ] = Helpers.Normalize(mousePos.x, timelineEditor.missionTimeline.rect.xMax, timelineEditor.missionTimeline.rect.xMin);
-                    timelineEditor.ShowMissionTimeline();
-                }
-
-                timelineEditor.heldWave.Destroy();
-                timelineEditor.heldWave = null;
-            }
-        }
     }
 
     private void HandleLaneHover()
@@ -187,277 +158,6 @@ public class Editor : Layout
         stage = null;
     }
 
-    public void ShowCampaignMap()
-    {
-        HideCampaignMap();
-        Vector3 offset = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, Camera.main.transform.position.y)) + ( Vector3.left * campaignEditor.selectedCampaign.width * 0.5f ) + (Vector3.forward * campaignEditor.selectedCampaign.height * 0.5f);
-        campaignMap = new CampaignMap(campaignEditor.selectedCampaign.width, campaignEditor.selectedCampaign.height, campaignEditor.selectedCampaign.columns, campaignEditor.selectedCampaign.rows, offset );
-
-        for (int i = 0; campaignMap.tileMap.count > i; i++)
-        {
-            int index = i;
-            Button button = new Button(campaignEditor.selectedCampaign.Has(index) ? campaignEditor.selectedCampaign.GetMissionDefinition(index).name : index.ToString(), campaignMap.tileMap.tileWidth - 1, campaignMap.tileMap.tileHeight * 0.5f, container, "CampaignMap" + index,
-                fontSize: 20,
-                Enter: (Button b) => b.SetColor(b.selected || missionEditor.missionSets != null ? b.color : Color.green),
-                Stay: (Button b) =>
-                {
-                    if (missionEditor.missionSets == null)
-                    {
-                        if (Input.GetMouseButtonDown(0))
-                        {
-                            if (campaignEditor.selectedCampaign.Has(index))
-                            {
-                                missionEditor.SetSelectedMission(campaignEditor.selectedCampaign.GetMissionDefinition(index));
-
-                                if (missionEditor.selectedMission.stageDefinition != null)
-                                {
-                                    stageEditor.SetSelectedStageDefinition(missionEditor.selectedMission.stageDefinition);
-                                    ShowStage(missionEditor.selectedMission.stageDefinition);
-                                }
-
-                                stageEditor.Show();
-                                missionEditor.ShowMissionEditor();
-                                timelineEditor.ShowMissionTimeline();
-
-                                campaignEditor.Hide();
-                                timelineEditor.Hide();
-                                missionEditor.Hide();
-                                HideCampaignMap();
-                            }
-                            else
-                            {
-                                missionEditor.ShowMissionSets(index, b.position + new Vector3(b.width * 0.5f, 0, b.height * 0.5f));
-                                b.SetColor(Color.yellow);
-                                b.Select();
-                            }
-                        }
-
-                        if (Input.GetMouseButtonDown(1) && campaignEditor.selectedCampaign.Has(index))
-                        {
-                            Debug.Log(index);
-                            //ok, so the problem is that it's the same damn instance!
-                            //that's ... uh, gonna be a bit of a bitch to work around
-                            //some kind of double bookkeeping required that I'm too tired to handle now
-                            //but at least hey, that's it -- when looking up the index and removing the instance, it finds the other identical instance, because it's the same in both
-                            //duh
-
-                            for ( int j = 0; campaignEditor.selectedCampaign.connections.Count > j; j++)
-                            {
-                                Connection connection = campaignEditor.selectedCampaign.connections[ j ];
-
-                                if ( connection.fromIndex == index || connection.toIndex == index)
-                                    campaignEditor.selectedCampaign.Remove(connection);
-                            }
-
-                            campaignEditor.selectedCampaign.Remove(campaignEditor.selectedCampaign.GetMissionDefinition(index));
-                            ShowCampaignMap();
-                        }
-                    }
-                },
-                Exit: (Button b) => b.SetColor(b.selected ? b.color : Color.white),
-                Close: (Button b) =>
-                {
-                    if (b.selected && (Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1)) && (missionEditor.missionSets == null || !missionEditor.missionSets.containsMouse) && (missionEditor.missions == null || !missionEditor.missions.containsMouse))
-                    {
-                        b.Deselect();
-                        b.SetColor(Color.white);
-                        missionEditor.HideMissions();
-                        missionEditor.HideMissionSets();
-                    }
-                });
-
-            button.SetPosition(campaignMap.tileMap.PositionOf(index));
-            _campaignMapButtons.Add(button);
-            Add(button);
-
-            if (campaignEditor.selectedCampaign.Has(index))
-            {
-                ShowConnectorAndTerminal(index, button);
-                ShowFirstMissionButton(index, button);
-                ShowFinalMissionButton(index, button);
-            }
-        }
-
-        ShowConnections();
-    }
-
-    public void HideCampaignMap()
-    {
-        for (int i = 0; _campaignMapButtons.Count > i; i++)
-        {
-            Remove(_campaignMapButtons[ i ]);
-            _campaignMapButtons[ i ].Destroy();
-        }
-
-        _campaignMapButtons.Clear();
-        HideConnectorsAndTerminals();
-        HideFinalMissionButtons();
-        HideFirstMissionButtons();
-        HideConnections();
-    }
-
-    private void ShowConnectorAndTerminal(int index, Button button)
-    {
-        Button connector = new Button("+", 0.5f, 0.5f, container, "Connector+",
-            Enter: (Button butt) => butt.SetColor(butt.selected ? butt.color : Color.green),
-            Stay: (Button butt) =>
-            {
-                if (Input.GetMouseButtonDown(0))
-                {
-                    butt.Select();
-                    butt.SetColor(Color.yellow);
-                    _selectedConnectorIndex = index;
-                    _dummyContainer = new GameObject("DummyContainer");
-                    _dummyConnector = GameObject.CreatePrimitive(PrimitiveType.Quad);
-                    _dummyConnector.transform.SetParent(_dummyContainer.transform);
-                    _dummyConnector.transform.localPosition += Vector3.up * 0.5f;
-                    _dummyContainer.transform.position = butt.position + Vector3.up;
-                }
-            },
-            Exit: (Button butt) => butt.SetColor(butt.selected ? butt.color : Color.white),
-            Close: (Button butt) =>
-            {
-                if (Input.GetMouseButtonUp(0))
-                {
-                    butt.Deselect();
-                    butt.SetColor(Color.white);
-
-                    if (_dummyContainer != null)
-                    {
-                        butt.Deselect();
-                        GameObject.Destroy(_dummyContainer);
-                        _dummyContainer = null;
-                        _dummyConnector = null;
-                    }
-                }
-            });
-
-        Button terminator = new Button("-", 0.5f, 0.5f, container, "Terminator-",
-            Enter: (Button butt) => butt.SetColor(_selectedConnectorIndex >= 0 ? Color.yellow : Color.green),
-            Stay: (Button butt) =>
-            {
-                if (_selectedConnectorIndex >= 0 && _selectedConnectorIndex != index && Input.GetMouseButtonUp(0))
-                {
-                    ScriptableObjects.Add(ScriptableObject.CreateInstance<Connection>().Initialize(_selectedConnectorIndex, index), campaignEditor.selectedCampaign);
-                    _selectedConnectorIndex = -1;
-                    butt.SetColor(Color.white);
-                    ShowConnections();
-                }
-            },
-            Exit: (Button butt) => butt.SetColor(Color.white));
-
-        Add(connector);
-        Add(terminator);
-        _connectorsAndTerminators.Add(connector);
-        _connectorsAndTerminators.Add(terminator);
-
-        connector.SetPosition(new Vector3(button.rect.xMax + 0.25f, button.position.y, button.rect.center.y));
-        terminator.SetPosition(new Vector3(button.rect.xMin - 0.25f, button.position.y, button.rect.center.y));
-    }
-
-    public void HideConnectorsAndTerminals()
-    {
-        for (int i = 0; _connectorsAndTerminators.Count > i; i++)
-        {
-            Remove(_connectorsAndTerminators[ i ]);
-            _connectorsAndTerminators[ i ].Destroy();
-        }
-
-        _connectorsAndTerminators.Clear();
-    }
-
-    public void ShowFirstMissionButton(int index, Button button)
-    {
-        Button butt = new Button("1st", 1, 0.5f, container, "First",
-            fontSize: 20,
-            Enter: (Button b) => b.SetColor(b.selected ? b.color : Color.green),
-            Stay: (Button b) =>
-            {
-                if (Input.GetMouseButtonDown(0))
-                {
-                    b.Select();
-                    b.SetColor(Color.yellow);
-                    campaignEditor.selectedCampaign.SetFirstMissionIndex(index);
-                }
-            },
-            Exit: (Button b) => b.SetColor(b.selected ? b.color : Color.white),
-            Close: (Button b) =>
-            {
-                if (Input.GetMouseButtonDown(0) && index != campaignEditor.selectedCampaign.firstMissionIndex)
-                {
-                    b.Deselect();
-                    b.SetColor(Color.white);
-                }
-            });
-
-        if ( index == campaignEditor.selectedCampaign.firstMissionIndex)
-        {
-            butt.Select();
-            butt.SetColor(Color.yellow);
-
-        }
-
-        Add(butt);
-        _firstMissionButtons.Add(butt);
-        butt.SetPosition(new Vector3(button.rect.center.x , button.position.y, button.rect.yMax + 0.25f));
-    }
-
-    public void HideFirstMissionButtons()
-    {
-        for (int i = 0; _firstMissionButtons.Count > i; i++)
-        {
-            Remove(_firstMissionButtons[ i ]);
-            _firstMissionButtons[ i ].Destroy();
-        }
-
-        _firstMissionButtons.Clear();
-    }
-
-    public void ShowFinalMissionButton(int index, Button button)
-    {
-        Button butt = new Button("Final", 1, 0.5f, container, "Final",
-            fontSize: 20,
-            Enter: (Button b) => b.SetColor(b.selected ? b.color : Color.green),
-            Stay: (Button b) =>
-            {
-                if (Input.GetMouseButtonDown(0))
-                {
-                    b.Select();
-                    b.SetColor(Color.yellow);
-                    campaignEditor.selectedCampaign.AddFinalMissionIndex( index );
-                }
-
-                if (Input.GetMouseButtonDown(1) && campaignEditor.selectedCampaign.HasFinalMissionIndex(index))
-                {
-                    b.Deselect();
-                    b.SetColor(Color.white);
-                    campaignEditor.selectedCampaign.RemoveFinalMissionIndex(index);
-                }
-            },
-            Exit: (Button b) => b.SetColor(b.selected ? b.color : Color.white));
-
-        if (campaignEditor.selectedCampaign.HasFinalMissionIndex(index))
-        {
-            butt.Select();
-            butt.SetColor(Color.yellow);
-        }
-
-        Add(butt);
-        _finalMissionButtons.Add(butt);
-        butt.SetPosition(new Vector3(button.rect.center.x, button.position.y, button.rect.yMin - 0.25f));
-    }
-
-    public void HideFinalMissionButtons()
-    {
-        for (int i = 0; _finalMissionButtons.Count > i; i++)
-        {
-            Remove(_finalMissionButtons[ i ]);
-            _finalMissionButtons[ i ].Destroy();
-        }
-
-        _finalMissionButtons.Clear();
-    }
-
     private void ShowCampaignEditor()
     {
         HideObjectsEditor();
@@ -474,13 +174,13 @@ public class Editor : Layout
         _campaignButton.Deselect();
         _campaignButton.SetColor(Color.white);
 
-        HideCampaignMap();
         stageEditor.Hide();
         missionEditor.Hide();
         campaignEditor.Hide();
         timelineEditor.Hide();
         waveEditor.HideWaveEventButtons();
         missionEditor.HideMissionEditor();
+        campaignMapEditor.HideCampaignMap();
         timelineEditor.HideMissionTimeline();
     }
 
@@ -506,39 +206,6 @@ public class Editor : Layout
         itemEditor.Hide();
     }
 
-    private void ShowConnections()
-    {
-        HideConnections();
-
-        for ( int i = 0; campaignEditor.selectedCampaign.connections.Count > i; i++)
-        {
-            Connection connection = campaignEditor.selectedCampaign.connections[ i ];
-
-            GameObject container = new GameObject("Connector");
-            GameObject quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            quad.transform.SetParent(container.transform);
-            quad.transform.localPosition += Vector3.up * 0.5f;
-
-            Vector3 fromPosition = campaignMap.tileMap.PositionOf(connection.fromIndex) + (Vector3.right * ((campaignMap.tileMap.tileWidth * 0.5f)));
-            Vector3 toPosition = campaignMap.tileMap.PositionOf(connection.toIndex) + (Vector3.left * ((campaignMap.tileMap.tileWidth * 0.5f)));
-
-            container.transform.position = fromPosition + Vector3.up;
-            container.transform.localScale = new Vector3(0.2f, Vector3.Distance(fromPosition, toPosition), 0.2f);
-            Quaternion rotation = Quaternion.LookRotation(Vector3.down, (toPosition - fromPosition).normalized);
-            container.transform.rotation = rotation;
-
-            _connectors.Add(container);
-        }
-    }
-
-    private void HideConnections()
-    {
-        for (int i = 0; _connectors.Count > i; i++)
-            GameObject.Destroy(_connectors[ i ]);
-
-        _connectors.Clear();
-    }
-
     public override void Refresh()
     {
         if (_campaignButton.selected)
@@ -547,9 +214,6 @@ public class Editor : Layout
             ShowObjectEditors();
     }
 
-    public Button GetMapButton(int index) => _campaignMapButtons[ index ];
-
-    public CampaignMap campaignMap { get; private set; }
     public Stage stage { get; private set; }
 
     public CampaignData campaignData { get; }
@@ -557,6 +221,7 @@ public class Editor : Layout
     public StageData stageData { get; }
     public WaveData waveData { get; }
 
+    public CampaignMapEditor campaignMapEditor { get; }
     public TimelineEditor timelineEditor { get; }
     public CampaignEditor campaignEditor { get; }
     public MissionEditor missionEditor { get; }
@@ -566,11 +231,6 @@ public class Editor : Layout
     public ItemEditor itemEditor { get; }
     public WaveEditor waveEditor { get; }
 
-    private List<Button> _connectorsAndTerminators { get; }
-    private List<Button> _finalMissionButtons { get; }
-    private List<Button> _firstMissionButtons { get; }
-    private List<Button> _campaignMapButtons { get; }
-    private List<GameObject> _connectors { get; }
     private HeldItem _heldItem { get; set; }
     private Button _campaignButton { get; }
     private Button _objectsButton { get; }
@@ -578,11 +238,6 @@ public class Editor : Layout
     private Button _testButton { get; }
     private Button _saveButton { get; }
     private Level _level { get; set; }
-
-    private int _selectedConnectorIndex { get; set; } = -1;
-    private GameObject _dummyConnector { get; set; }
-    private GameObject _dummyContainer { get; set; }
-
 
     public Editor(GameObject parent) : base("Editor", parent)
     {
@@ -606,35 +261,18 @@ public class Editor : Layout
             ScriptableObjects.Add(ScriptableObject.CreateInstance<EnemySet>(), objectData);
             ScriptableObjects.Add(ScriptableObject.CreateInstance<ItemSet>(), objectData);
             ScriptableObjects.Add(ScriptableObject.CreateInstance<HeroSet>(), objectData);
-
-            for (int i = 0; (int) Definitions.Enemies.Count > i; i++)
-                ScriptableObjects.Add(ScriptableObject.CreateInstance<EnemyDefinition>().Initialize(((Definitions.Enemies) i).ToString(), 2, 1, (Definitions.Enemies) i), objectData.enemySets[ (int) Assets.ObjectDataSets.Default ]);
-
-            for (int i = 0; (int) Definitions.Heroes.Count > i; i++)
-                ScriptableObjects.Add(ScriptableObject.CreateInstance<HeroDefinition>().Initialize(((Definitions.Heroes) i).ToString(), 2, 1, (Definitions.Heroes) i), objectData.heroSets[ (int) Assets.ObjectDataSets.Default ]);
-
-            for (int i = 0; (int) Definitions.Items.Count > i; i++)
-                ScriptableObjects.Add(ScriptableObject.CreateInstance<ItemDefinition>().Initialize(((Definitions.Items) i).ToString(), 2, 1, (Definitions.Items) i), objectData.itemSets[ (int) Assets.ObjectDataSets.Default ]);
         }
 
-        if ( ( int ) Definitions.Enemies.Count > objectData.enemySets[ (int) Assets.ObjectDataSets.Default ].enemyDefinitions.Count)
-            for (int i = objectData.enemySets[ (int) Assets.ObjectDataSets.Default ].enemyDefinitions.Count; (int) Definitions.Enemies.Count > i; i++)
-                ScriptableObjects.Add(ScriptableObject.CreateInstance<EnemyDefinition>().Initialize(((Definitions.Enemies) i).ToString(), 2, 1, (Definitions.Enemies) i), objectData.enemySets[ (int) Assets.ObjectDataSets.Default ]);
+        for (int i = objectData.enemySets[ (int) Assets.ObjectDataSets.Default ].enemyDefinitions.Count; (int) Definitions.Enemies.Count > i; i++)
+            ScriptableObjects.Add(ScriptableObject.CreateInstance<EnemyDefinition>().Initialize(((Definitions.Enemies) i).ToString(), 2, 1, (Definitions.Enemies) i), objectData.enemySets[ (int) Assets.ObjectDataSets.Default ]);
 
-        if ((int) Definitions.Heroes.Count > objectData.heroSets[ (int) Assets.ObjectDataSets.Default ].heroDefinitions.Count)
-            for (int i = objectData.heroSets[ (int) Assets.ObjectDataSets.Default ].heroDefinitions.Count; (int) Definitions.Heroes.Count > i; i++)
-                ScriptableObjects.Add(ScriptableObject.CreateInstance<HeroDefinition>().Initialize(((Definitions.Heroes) i).ToString(), 2, 1, (Definitions.Heroes) i), objectData.heroSets[ (int) Assets.ObjectDataSets.Default ]);
+        for (int i = objectData.heroSets[ (int) Assets.ObjectDataSets.Default ].heroDefinitions.Count; (int) Definitions.Heroes.Count > i; i++)
+            ScriptableObjects.Add(ScriptableObject.CreateInstance<HeroDefinition>().Initialize(((Definitions.Heroes) i).ToString(), 2, 1, (Definitions.Heroes) i), objectData.heroSets[ (int) Assets.ObjectDataSets.Default ]);
 
-        if ((int) Definitions.Items.Count > objectData.itemSets[ (int) Assets.ObjectDataSets.Default ].itemDefinitions.Count)
-            for (int i = objectData.itemSets[ (int) Assets.ObjectDataSets.Default ].itemDefinitions.Count; (int) Definitions.Items.Count > i; i++)
-                ScriptableObjects.Add(ScriptableObject.CreateInstance<ItemDefinition>().Initialize(((Definitions.Items) i).ToString(), 2, 1, (Definitions.Items) i), objectData.itemSets[ (int) Assets.ObjectDataSets.Default ]);
+        for (int i = objectData.itemSets[ (int) Assets.ObjectDataSets.Default ].itemDefinitions.Count; (int) Definitions.Items.Count > i; i++)
+            ScriptableObjects.Add(ScriptableObject.CreateInstance<ItemDefinition>().Initialize(((Definitions.Items) i).ToString(), 2, 1, (Definitions.Items) i), objectData.itemSets[ (int) Assets.ObjectDataSets.Default ]);
 
         Definitions.Initialize(objectData);
-        _connectors = new List<GameObject>();
-        _campaignMapButtons = new List<Button>();
-        _firstMissionButtons = new List<Button>();
-        _finalMissionButtons = new List<Button>();
-        _connectorsAndTerminators = new List<Button>();
 
         Add(_testButton = new Button("Test", 1.5f, 0.5f, container, "Test",
             fontSize: 20,
@@ -722,6 +360,7 @@ public class Editor : Layout
             Exit: (Button button) => button.SetColor(button.selected ? button.color : Color.white)));
 
         _objectsButton.SetPosition(_campaignButton.position + Vector3.right * (_objectsButton.width));
+        Add(campaignMapEditor = new CampaignMapEditor(this, container));
         Add(campaignEditor = new CampaignEditor(this, Vector3.zero, container));
         Add(timelineEditor = new TimelineEditor(this, container));
         Add(missionEditor = new MissionEditor(this, container));
