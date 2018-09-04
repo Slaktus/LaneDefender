@@ -5,6 +5,12 @@ using UnityEngine;
 
 public class TimelineEditor : Layout
 {
+    private void SetSelectedWaveDefinition(WaveDefinition waveDefinition) => _editor.waveEditor.SetSelectedWaveDefinition(waveDefinition);
+    private void HideWaveEventButtons() => _editor.waveEditor.HideWaveEventButtons();
+    private void ShowWaveEventButtons() => _editor.waveEditor.ShowWaveEventButtons();
+    private void HideIndicator() => _indicator.enabled = false;
+    private void ShowIndicator() => _indicator.enabled = true;
+
     public override void Update()
     {
         _indicator.transform.position = mousePos + Vector3.up;
@@ -22,7 +28,7 @@ public class TimelineEditor : Layout
             {
                 if (containsMouse)
                 {
-                    _editor.missionEditor.selectedMission.waveTimes[ _editor.missionEditor.selectedMission.waveDefinitions.IndexOf(heldWave.waveDefinition) ] = Helpers.Normalize(mousePos.x, missionTimeline.rect.xMax, missionTimeline.rect.xMin);
+                    selectedMission.waveTimes[ selectedMission.waveDefinitions.IndexOf(heldWave.waveDefinition) ] = Helpers.Normalize(mousePos.x, missionTimeline.rect.xMax, missionTimeline.rect.xMin);
                     ShowMissionTimeline();
                 }
 
@@ -34,7 +40,7 @@ public class TimelineEditor : Layout
 
     public void AddWaveToTimeline(WaveDefinition waveDefinition)
     {
-        _editor.missionEditor.selectedMission.Add(waveDefinition, timelinePosition);
+        selectedMission.Add(waveDefinition, timelinePosition);
 
         Button button = new Button("Wave", 2, 1, container, "Wave",
             Enter: (Button b) => b.SetColor(b.selected ? b.color : Color.green),
@@ -42,7 +48,7 @@ public class TimelineEditor : Layout
             {
                 if (Input.GetMouseButtonDown(1))
                 {
-                    _editor.missionEditor.selectedMission.Remove(waveDefinition);
+                    selectedMission.Remove(waveDefinition);
                     _buttons.Remove(b);
                     b.Destroy();
                 }
@@ -54,9 +60,9 @@ public class TimelineEditor : Layout
                         _buttons[ i ].SetColor(Color.white);
                     }
 
-                    _editor.waveEditor.SetSelectedWaveDefinition(waveDefinition);
-                    _editor.waveEditor.HideWaveEventButtons();
-                    _editor.waveEditor.ShowWaveEventButtons();
+                    SetSelectedWaveDefinition(waveDefinition);
+                    HideWaveEventButtons();
+                    ShowWaveEventButtons();
                     b.SetColor(Color.yellow);
                     b.Select();
                 }
@@ -65,7 +71,7 @@ public class TimelineEditor : Layout
             {
                 if (_editor.stage.conveyor == null || !_editor.stage.conveyor.showing)
                 {
-                    if (_editor.waveEditor.heldWaveEvent == null && heldWave == null && Input.GetMouseButton(0))
+                    if (heldWaveEvent == null && heldWave == null && Input.GetMouseButton(0))
                     {
                         heldWave = new HeldWave(b.rect.position, waveDefinition);
                         heldWave.SetText("Wave");
@@ -75,9 +81,9 @@ public class TimelineEditor : Layout
                 }
             });
 
-        _editor.waveEditor.SetSelectedWaveDefinition(waveDefinition);
-        _editor.waveEditor.HideWaveEventButtons();
-        _editor.waveEditor.ShowWaveEventButtons();
+        SetSelectedWaveDefinition(waveDefinition);
+        HideWaveEventButtons();
+        ShowWaveEventButtons();
 
         for (int i = 0; _buttons.Count > i; i++)
         {
@@ -108,7 +114,7 @@ public class TimelineEditor : Layout
                 {
                     if (Input.GetMouseButtonDown(1))
                     {
-                        _editor.missionEditor.selectedMission.Remove(waveDefinition);
+                        selectedMission.Remove(waveDefinition);
                         _buttons.Remove(b);
                         b.Destroy();
                     }
@@ -149,7 +155,7 @@ public class TimelineEditor : Layout
 
     public void RemoveWaveFromTimeline(WaveDefinition waveDefinition)
     {
-        int index = _editor.missionEditor.selectedMission.waveDefinitions.IndexOf(waveDefinition);
+        int index = selectedMission.waveDefinitions.IndexOf(waveDefinition);
         Remove(_buttons[ index ]);
         _buttons[ index ].Destroy();
         _buttons.RemoveAt(index);
@@ -186,9 +192,9 @@ public class TimelineEditor : Layout
 
             missionTimeline.SetPosition(new Vector3(_editor.stage.start + (_editor.stage.width * 0.5f), 0, Camera.main.ViewportToWorldPoint(new Vector3(0, 1, Camera.main.transform.position.y)).z) + (Vector3.back * missionTimeline.height * 0.5f) + Vector3.up);
 
-            if (_editor.missionEditor.selectedMission != null)
-                for (int i = 0; _editor.missionEditor.selectedMission.waveDefinitions.Count > i; i++)
-                    AddWaveToTimeline(_editor.missionEditor.selectedMission.waveDefinitions[ i ], _editor.missionEditor.selectedMission.waveTimes[ i ]);
+            if (selectedMission != null)
+                for (int i = 0; selectedMission.waveDefinitions.Count > i; i++)
+                    AddWaveToTimeline(selectedMission.waveDefinitions[ i ], selectedMission.waveTimes[ i ]);
         }
     }
 
@@ -209,19 +215,16 @@ public class TimelineEditor : Layout
         missionTimeline = null;
     }
 
-    public override void Hide()
-    {
-        HideIndicator();
-    }
-
-    private void ShowIndicator() => _indicator.enabled = true;
-    private void HideIndicator() => _indicator.enabled = false;
+    public override void Hide() => HideIndicator();
 
     public Vector3 indicatorPosition => new Vector3(_indicator.transform.position.x, 0, missionTimeline.rect.center.y);
 
     public float timelinePosition { get; private set; }
     public Button missionTimeline { get; set; }
     public HeldWave heldWave { get; set; }
+
+    private MissionDefinition selectedMission => _editor.missionEditor.selectedMission;
+    private HeldEvent heldWaveEvent => _editor.waveEditor.heldWaveEvent;
 
     private Editor _editor { get; }
     private MeshRenderer _indicator { get; }

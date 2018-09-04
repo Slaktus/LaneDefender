@@ -44,7 +44,7 @@ public class TitleScreen : Layout
                     {
                         if (Input.GetMouseButtonDown(0))
                         {
-                            selectedCampaign = campaignData.campaignSets[ iIndex ].campaignDefinitions[ jIndex ];
+                            selectedCampaign = campaignData.GetCampaignSet(iIndex).campaignDefinitions[ jIndex ];
                             selectedCampaignIndex = buttons.IndexOf(butt);
                         }
                     },

@@ -4,6 +4,12 @@ using UnityEngine;
 
 public class StageEditor : Layout
 {
+    private void SetStageDefinition(StageDefinition stageDefinition) => _editor.missionEditor.SetStageDefinition(stageDefinition);
+    private void ShowMissionTimeline() => _editor.timelineEditor.ShowMissionTimeline();
+    private void ShowMissionEditor() => _editor.missionEditor.ShowMissionEditor();
+    private void ShowStage() => _editor.ShowStage(selectedStageDefinition);
+    private void HideStage() => _editor.HideStage();
+
     public override void Show()
     {
         ShowStageSets();
@@ -110,20 +116,19 @@ public class StageEditor : Layout
             {
                 if (_selectedStageSet != null && Input.GetMouseButtonDown(0))
                 {
-                    selectedStageDefinition = _selectedStageSet.stageDefinitions[ index ];
+                    selectedStageDefinition = _selectedStageSet.GetStage( index );
 
                     HideStageSets();
                     HideStageDefinitions();
-                    _editor.HideStage();
+                    HideStage();
 
-                    _editor.missionEditor.selectedMission.stageDefinition = selectedStageDefinition;
-                    _editor.ShowStage(selectedStageDefinition);
+                    SetStageDefinition(selectedStageDefinition);
+                    ShowStage();
 
                     ShowStageSets();
                     ShowStageEditor();
-                    _editor.timelineEditor.ShowMissionTimeline();
-                    _editor.missionEditor.ShowMissionEditor();
-
+                    ShowMissionTimeline();
+                    ShowMissionEditor();
                 }
             },
             Exit: (Button button) => button.SetColor(Color.white))))

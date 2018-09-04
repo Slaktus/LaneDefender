@@ -15,36 +15,22 @@ public class Editor : Layout
         if (stage != null && stage.conveyor != null && stage.conveyor.showing)
         {
             Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-            //The actual raycast returns an array with all the targets the ray passed through
-            //Note that we don't pass in the ray itself -- that's because the method taking a ray as argument flat-out doesn't work
-            //We don't bother constraining the raycast by layer mask just yet, since the ground plane is the only collider in the scene
             RaycastHit[] hits = Physics.RaycastAll(mouseRay.origin, mouseRay.direction, float.PositiveInfinity);
 
-            //These references might be populated later
             Lane hoveredLane = null;
             ConveyorItem hoveredItem = null;
 
-            //Proceed if we hit the ground plane
             if (hits.Length > 0)
             {
-                //Get the mouse position on the ground plane
                 Vector3 mousePosition = hits[ 0 ].point;
-
-                //See if the mouse is hovering any lanes
                 hoveredLane = stage.GetHoveredLane(mousePosition);
 
-                //Proceed if the mouse is hovering the conveyor
                 if (stage.conveyor.Contains(mousePosition))
                 {
-                    //Try to get a hovered conveyor item
                     hoveredItem = stage.conveyor.GetHoveredItem(mousePosition);
 
-                    //Proceed if an item is hovered and no item is held
                     if (hoveredItem != null && _heldItem == null)
                     {
-                        //Instantiate a new HeldItem if no item is held and the left mouse button is pressed
-                        //Otherwise, change the color of the item to indicate hover
                         if (_heldItem == null && Input.GetMouseButtonDown(0))
                             _heldItem = new HeldItem(hoveredItem);
                         else
@@ -52,16 +38,12 @@ public class Editor : Layout
                     }
                 }
 
-                //Reset lane colors
                 stage.SetLaneColor(Color.black);
 
-                //Proceed if a lane is hovered and an item is held
                 if (_heldItem != null && hoveredLane != null)
                 {
                     hoveredLane.color = Color.yellow;
 
-                    //Proceed if the left mouse button is not held
-                    //This will only happen if the left mouse button is released
                     if (!Input.GetMouseButton(0))
                     {
                         hoveredLane.Add(new LaneItem(_heldItem, hoveredLane));
@@ -71,16 +53,12 @@ public class Editor : Layout
                     }
                 }
 
-                //Proceed if an item is held
                 if (_heldItem != null)
                 {
-                    //Position the held item at the world-space mouse position
                     _heldItem.SetPosition(mousePosition);
 
-                    //Proceed if the left mouse button is released or the right mouse button is pressed
                     if (!Input.GetMouseButton(0) || Input.GetMouseButtonDown(1))
                     {
-                        //Reset the held conveyor item's color and clean up the held item
                         _heldItem.conveyorItem.color = Color.white;
                         _heldItem.Destroy();
                         _heldItem = null;
@@ -88,7 +66,6 @@ public class Editor : Layout
                 }
             }
 
-            //Reset the color of any item not currently hovered
             stage.conveyor.SetItemColor(Color.white, _heldItem != null ? _heldItem.conveyorItem : hoveredItem);
 
             if (Time.time > _itemTime && (1 > _level.progress || stage.enemies > 0))

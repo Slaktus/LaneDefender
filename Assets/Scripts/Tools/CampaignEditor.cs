@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class CampaignEditor : Layout
 {
+    private CampaignSet GetCampaignSet(int index) => _editor.campaignData.GetCampaignSet(index);
+
     public void ShowCampaignSets()
     {
         HideCampaignSets();
@@ -17,19 +19,19 @@ public class CampaignEditor : Layout
             Button.GetButtons(count,
             (int index) => new Button("Campaign Set", 3, 1, container, "CampaignSet", fontSize: 20,
                                                             //this condition can probably be simplified
-                Enter: (Button button) => button.SetColor(_campaigns != null && selectedCampaignSet == _editor.campaignData.campaignSets[ index ] ? button.color : Color.green),
+                Enter: (Button button) => button.SetColor(_campaigns != null && selectedCampaignSet == GetCampaignSet( index ) ? button.color : Color.green),
                 Stay: (Button button) =>
                 {
                     if (Input.GetMouseButtonDown(0))
                     {
-                        selectedCampaignSet = _editor.campaignData.campaignSets[ index ];
+                        selectedCampaignSet = GetCampaignSet(index);
                         ShowCampaigns(index, button.position + new Vector3(button.width * 0.5f, 0, button.height * 0.5f));
                         button.SetColor(Color.yellow);
                         button.Select();
                     }
                 },
                                                             //this condition can probably be simplified
-                Exit: (Button button) => button.SetColor(_campaigns != null && selectedCampaignSet == _editor.campaignData.campaignSets[ index ] ? button.color : Color.white),
+                Exit: (Button button) => button.SetColor(_campaigns != null && selectedCampaignSet == GetCampaignSet( index ) ? button.color : Color.white),
                 Close: (Button button) =>
                 {
                     if (button.selected && Input.GetMouseButtonDown(0) && (_campaigns == null || !_campaigns.containsMouse))

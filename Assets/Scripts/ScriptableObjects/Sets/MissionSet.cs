@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class MissionSet : DefinitionBase
 {
+    public MissionDefinition GetMission(int index) => missionDefinitions[ index ];
     public override void Add( ScriptableObject toAdd ) => missionDefinitions.Add( toAdd as MissionDefinition );
     public override void Remove( ScriptableObject toRemove ) => missionDefinitions.Remove( toRemove as MissionDefinition );
 

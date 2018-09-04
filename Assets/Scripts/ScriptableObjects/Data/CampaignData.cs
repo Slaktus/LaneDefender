@@ -3,6 +3,9 @@ using UnityEngine;
 
 public class CampaignData : DefinitionBase
 {
+    public CampaignSet GetCampaignSet(int index) => campaignSets[ index ];
+    public MissionSet GetMissionSet(int index) => missionSets[ index ];
+
     public override void Add( ScriptableObject toAdd )
     {
         if ( toAdd is MissionSet )

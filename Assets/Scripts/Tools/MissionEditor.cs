@@ -4,6 +4,13 @@ using UnityEngine;
 
 public class MissionEditor : Layout
 {
+    public void SetSelectedMission(MissionDefinition selectedMission) => this.selectedMission = selectedMission;
+    public void SetStageDefinition(StageDefinition stageDefinition) => selectedMission.stageDefinition = stageDefinition;
+
+    private void ShowCampaignMap() => _editor.campaignMapEditor.ShowCampaignMap();
+    private MissionSet GetMissionSet(int index) => _editor.campaignData.GetMissionSet(index);
+    private MissionDefinition GetMission(int index) => selectedMissionSet.GetMission(index);
+
     public void ShowMissionSets( int index , Vector3 position )
     {
         HideMissionSets();
@@ -13,20 +20,20 @@ public class MissionEditor : Layout
 
         missionSets.Add(new List<Button>(Button.GetButtons(count, (int capturedIndex) => new Button("Mission Set", 4, 1, container, "MissionSet",
             fontSize: 20,
-            Enter: (Button button) => button.SetColor(selectedMissionSet == _editor.campaignData.missionSets[ capturedIndex ] ? button.color : Color.green),
+            Enter: (Button button) => button.SetColor(selectedMissionSet == GetMissionSet( capturedIndex ) ? button.color : Color.green),
             Stay: (Button button) =>
             {
                 if (Input.GetMouseButtonDown(0))
                 {
                     button.SetColor(Color.yellow);
-                    selectedMissionSet = _editor.campaignData.missionSets[ capturedIndex ];
+                    selectedMissionSet = GetMissionSet(capturedIndex);
                     ShowMissions(index, button.position + new Vector3(button.width * 0.5f, 0, button.height * 0.5f));
                 }
             },
-            Exit: (Button button) => button.SetColor(selectedMissionSet == _editor.campaignData.missionSets[ capturedIndex ] ? button.color : Color.white),
+            Exit: (Button button) => button.SetColor(selectedMissionSet == GetMissionSet(capturedIndex) ? button.color : Color.white),
             Close: (Button button) =>
             {
-                if (Input.GetMouseButtonDown(0) && selectedMissionSet == _editor.campaignData.missionSets[ capturedIndex ] && missions != null && !missions.containsMouse)
+                if (Input.GetMouseButtonDown(0) && selectedMissionSet == GetMissionSet(capturedIndex) && missions != null && !missions.containsMouse)
                 {
                     HideMissions();
                     selectedMissionSet = null;
@@ -74,9 +81,9 @@ public class MissionEditor : Layout
             {
                 if (Input.GetMouseButtonDown(0))
                 {
-                    selectedMission = selectedMissionSet.missionDefinitions[ capturedIndex ];
-                    _editor.campaignEditor.selectedCampaign.Add(selectedMission, index);
-                    _editor.campaignMapEditor.ShowCampaignMap();
+                    selectedMission = GetMission(capturedIndex);
+                    selectedCampaign.Add(selectedMission, index);
+                    ShowCampaignMap();
                     HideMissionSets();
                     HideMissions();
                 }
@@ -140,12 +147,13 @@ public class MissionEditor : Layout
         HideMissionSets();
     }
 
-    public void SetSelectedMission( MissionDefinition selectedMission ) => this.selectedMission = selectedMission;
 
     public MissionSet selectedMissionSet { get; private set; }
     public MissionDefinition selectedMission { get; private set; }
     public Layout missionSets { get; private set; }
     public Layout missions { get; private set; }
+
+    private CampaignDefinition selectedCampaign => _editor.campaignEditor.selectedCampaign;
 
     private Editor _editor { get; }
     private Layout _missionEditorLayout { get; set; }
