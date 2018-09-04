@@ -15,6 +15,8 @@ public static class ScriptableObjects
 
     public static void Add<T,Y>( T toAdd , Y addTo ) where T : ScriptableObject where Y : ScriptableObject
     {
+        toAdd.name = "New" + typeof(T).Name;
+
         if ( addTo is DefinitionBase)
             ( addTo as DefinitionBase).Add(toAdd);
         

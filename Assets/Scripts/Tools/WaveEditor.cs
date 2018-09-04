@@ -263,7 +263,7 @@ public class WaveEditor : Layout
             new Field( "Delay" , _selectedWaveEvent.delay.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers  , EndInput: ( Field field ) => float.TryParse( field.label.text , out selectedWaveDefinition.waveEvents[ index ].delay ) ) ,
 
             new Label("Entry:" , Color.black , 1.25f , 0.5f , container , fontSize: 20 , anchor: TextAnchor.MiddleCenter ) ,
-            new Field( "Entry" , _selectedWaveEvent.entryPoint.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers , StartInput: ( Field field ) => Debug.Log("hello"), EndInput: ( Field field ) => float.TryParse( field.label.text , out selectedWaveDefinition.waveEvents[ index ].entryPoint ) )
+            new Field( "Entry" , _selectedWaveEvent.entryPoint.ToString() , 2 , 0.5f , 20 , container , Field.ContentMode.Numbers , EndInput: ( Field field ) => float.TryParse( field.label.text , out selectedWaveDefinition.waveEvents[ index ].entryPoint ) )
         };
 
         Add(waveEventEditor = new Layout("WaveEventEditor", 4, 3, 0.1f, 0.1f, waveEventEditorButtons.Count / 2, container));

@@ -3,6 +3,58 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
+public class RenameableButton : Panel
+{
+    public static List<RenameableButton> GetButtons(int count, Func<int, RenameableButton> GetButton)
+    {
+        List<RenameableButton> buttons = new List<RenameableButton>(count);
+
+        for (int i = 0; count > i; i++)
+            buttons.Add(GetButton(i));
+
+        return buttons;
+    }
+
+    public override void Update()
+    {
+        field.Update();
+
+        if ( !field.editing)
+            button.Update();
+    }
+
+    public override void LateUpdate()
+    {
+        field.LateUpdate();
+
+        if (!field.editing)
+            button.LateUpdate();
+    }
+
+    public override void SetHeight(float height)
+    {
+        field.SetHeight(height);
+        button.SetHeight(height);
+        base.SetHeight(height);
+    }
+
+    public override void SetWidth(float width)
+    {
+        field.SetWidth(width);
+        button.SetWidth(width);
+        base.SetWidth(width);
+    }
+
+    Field field { get; }
+    Button button { get; }
+
+    public RenameableButton(string name, float width, float height, GameObject parent = null, int fontSize = 35, Field.ContentMode contentMode = Field.ContentMode.TextAndNumbers, Field.ButtonMode buttonMode = Field.ButtonMode.Right, Field.EditMode editMode = Field.EditMode.SingleClick, Action<Field> StartInput = null, Action<Field> EndInput = null, Action<Button> Enter = null, Action<Button> Stay = null, Action<Button> Exit = null, Action<Button> Close = null, bool hideQuad = false) : base(name, width, height, parent, false)
+    {
+        field = new Field(name+"Field", name, width, height, fontSize, container, contentMode, buttonMode, editMode, StartInput, EndInput);
+        button = new Button(string.Empty, width, height, container, name+"Button", Enter, Stay, Exit, Close, hideQuad);
+    }
+}
+
 public class Field : Button
 {
     public override void Update()
@@ -22,7 +74,7 @@ public class Field : Button
         StartInput?.Invoke( this );
         ShowQuad();
 
-        while ( Input.GetMouseButton( 0 ) )
+        while ( Input.GetMouseButton( 0 ) || Input.GetMouseButton(1) )
             yield return null;
 
         string input = label.text;
@@ -74,6 +126,7 @@ public class Field : Button
     }
 
     public new Label label => base.label;
+    public bool editing => _handler != null;
 
     private bool _doubleClick
     {
@@ -94,24 +147,26 @@ public class Field : Button
     private float _doubleClickTime { get; set; }
     private IEnumerator _handler { get; set; }
     private ContentMode _contentMode { get; }
+    private ButtonMode _buttonMode { get; }
     private EditMode _editMode { get; }
     private bool _click;
 
-    public Field( string name , string label , float width , float height , int fontSize = 35 , GameObject parent = null , ContentMode contentMode = ContentMode.TextAndNumbers , EditMode editMode = EditMode.SingleClick , Action<Field> StartInput = null , Action<Field> EndInput = null ) : base(label, width, height, parent, name, hideQuad: true, fontSize: fontSize)
+    public Field( string name , string label , float width , float height , int fontSize = 35 , GameObject parent = null , ContentMode contentMode = ContentMode.TextAndNumbers , ButtonMode buttonMode = ButtonMode.Left, EditMode editMode = EditMode.SingleClick , Action<Field> StartInput = null , Action<Field> EndInput = null ) : base(label, width, height, parent, name, hideQuad: true, fontSize: fontSize)
     {
         this.StartInput = StartInput;
         this.EndInput = EndInput;
         _contentMode = contentMode;
+        _buttonMode = buttonMode;
         _editMode = editMode;
 
         SetStay( ( Button button ) =>
         {
-            if ( Input.GetMouseButtonDown( 0 ) )
+            if (Input.GetMouseButtonDown((int)_buttonMode))
             {
-                switch ( _editMode )
+                switch (_editMode)
                 {
                     case EditMode.DoubleClick:
-                        if ( _doubleClick )
+                        if (_doubleClick)
                             _handler = Handler();
                         else
                             _doubleClick = true;
@@ -122,7 +177,7 @@ public class Field : Button
                         break;
                 }
             }
-        } );
+        });
     }
 
     public enum ContentMode
@@ -136,6 +191,12 @@ public class Field : Button
     {
         SingleClick,
         DoubleClick
+    }
+
+    public enum ButtonMode
+    {
+        Left = 0,
+        Right = 1
     }
 }
 
@@ -234,7 +295,7 @@ public class Button : Panel
     private Action<Button> Stay { get; set; }
     private Action<Button> Exit { get; set; }
 
-    public Button(string label, float width, float height, GameObject parent, string name = "Button", Action<Button> Enter = null, Action<Button> Stay = null, Action<Button> Exit = null, Action<Button> Close = null, bool hideQuad = false, int fontSize = 35, float characterSize = 0.15f) : base( name , width , height , hideQuad)
+    public Button(string label, float width, float height, GameObject parent, string name = "Button", Action<Button> Enter = null, Action<Button> Stay = null, Action<Button> Exit = null, Action<Button> Close = null, bool hideQuad = false, int fontSize = 35, float characterSize = 0.15f) : base( name , width , height , parent, hideQuad)
     {
         SetClose( Close );
         SetEnter( Enter );
@@ -249,7 +310,8 @@ public class Button : Panel
             container.transform.localPosition = Vector3.up;
         }
 
-        this.label = new Label( label , Color.black , width , height , container , fontSize: fontSize, characterSize: characterSize );
+        if (!string.IsNullOrEmpty(label))
+            this.label = new Label( label , Color.black , width , height , container , fontSize: fontSize, characterSize: characterSize );
     }
 }
 
@@ -442,7 +504,7 @@ public class Layout : Panel
             SetParent( parent );
     }
 
-    public Layout( string name , GameObject parent = null ) : base( name , 0 , 0, true )
+    public Layout( string name , GameObject parent = null ) : base( name , 0 , 0, parent, true )
     {
         constrainElements = false;
         elements = new List<Element>();
@@ -474,7 +536,7 @@ public class Panel : Element
 
     protected MeshRenderer quad { get; set; }
 
-    public Panel( string name , float width , float height , bool hideQuad = false ) : base( name , width , height )
+    public Panel( string name , float width , float height , GameObject parent = null, bool hideQuad = false ) : base( name , width , height )
     {
         quad = GameObject.CreatePrimitive( PrimitiveType.Quad ).GetComponent<MeshRenderer>();
         quad.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
@@ -484,6 +546,9 @@ public class Panel : Element
         quad.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
         quad.transform.localScale = new Vector3( width , height , 1 );
         quad.transform.name = name + "BG";
+
+        if (parent != null)
+            SetParent(parent);
 
         if (hideQuad)
             HideQuad();

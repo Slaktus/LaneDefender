@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class CampaignEditor : Layout
 {
+    private void ShowCampaignMap() => _editor.campaignMapEditor.ShowCampaignMap();
     private CampaignSet GetCampaignSet(int index) => _editor.campaignData.GetCampaignSet(index);
+    private CampaignDefinition GetCampaign(int index) => selectedCampaignSet.campaignDefinitions[ index ];
 
     public void ShowCampaignSets()
     {
@@ -15,10 +17,15 @@ public class CampaignEditor : Layout
         campaignSets.SetViewportPosition(new Vector2(0, 1));
         campaignSets.SetPosition(campaignSets.position + Vector3.up + Vector3.back);
 
-        campaignSets.Add(new List<Button>(
-            Button.GetButtons(count,
-            (int index) => new Button("Campaign Set", 3, 1, container, "CampaignSet", fontSize: 20,
-                                                            //this condition can probably be simplified
+        campaignSets.Add(new List<RenameableButton>(
+            RenameableButton.GetButtons(count,
+            (int index) => new RenameableButton(GetCampaignSet(index).name, 3, 1, container, 
+                fontSize: 20,
+                EndInput: (Field field) => 
+                {
+                    GetCampaignSet(index).name = field.label.text;
+                    field.SetColor(Color.white);
+                },
                 Enter: (Button button) => button.SetColor(_campaigns != null && selectedCampaignSet == GetCampaignSet( index ) ? button.color : Color.green),
                 Stay: (Button button) =>
                 {
@@ -42,24 +49,24 @@ public class CampaignEditor : Layout
                         button.SetColor(Color.white);
                     }
                 })
-            ))
-        {
-            new Button("New Set", 4, 1, container, "NewCampaignSet", fontSize: 20,
-                Enter: (Button button) => button.SetColor(Color.green),
-                Stay: (Button button) =>
-                {
-                    if (Input.GetMouseButtonDown(0))
-                    {
-                        HideCampaigns();
-                        ScriptableObjects.Add(ScriptableObject.CreateInstance<CampaignSet>(), _editor.campaignData);
-                        ShowCampaignSets();
+            )));
 
-                        if (selectedCampaign != null)
-                            ShowCampaignEditor();
-                    }
-                },
-                Exit: (Button button) => button.SetColor(Color.white))
-        }, true);
+        campaignSets.Add(new Button("New Set", 4, 1, container, "NewCampaignSet",
+            fontSize: 20,
+            Enter: (Button button) => button.SetColor(Color.green),
+            Stay: (Button button) =>
+            {
+                if (Input.GetMouseButtonDown(0))
+                {
+                    HideCampaigns();
+                    ScriptableObjects.Add(ScriptableObject.CreateInstance<CampaignSet>(), _editor.campaignData);
+                    ShowCampaignSets();
+
+                    if (selectedCampaign != null)
+                        ShowCampaignEditor();
+                }
+            },
+            Exit: (Button button) => button.SetColor(Color.white)), true);
     }
 
     public void HideCampaignSets()
@@ -78,37 +85,44 @@ public class CampaignEditor : Layout
         Add(_campaigns = new Layout( "CampaignLayout" , 3 , count + 1 , 0.25f , 0.1f , count + 1 , container ));
         _campaigns.SetPosition( position + ( Vector3.right * _campaigns.width * 0.5f ) + ( Vector3.back * _campaigns.height * 0.5f ) );
 
-        _campaigns.Add(new List<Button>(
-            Button.GetButtons(count,
-            (int capturedIndex) => new Button("Campaign", 3, 1, container, "Campaign", fontSize: 20,
+        _campaigns.Add(new List<RenameableButton>(
+            RenameableButton.GetButtons(count,
+            (int capturedIndex) => new RenameableButton("Campaign", 3, 1, container,
+                fontSize: 20,
+                EndInput: (Field field) =>
+                {
+                    GetCampaignSet(index).name = field.label.text;
+                    field.SetColor(Color.white);
+                },
                 Enter: (Button button) => button.SetColor(Color.green),
                 Stay: (Button button) =>
                 {
                     if (Input.GetMouseButtonDown(0))
                     {
-                        selectedCampaign = selectedCampaignSet.campaignDefinitions[ capturedIndex ];
+                        selectedCampaign = GetCampaign( capturedIndex);
 
                         HideCampaigns();
                         HideCampaignSets();
+
+                        ShowCampaignMap();
                         ShowCampaignSets();
                         ShowCampaignEditor();
-                        _editor.campaignMapEditor.ShowCampaignMap();
                     }
                 },
-                Exit: (Button button) => button.SetColor(Color.white))))
-        {
-            new Button( "New Campaign" , 3 , 1 , container , "NewCampaign" , fontSize: 20,
-                Enter: ( Button button ) => button.SetColor( Color.green ) ,
-                Stay: ( Button button ) =>
+                Exit: (Button button) => button.SetColor(Color.white)))) );
+
+        _campaigns.Add(new Button("New Campaign", 3, 1, container, "NewCampaign",
+            fontSize: 20,
+            Enter: (Button button) => button.SetColor(Color.green),
+            Stay: (Button button) =>
+            {
+                if (Input.GetMouseButtonDown(0))
                 {
-                    if ( Input.GetMouseButtonDown( 0 ) )
-                    {
-                        ScriptableObjects.Add( CampaignDefinition.Default() , selectedCampaignSet );
-                        ShowCampaigns( index , position );
-                    }
-                } ,
-                Exit: ( Button button ) => button.SetColor( Color.white ) )
-        }, true );
+                    ScriptableObjects.Add(CampaignDefinition.Default(), selectedCampaignSet);
+                    ShowCampaigns(index, position);
+                }
+            },
+            Exit: (Button button) => button.SetColor(Color.white)), true);
     }
 
     public void HideCampaigns()
