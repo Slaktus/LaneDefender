@@ -291,6 +291,7 @@ public class Editor : Layout
 
         _campaignMapButtons.Clear();
         HideConnectorsAndTerminals();
+        HideFinalMissionButtons();
         HideFirstMissionButtons();
         HideConnections();
     }
@@ -615,6 +616,18 @@ public class Editor : Layout
             for (int i = 0; (int) Definitions.Items.Count > i; i++)
                 ScriptableObjects.Add(ScriptableObject.CreateInstance<ItemDefinition>().Initialize(((Definitions.Items) i).ToString(), 2, 1, (Definitions.Items) i), objectData.itemSets[ (int) Assets.ObjectDataSets.Default ]);
         }
+
+        if ( ( int ) Definitions.Enemies.Count > objectData.enemySets[ (int) Assets.ObjectDataSets.Default ].enemyDefinitions.Count)
+            for (int i = objectData.enemySets[ (int) Assets.ObjectDataSets.Default ].enemyDefinitions.Count; (int) Definitions.Enemies.Count > i; i++)
+                ScriptableObjects.Add(ScriptableObject.CreateInstance<EnemyDefinition>().Initialize(((Definitions.Enemies) i).ToString(), 2, 1, (Definitions.Enemies) i), objectData.enemySets[ (int) Assets.ObjectDataSets.Default ]);
+
+        if ((int) Definitions.Heroes.Count > objectData.heroSets[ (int) Assets.ObjectDataSets.Default ].heroDefinitions.Count)
+            for (int i = objectData.heroSets[ (int) Assets.ObjectDataSets.Default ].heroDefinitions.Count; (int) Definitions.Heroes.Count > i; i++)
+                ScriptableObjects.Add(ScriptableObject.CreateInstance<HeroDefinition>().Initialize(((Definitions.Heroes) i).ToString(), 2, 1, (Definitions.Heroes) i), objectData.heroSets[ (int) Assets.ObjectDataSets.Default ]);
+
+        if ((int) Definitions.Items.Count > objectData.itemSets[ (int) Assets.ObjectDataSets.Default ].itemDefinitions.Count)
+            for (int i = objectData.itemSets[ (int) Assets.ObjectDataSets.Default ].itemDefinitions.Count; (int) Definitions.Items.Count > i; i++)
+                ScriptableObjects.Add(ScriptableObject.CreateInstance<ItemDefinition>().Initialize(((Definitions.Items) i).ToString(), 2, 1, (Definitions.Items) i), objectData.itemSets[ (int) Assets.ObjectDataSets.Default ]);
 
         Definitions.Initialize(objectData);
         _connectors = new List<GameObject>();
