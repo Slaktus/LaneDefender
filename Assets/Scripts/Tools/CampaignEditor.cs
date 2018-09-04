@@ -87,11 +87,11 @@ public class CampaignEditor : Layout
 
         _campaigns.Add(new List<RenameableButton>(
             RenameableButton.GetButtons(count,
-            (int capturedIndex) => new RenameableButton("Campaign", 3, 1, container,
+            (int capturedIndex) => new RenameableButton(GetCampaign(capturedIndex).name, 3, 1, container,
                 fontSize: 20,
                 EndInput: (Field field) =>
                 {
-                    GetCampaignSet(index).name = field.label.text;
+                    GetCampaign(capturedIndex).name = field.label.text;
                     field.SetColor(Color.white);
                 },
                 Enter: (Button button) => button.SetColor(Color.green),

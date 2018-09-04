@@ -5,6 +5,8 @@ using UnityEngine;
 public class CampaignMapEditor : Layout
 {
     private void SetSelectedMission(MissionDefinition missionDefinition) => _editor.missionEditor.SetSelectedMission(missionDefinition);
+    private MissionDefinition GetMission(int index) => selectedCampaign.GetMissionDefinition(index);
+    private bool HasMission(int index) => _editor.campaignEditor.selectedCampaign.Has(index);
 
     public override void Update()
     {
@@ -27,8 +29,14 @@ public class CampaignMapEditor : Layout
         for (int i = 0; campaignMap.tileMap.count > i; i++)
         {
             int index = i;
-            Button button = new Button(selectedCampaign.Has(index) ? selectedCampaign.GetMissionDefinition(index).name : index.ToString(), campaignMap.tileMap.tileWidth - 1, campaignMap.tileMap.tileHeight * 0.5f, container, "CampaignMap" + index,
+            bool mission = selectedCampaign.Has(index);
+            RenameableButton button = new RenameableButton(mission ? GetMission(index).name : index.ToString(), mission ? campaignMap.tileMap.tileWidth - 1 : 1 , mission ? campaignMap.tileMap.tileHeight * 0.5f : 1, container,
                 fontSize: 20,
+                EndInput: (Field field) => 
+                {
+                    GetMission(index).name = field.label.text;
+                    ShowCampaignMap();
+                },
                 Enter: (Button b) => b.SetColor(b.selected || missionSets != null ? b.color : Color.green),
                 Stay: (Button b) =>
                 {
@@ -96,6 +104,9 @@ public class CampaignMapEditor : Layout
                     }
                 });
 
+            if (!mission)
+                button.DisableField();
+
             button.SetPosition(campaignMap.tileMap.PositionOf(index));
             _campaignMapButtons.Add(button);
             Add(button);
@@ -126,7 +137,7 @@ public class CampaignMapEditor : Layout
         HideConnections();
     }
 
-    private void ShowConnectorAndTerminal(int index, Button button)
+    private void ShowConnectorAndTerminal(int index, RenameableButton button)
     {
         Button connector = new Button("+", 0.5f, 0.5f, container, "Connector+",
             Enter: (Button butt) => butt.SetColor(butt.selected ? butt.color : Color.green),
@@ -196,7 +207,7 @@ public class CampaignMapEditor : Layout
         _connectorsAndTerminators.Clear();
     }
 
-    public void ShowFirstMissionButton(int index, Button button)
+    public void ShowFirstMissionButton(int index, RenameableButton button)
     {
         Button butt = new Button("1st", 1, 0.5f, container, "First",
             fontSize: 20,
@@ -243,7 +254,7 @@ public class CampaignMapEditor : Layout
         _firstMissionButtons.Clear();
     }
 
-    public void ShowFinalMissionButton(int index, Button button)
+    public void ShowFinalMissionButton(int index, RenameableButton button)
     {
         Button butt = new Button("Final", 1, 0.5f, container, "Final",
             fontSize: 20,
@@ -331,7 +342,7 @@ public class CampaignMapEditor : Layout
     private List<Button> _connectorsAndTerminators { get; }
     private List<Button> _finalMissionButtons { get; }
     private List<Button> _firstMissionButtons { get; }
-    private List<Button> _campaignMapButtons { get; }
+    private List<RenameableButton> _campaignMapButtons { get; }
     private GameObject _dummyConnector { get; set; }
     private GameObject _dummyContainer { get; set; }
     private List<GameObject> _connectors { get; }
@@ -341,9 +352,9 @@ public class CampaignMapEditor : Layout
     {
         _editor = editor;
         _connectors = new List<GameObject>();
-        _campaignMapButtons = new List<Button>();
         _firstMissionButtons = new List<Button>();
         _finalMissionButtons = new List<Button>();
         _connectorsAndTerminators = new List<Button>();
+        _campaignMapButtons = new List<RenameableButton>();
     }
 }

@@ -1,5 +1,4 @@
 ﻿#if UNITY_EDITOR
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Editor : Layout
@@ -118,7 +117,9 @@ public class Editor : Layout
         }
     }
 
-    public void ShowStage(StageDefinition stageDefinition) => stage = new Stage(stageDefinition, new Player(),
+    public void ShowStage(StageDefinition stageDefinition) => stage = new Stage(
+        stageDefinition, 
+        new Player(),
         new Conveyor(
             speed: 5,
             width: 5,

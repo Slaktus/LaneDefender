@@ -17,41 +17,52 @@ public class RenameableButton : Panel
 
     public override void Update()
     {
-        field.Update();
+        _field.Update();
 
-        if ( !field.editing)
-            button.Update();
+        if ( !_field.editing)
+            _button.Update();
     }
 
     public override void LateUpdate()
     {
-        field.LateUpdate();
+        _field.LateUpdate();
 
-        if (!field.editing)
-            button.LateUpdate();
+        if (!_field.editing)
+            _button.LateUpdate();
     }
+
+    public void ShowField() => _field.Show();
+    public void HideField() => _field.Hide();
+    public void ShowButton() => _button.Show();
+    public void HideButton() => _button.Hide();
+    public void EnableField() => _field.Enable();
+    public void EnableButton() => _button.Enable();
+    public void DisableField() => _field.Disable();
+    public void DisableButton() => _button.Disable();
 
     public override void SetHeight(float height)
     {
-        field.SetHeight(height);
-        button.SetHeight(height);
+        _field.SetHeight(height);
+        _button.SetHeight(height);
         base.SetHeight(height);
     }
 
     public override void SetWidth(float width)
     {
-        field.SetWidth(width);
-        button.SetWidth(width);
+        _field.SetWidth(width);
+        _button.SetWidth(width);
         base.SetWidth(width);
     }
 
-    Field field { get; }
-    Button button { get; }
+    public Vector3 position => _button.position;
+
+    private Field _field { get; }
+    private Button _button { get; }
 
     public RenameableButton(string name, float width, float height, GameObject parent = null, int fontSize = 35, Field.ContentMode contentMode = Field.ContentMode.TextAndNumbers, Field.ButtonMode buttonMode = Field.ButtonMode.Right, Field.EditMode editMode = Field.EditMode.SingleClick, Action<Field> StartInput = null, Action<Field> EndInput = null, Action<Button> Enter = null, Action<Button> Stay = null, Action<Button> Exit = null, Action<Button> Close = null, bool hideQuad = false) : base(name, width, height, parent, false)
     {
-        field = new Field(name+"Field", name, width, height, fontSize, container, contentMode, buttonMode, editMode, StartInput, EndInput);
-        button = new Button(string.Empty, width, height, container, name+"Button", Enter, Stay, Exit, Close, hideQuad);
+        _field = new Field(name+"Field", name, width, height, fontSize, container, contentMode, buttonMode, editMode, StartInput, EndInput);
+        _button = new Button(string.Empty, width, height, container, name+"Button", Enter, Stay, Exit, Close, hideQuad);
     }
 }
 
@@ -59,11 +70,14 @@ public class Field : Button
 {
     public override void Update()
     {
-        if ( _handler != null )
-            _handler.MoveNext();
+        if ( enabled)
+        {
+            if (_handler != null)
+                _handler.MoveNext();
 
-        if ( Time.time > _doubleClickTime )
-            _click = false;
+            if (Time.time > _doubleClickTime)
+                _click = false;
+        }
 
         base.Update();
     }
@@ -136,8 +150,11 @@ public class Field : Button
         }
         set
         {
-            _doubleClickTime = Time.time + _doubleClickInterval;
-            _click = value;
+            if ( enabled)
+            {
+                _doubleClickTime = Time.time + _doubleClickInterval;
+                _click = value;
+            }
         }
     }
 
@@ -216,27 +233,30 @@ public class Button : Panel
 
     public override void Update()
     {
-        if (!hovering && !containsMouse)
+        if (enabled && !hovering && !containsMouse)
             Close?.Invoke(this);
     }
 
     public override void LateUpdate()
     {
-        if (containsMouse)
+        if (enabled)
         {
-            if (!hovering)
+            if (containsMouse)
             {
-                Enter?.Invoke(this);
-                hovering = true;
-            }
-            else
-                Stay?.Invoke(this);
+                if (!hovering)
+                {
+                    Enter?.Invoke(this);
+                    hovering = true;
+                }
+                else
+                    Stay?.Invoke(this);
 
-        }
-        else if (hovering)
-        {
-            Exit?.Invoke(this);
-            hovering = false;
+            }
+            else if (hovering)
+            {
+                Exit?.Invoke(this);
+                hovering = false;
+            }
         }
     }
 
@@ -262,15 +282,16 @@ public class Button : Panel
     {
         this.width = width;
         quad.transform.localScale = new Vector3(width, quad.transform.localScale.y, quad.transform.localScale.z);
-
     }
 
     public override void SetHeight(float height)
     {
         this.height = height;
         quad.transform.localScale = new Vector3(quad.transform.localScale.x, height, quad.transform.localScale.z);
-
     }
+
+    public void Enable() => enabled = true;
+    public void Disable() => enabled = false;
 
     public void SetLabel( string text ) => label.SetText( text );
     public void SetColor( Color color ) => quad.material.color = color;
@@ -285,6 +306,7 @@ public class Button : Panel
     public Color color => quad.material.color;
 
     public bool selected { get; private set; }
+    public bool enabled { get; private set; }
 
     protected bool hovering { get; set; }
     protected bool closing { get; set; }
@@ -297,6 +319,7 @@ public class Button : Panel
 
     public Button(string label, float width, float height, GameObject parent, string name = "Button", Action<Button> Enter = null, Action<Button> Stay = null, Action<Button> Exit = null, Action<Button> Close = null, bool hideQuad = false, int fontSize = 35, float characterSize = 0.15f) : base( name , width , height , parent, hideQuad)
     {
+        enabled = true;
         SetClose( Close );
         SetEnter( Enter );
         SetStay( Stay );
@@ -310,8 +333,7 @@ public class Button : Panel
             container.transform.localPosition = Vector3.up;
         }
 
-        if (!string.IsNullOrEmpty(label))
-            this.label = new Label( label , Color.black , width , height , container , fontSize: fontSize, characterSize: characterSize );
+        this.label = new Label( label , Color.black , width , height , container , fontSize: fontSize, characterSize: characterSize );
     }
 }
 
@@ -571,7 +593,6 @@ public abstract class Element
     public abstract void Destroy();
     public abstract void SetWidth( float width);
     public abstract void SetHeight(float height);
-
 
     public Rect rect => new Rect( container.transform.position.x - ( width * 0.5f ) , container.transform.position.z - ( height * 0.5f ) , width , height );
     public virtual bool Contains( Vector3 position ) => Contains( new Vector2( position.x , position.z ) );

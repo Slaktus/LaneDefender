@@ -18,8 +18,13 @@ public class MissionEditor : Layout
         Add(missionSets = new Layout("MissionSets", 4, count + 1, 0.25f, 0.1f, count + 1, container));
         missionSets.SetPosition( position + ( Vector3.right * missionSets.width * 0.5f ) + ( Vector3.back * missionSets.height * 0.5f ) );
 
-        missionSets.Add(new List<Button>(Button.GetButtons(count, (int capturedIndex) => new Button("Mission Set", 4, 1, container, "MissionSet",
+        missionSets.Add(new List<RenameableButton>(RenameableButton.GetButtons(count, (int capturedIndex) => new RenameableButton(_editor.campaignData.missionSets[ capturedIndex ].name, 3, 1, container,
             fontSize: 20,
+            EndInput: (Field field) =>
+            {
+                GetMissionSet(capturedIndex).name = field.label.text;
+                ShowMissionSets(index,position);
+            },
             Enter: (Button button) => button.SetColor(selectedMissionSet == GetMissionSet( capturedIndex ) ? button.color : Color.green),
             Stay: (Button button) =>
             {
@@ -39,22 +44,21 @@ public class MissionEditor : Layout
                     selectedMissionSet = null;
                     button.SetColor(Color.white);
                 }
-            })))
-        {
-            new Button( "New Set" , 4 , 1 , container , "NewMissionSet" ,
+            }))));
+
+        missionSets.Add(new Button("New Set", 4, 1, container, "NewMissionSet",
                 fontSize: 20,
-                Enter: ( Button button ) => button.SetColor( Color.green ) ,
-                Stay: ( Button button ) =>
+                Enter: (Button button) => button.SetColor(Color.green),
+                Stay: (Button button) =>
                 {
-                    if ( Input.GetMouseButtonDown( 0 ) )
+                    if (Input.GetMouseButtonDown(0))
                     {
                         HideMissions();
-                        ScriptableObjects.Add( ScriptableObject.CreateInstance<MissionSet>() , _editor.campaignData );
-                        ShowMissionSets( index , position );
+                        ScriptableObjects.Add(ScriptableObject.CreateInstance<MissionSet>(), _editor.campaignData);
+                        ShowMissionSets(index, position);
                     }
-                } ,
-                Exit: ( Button button ) => button.SetColor( Color.white ) )
-        } , true );
+                },
+                Exit: (Button button) => button.SetColor(Color.white)), true);
     }
 
     public void HideMissionSets()
@@ -74,8 +78,13 @@ public class MissionEditor : Layout
         Add(missions = new Layout("MissionLayout", 4, count + 1, 0.25f, 0.1f, count + 1, container));
         missions.SetPosition( position + ( Vector3.right * missions.width * 0.5f ) + ( Vector3.back * missions.height * 0.5f ) );
 
-        missions.Add(new List<Button>(Button.GetButtons(count, (int capturedIndex) => new Button("Mission", 4, 1, container, "Mission",
+        missions.Add(new List<RenameableButton>(RenameableButton.GetButtons(count, (int capturedIndex) => new RenameableButton(GetMission(capturedIndex).name, 3, 1, container,
             fontSize: 20,
+            EndInput: (Field field) =>
+            {
+                GetMission(capturedIndex).name = field.label.text;
+                ShowMissions(index, position);
+            },
             Enter: (Button button) => button.SetColor(Color.green),
             Stay: (Button button) =>
             {
@@ -88,21 +97,20 @@ public class MissionEditor : Layout
                     HideMissions();
                 }
             },
-            Exit: (Button button) => button.SetColor(Color.white))))
-            {
-                new Button( "New Mission" , 4 , 1 , container , "NewMission" ,
+            Exit: (Button button) => button.SetColor(Color.white)))));
+
+        missions.Add(new Button("New Mission", 4, 1, container, "NewMission",
                     fontSize: 20,
-                    Enter: ( Button button ) => button.SetColor( Color.green ) ,
-                    Stay: ( Button button ) =>
+                    Enter: (Button button) => button.SetColor(Color.green),
+                    Stay: (Button button) =>
                     {
-                        if ( Input.GetMouseButtonDown( 0 ) )
+                        if (Input.GetMouseButtonDown(0))
                         {
-                            ScriptableObjects.Add( MissionDefinition.Default() , selectedMissionSet );
-                            ShowMissions( index , position );
+                            ScriptableObjects.Add(MissionDefinition.Default(), selectedMissionSet);
+                            ShowMissions(index, position);
                         }
-                    } ,
-                    Exit: ( Button button ) => button.SetColor( Color.white ) )
-            }, true);
+                    },
+                    Exit: (Button button) => button.SetColor(Color.white)), true);
     }
 
     public void HideMissions()
