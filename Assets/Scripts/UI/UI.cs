@@ -197,7 +197,19 @@ public class Button : Panel
     public void Select() => selected = true;
     public void Deselect() => selected = false;
 
-    public override void SetLocalScale( Vector3 localScale ) => quad.transform.localScale = localScale;
+    public override void SetWidth(float width)
+    {
+        this.width = width;
+        quad.transform.localScale = new Vector3(width, quad.transform.localScale.y, quad.transform.localScale.z);
+
+    }
+
+    public override void SetHeight(float height)
+    {
+        this.height = height;
+        quad.transform.localScale = new Vector3(quad.transform.localScale.x, height, quad.transform.localScale.z);
+
+    }
 
     public void SetLabel( string text ) => label.SetText( text );
     public void SetColor( Color color ) => quad.material.color = color;
@@ -248,8 +260,10 @@ public class Label : Element
     public void SetText( string text ) => textMesh.text = text;
     public void SetColor( Color color ) => textMesh.color = color;
     public void SetLocalRotation( Quaternion localRotation ) => textMesh.transform.localRotation = localRotation;
-    public override void SetLocalScale( Vector3 localScale ) => textMesh.transform.localScale = localScale;
     public override void Destroy() => GameObject.Destroy( container );
+
+    public override void SetWidth(float width)=> this.width = width;
+    public override void SetHeight(float height) => this.height = height;
 
     public string text => textMesh.text;
 
@@ -325,12 +339,9 @@ public class Layout : Panel
                     y++;
                 }
 
-                Vector3 localPosition = new Vector3( ( -width * 0.5f ) + ( size.x * x ) + ( size.x * 0.5f ) + ( spacing * x ) + padding , 1 , ( height * 0.5f ) - ( size.y * y ) - ( size.y * 0.5f ) - ( spacing * y ) - padding );
-
-                if ( !( elements[ i ] is Label ) )
-                    elements[ i ].SetLocalScale( new Vector3( size.x , size.y , 1 ) );
-
-                elements[ i ].SetLocalPosition( localPosition );
+                elements[ i ].SetWidth(size.x);
+                elements[ i ].SetHeight(size.y);
+                elements[ i ].SetLocalPosition(new Vector3((-width * 0.5f) + (size.x * x) + (size.x * 0.5f) + (spacing * x) + padding, 1, (height * 0.5f) - (size.y * y) - (size.y * 0.5f) - (spacing * y) - padding));
                 x++;
             }
         }
@@ -447,7 +458,20 @@ public class Panel : Element
     public void ShowQuad() => quad.enabled = true;
     public void HideQuad() => quad.enabled = false;
     public override void Destroy() => GameObject.Destroy( container );
-    public override void SetLocalScale( Vector3 localScale ) => quad.transform.localScale = localScale;
+
+    public override void SetWidth(float width)
+    {
+        this.width = width;
+        quad.transform.localScale = new Vector3(width, quad.transform.localScale.y, quad.transform.localScale.z);
+
+    }
+
+    public override void SetHeight(float height)
+    {
+        this.height = height;
+        quad.transform.localScale = new Vector3(quad.transform.localScale.x, height, quad.transform.localScale.z);
+
+    }
 
     protected MeshRenderer quad { get; set; }
 
@@ -474,8 +498,9 @@ public abstract class Element
     public void SetParent( GameObject parent ) => container.transform.SetParent( parent.transform );
     public void SetPosition( Vector3 position ) => container.transform.position = position;
 
-    public abstract void SetLocalScale( Vector3 localScale );
     public abstract void Destroy();
+    public abstract void SetWidth( float width);
+    public abstract void SetHeight(float height);
 
     public Rect rect => new Rect( container.transform.position.x - ( width * 0.5f ) , container.transform.position.z - ( height * 0.5f ) , width , height );
     public virtual bool Contains( Vector3 position ) => Contains( new Vector2( position.x , position.z ) );
@@ -489,7 +514,7 @@ public abstract class Element
     protected Vector3 mousePos => Camera.main.ScreenToWorldPoint( new Vector3( Input.mousePosition.x , Input.mousePosition.y , Camera.main.transform.position.y ) );
     protected GameObject container { get; set; }
     public float width { get; protected set; }
-    public float height { get;protected  set; }
+    public float height { get; protected  set; }
 
     public Element( string name , float width , float height )
     {
