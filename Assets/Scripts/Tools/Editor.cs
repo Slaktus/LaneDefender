@@ -274,6 +274,7 @@ public class Editor : Layout
             {
                 ShowConnectorAndTerminal(index, button);
                 ShowFirstMissionButton(index, button);
+                ShowFinalMissionButton(index, button);
             }
         }
 
@@ -375,7 +376,7 @@ public class Editor : Layout
                 {
                     b.Select();
                     b.SetColor(Color.yellow);
-                    campaignEditor.selectedCampaign.firstMissionIndex = index;
+                    campaignEditor.selectedCampaign.SetFirstMissionIndex(index);
                 }
             },
             Exit: (Button b) => b.SetColor(b.selected ? b.color : Color.white),
@@ -409,6 +410,51 @@ public class Editor : Layout
         }
 
         _firstMissionButtons.Clear();
+    }
+
+    public void ShowFinalMissionButton(int index, Button button)
+    {
+        Button butt = new Button("Final", 1, 0.5f, container, "Final",
+            fontSize: 20,
+            Enter: (Button b) => b.SetColor(b.selected ? b.color : Color.green),
+            Stay: (Button b) =>
+            {
+                if (Input.GetMouseButtonDown(0))
+                {
+                    b.Select();
+                    b.SetColor(Color.yellow);
+                    campaignEditor.selectedCampaign.AddFinalMissionIndex( index );
+                }
+
+                if (Input.GetMouseButtonDown(1) && campaignEditor.selectedCampaign.HasFinalMissionIndex(index))
+                {
+                    b.Deselect();
+                    b.SetColor(Color.white);
+                    campaignEditor.selectedCampaign.RemoveFinalMissionIndex(index);
+                }
+            },
+            Exit: (Button b) => b.SetColor(b.selected ? b.color : Color.white));
+
+        if (campaignEditor.selectedCampaign.HasFinalMissionIndex(index))
+        {
+            butt.Select();
+            butt.SetColor(Color.yellow);
+        }
+
+        Add(butt);
+        _finalMissionButtons.Add(butt);
+        butt.SetPosition(new Vector3(button.rect.center.x, button.position.y, button.rect.yMin - 0.25f));
+    }
+
+    public void HideFinalMissionButtons()
+    {
+        for (int i = 0; _finalMissionButtons.Count > i; i++)
+        {
+            Remove(_finalMissionButtons[ i ]);
+            _finalMissionButtons[ i ].Destroy();
+        }
+
+        _finalMissionButtons.Clear();
     }
 
     private void ShowCampaignEditor()
@@ -520,6 +566,7 @@ public class Editor : Layout
     public WaveEditor waveEditor { get; }
 
     private List<Button> _connectorsAndTerminators { get; }
+    private List<Button> _finalMissionButtons { get; }
     private List<Button> _firstMissionButtons { get; }
     private List<Button> _campaignMapButtons { get; }
     private List<GameObject> _connectors { get; }
@@ -573,6 +620,7 @@ public class Editor : Layout
         _connectors = new List<GameObject>();
         _campaignMapButtons = new List<Button>();
         _firstMissionButtons = new List<Button>();
+        _finalMissionButtons = new List<Button>();
         _connectorsAndTerminators = new List<Button>();
 
         Add(_testButton = new Button("Test", 1.5f, 0.5f, container, "Test",

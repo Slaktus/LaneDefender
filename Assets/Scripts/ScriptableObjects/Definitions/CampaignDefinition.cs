@@ -48,9 +48,15 @@ public class CampaignDefinition : DefinitionBase
         }
     }
 
+    public void SetFirstMissionIndex(int firstMissionIndex) => this.firstMissionIndex = firstMissionIndex;
+    public void AddFinalMissionIndex(int finalMissionIndex) => finalMissionIndices.Add(finalMissionIndex);
+    public bool HasFinalMissionIndex(int finalMissionIndex) => finalMissionIndices.Contains(finalMissionIndex);
+    public void RemoveFinalMissionIndex(int finalMissionIndex) => finalMissionIndices.Remove(finalMissionIndex);
+
     public List<MissionDefinition> missionDefinitions = new List<MissionDefinition>();
     public List<Connection> connections = new List<Connection>();
     public List<int> missionIndices = new List<int>();
+    public List<int> finalMissionIndices = new List<int>();
     public int firstMissionIndex;
     public float height;
     public float width;
