@@ -74,7 +74,6 @@ public class TimelineEditor : Layout
 
     public void AddWaveToTimeline(WaveDefinition waveDefinition, float timelinePosition)
     {
-
         Button button = new Button("Wave", 1, 1, container, "Wave",
             fontSize: 20,
             Enter: (Button b) =>
@@ -197,7 +196,7 @@ public class TimelineEditor : Layout
     private void ShowIndicator() => _indicator.enabled = true;
     private void HideIndicator() => _indicator.enabled = false;
 
-    public Vector3 indicatorPosition => new Vector3(_indicator.transform.position.x, 0, missionTimeline.rect.yMin);
+    public Vector3 indicatorPosition => new Vector3(_indicator.transform.position.x, 0, missionTimeline.rect.center.y);
 
     public float timelinePosition { get; private set; }
     public Button missionTimeline { get; set; }

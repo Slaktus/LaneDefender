@@ -339,8 +339,7 @@ public class Layout : Panel
                     y++;
                 }
 
-                elements[ i ].SetWidth(size.x);
-                elements[ i ].SetHeight(size.y);
+                elements[ i ].SetWidthAndHeight(size);
                 elements[ i ].SetLocalPosition(new Vector3((-width * 0.5f) + (size.x * x) + (size.x * 0.5f) + (spacing * x) + padding, 1, (height * 0.5f) - (size.y * y) - (size.y * 0.5f) - (spacing * y) - padding));
                 x++;
             }
@@ -493,6 +492,12 @@ public class Panel : Element
 
 public abstract class Element
 {
+    public void SetWidthAndHeight(Vector2 size)
+    {
+        SetWidth(size.x);
+        SetHeight(size.y);
+    }
+
     public void SetViewportPosition( Vector2 viewportPosition ) => SetLocalPosition( Camera.main.ViewportToWorldPoint( new Vector3( viewportPosition.x , viewportPosition.y , Camera.main.transform.position.y ) ) + ( Vector3.right * width * 0.5f ) + ( Vector3.back * height * 0.5f ) );
     public void SetLocalPosition( Vector3 localPosition ) => container.transform.localPosition = localPosition;
     public void SetParent( GameObject parent ) => container.transform.SetParent( parent.transform );
@@ -501,6 +506,7 @@ public abstract class Element
     public abstract void Destroy();
     public abstract void SetWidth( float width);
     public abstract void SetHeight(float height);
+
 
     public Rect rect => new Rect( container.transform.position.x - ( width * 0.5f ) , container.transform.position.z - ( height * 0.5f ) , width , height );
     public virtual bool Contains( Vector3 position ) => Contains( new Vector2( position.x , position.z ) );
