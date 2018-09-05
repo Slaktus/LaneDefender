@@ -34,7 +34,7 @@ public class CampaignMapEditor : Layout
                 fontSize: 20,
                 DeleteStay: (Button b) =>
                 {
-                    if (mission && Input.GetMouseButtonDown(0))
+                    if (mission && Input.GetMouseButtonUp(0))
                     {
                         selectedCampaign.RemoveMissionDefinitionAt(index);
                         CullConnections();

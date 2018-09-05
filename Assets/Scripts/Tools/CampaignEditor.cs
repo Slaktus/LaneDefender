@@ -23,7 +23,7 @@ public class CampaignEditor : Layout
                 fontSize: 20,
                 DeleteStay: ( Button button ) =>
                 {
-                    if (Input.GetMouseButtonDown(0))
+                    if (Input.GetMouseButtonUp(0))
                     {
                         if (button.selected)
                             HideCampaigns();
@@ -101,7 +101,7 @@ public class CampaignEditor : Layout
                 fontSize: 20,
                 DeleteStay: (Button button) =>
                 {
-                    if (Input.GetMouseButtonDown(0))
+                    if (Input.GetMouseButtonUp(0))
                     {
                         selectedCampaignSet.Remove(GetCampaign(index));
                         ShowCampaigns(index,position);

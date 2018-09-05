@@ -22,7 +22,7 @@ public class WaveEditor : Layout
             fontSize: 20,
             DeleteStay: (Button b) =>
             {
-                if (Input.GetMouseButtonDown(0))
+                if (Input.GetMouseButtonUp(0))
                 {
                     if (b.selected)
                         HideWaveDefinitions();
@@ -94,7 +94,7 @@ public class WaveEditor : Layout
             fontSize: 20,
             DeleteStay: (Button b) =>
             {
-                if (Input.GetMouseButtonDown(0))
+                if (Input.GetMouseButtonUp(0))
                 {
                     selectedWaveSet.Remove(GetWaveDefinition(index));
                     ShowWaveDefinitions(position);

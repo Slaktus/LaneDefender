@@ -8,14 +8,15 @@ public class Entry : MonoBehaviour
 
 	void Awake()
     {
+        PlayerPrefs.DeleteAll();
         string player = PlayerPrefs.GetString("Player");
 
         instance = this;
         #if !UNITY_EDITOR
         //Assets.Initialize(this, () => StartSession(new Player()));
         #else
-        //Assets.Initialize(this, () => ShowTitleScreen(string.IsNullOrEmpty(player) ? new Player() : new Player(JsonUtility.FromJson<Player>(player))));
-        Assets.Initialize(this, () => editor = new Editor(gameObject));
+        Assets.Initialize(this, () => ShowTitleScreen(string.IsNullOrEmpty(player) ? new Player() : new Player(JsonUtility.FromJson<Player>(player))));
+        //Assets.Initialize(this, () => editor = new Editor(gameObject));
         #endif
     }
 
@@ -59,6 +60,7 @@ public class Entry : MonoBehaviour
             session.player.progress.AddCampaignProgress();
 
         MissionDefinition missionDefinition = session.player.progress.IsNewGame(selectedCampaignIndex) ? selectedCampaign.GetMissionDefinition(selectedCampaign.firstMissionIndex) : null;
+        int missionIndex = selectedCampaign.firstMissionIndex;
 
         if (missionDefinition == null)
         {
@@ -78,17 +80,20 @@ public class Entry : MonoBehaviour
                     Stay: (Button b) =>
                     {
                         if (Input.GetMouseButtonDown(0))
+                        {
+                            missionIndex = iIndex;
                             missionDefinition = selectedCampaign.GetMissionDefinition(iIndex);
+                        }
                     },
-                    Exit: (Button b) => b.SetColor(Color.white));
+                    Exit: (Button b) => b.SetColor(Color.cyan));
 
                     campaignLayout.Add(button);
+                    button.SetColor(Color.cyan);
                     button.SetPosition(campaignMap.tileMap.PositionOf(i));
 
                     for ( int j = 0; selectedCampaign.connections.Count > j; j++)
                     {
                         int jIndex = j;
-
                         if ( selectedCampaign.connections[ j ].fromIndex == i )
                         {
                             if (!session.player.progress.HasCompleted(selectedCampaignIndex, selectedCampaign.connections[ j ].toIndex))
@@ -99,12 +104,15 @@ public class Entry : MonoBehaviour
                                 Stay: (Button b) =>
                                 {
                                     if (Input.GetMouseButtonDown(0))
-                                        missionDefinition = selectedCampaign.GetMissionDefinition(jIndex);
+                                    {
+                                        missionIndex = selectedCampaign.connections[ jIndex ].toIndex;
+                                        missionDefinition = selectedCampaign.GetMissionDefinition(selectedCampaign.connections[ jIndex ].toIndex);
+                                    }
                                 },
                                 Exit: (Button b) => b.SetColor(Color.white));
 
                                 campaignLayout.Add(butt);
-                                butt.SetPosition(campaignMap.tileMap.PositionOf(selectedCampaign.connections[ j ].toIndex));
+                                butt.SetPosition(campaignMap.tileMap.PositionOf(selectedCampaign.connections[ jIndex ].toIndex));
                             }
                         }
                     }
@@ -225,8 +233,6 @@ public class Entry : MonoBehaviour
         //boss battle?
 
         //end of level fanfare
-
-        int missionIndex = selectedCampaign.GetMissionIndex(missionDefinition);
 
         if ( !session.player.progress.HasCompleted(selectedCampaignIndex, missionIndex))
             session.player.progress.AddCompleted(selectedCampaignIndex, missionIndex);

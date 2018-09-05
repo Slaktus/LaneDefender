@@ -23,7 +23,7 @@ public class MissionEditor : Layout
             fontSize: 20,
             DeleteStay: (Button button) =>
             {
-                if (Input.GetMouseButtonDown(0))
+                if (Input.GetMouseButtonUp(0))
                 {
                     if (button.selected)
                         HideMissions();
@@ -95,7 +95,7 @@ public class MissionEditor : Layout
             fontSize: 20,
             DeleteStay: (Button button) =>
             {
-                if (Input.GetMouseButtonDown(0))
+                if (Input.GetMouseButtonUp(0))
                 {
                     selectedMissionSet.Remove(GetMission(capturedIndex));
                     ShowMissions(index, position);
