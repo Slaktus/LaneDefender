@@ -82,7 +82,7 @@ public class Lane
 
         _quad = GameObject.CreatePrimitive( PrimitiveType.Quad );
         _quad.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
-        _quad.transform.position = new Vector3( width * 0.5f , 0 , -depth + ( height * 0.5f ) );
+        _quad.transform.localPosition = new Vector3( width * 0.5f , 0 , -depth + ( height * 0.5f ) );
         _quad.transform.localScale = new Vector3( width , height , 0 );
         _quad.transform.name = name;
 

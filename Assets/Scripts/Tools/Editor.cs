@@ -118,6 +118,7 @@ public class Editor : Layout
     }
 
     public void ShowStage(StageDefinition stageDefinition) => stage = new Stage(
+        Vector3.right * 3,
         stageDefinition, 
         new Player(),
         new Conveyor(

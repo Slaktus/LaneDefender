@@ -155,7 +155,7 @@ public class Entry : MonoBehaviour
             itemWidthPadding: 2,
             itemSpacing: 0.1f));
 
-        session.SetStage(new Stage(stageDefinition, session.player, session.conveyor));
+        session.SetStage(new Stage( Vector3.right * 3 , stageDefinition, session.player, session.conveyor));
 
         Level level = new Level(missionDefinition.duration);
 

@@ -135,7 +135,7 @@ public class TimelineEditor : Layout
                 },
                 Exit: (Button button) => HideIndicator()));
 
-            missionTimeline.SetPosition(new Vector3(_editor.stage.start + (_editor.stage.width * 0.5f), 0, Camera.main.ViewportToWorldPoint(new Vector3(0, 1, Camera.main.transform.position.y)).z) + (Vector3.back * missionTimeline.height * 0.5f) + Vector3.up);
+            missionTimeline.SetPosition(_editor.stage.offset + new Vector3(_editor.stage.start + (_editor.stage.width * 0.5f), 0, Camera.main.ViewportToWorldPoint(new Vector3(0, 1, Camera.main.transform.position.y)).z) + (Vector3.back * missionTimeline.height * 0.5f) + Vector3.up);
 
             if (selectedMission != null)
                 for (int i = 0; selectedMission.waveDefinitions.Count > i; i++)

@@ -152,25 +152,24 @@ public class Stage
     public float start => _lanes[ 0 ].start.x;
     public float laneSpacing { get; private set; }
     public Conveyor conveyor { get; private set; }
+    public Vector3 offset { get; private set; }
     public float speed { get; private set; }
     public float width { get; private set; }
+    public GameObject ground { get; }
 
     private Player _player { get; }
     private List<Lane> _lanes { get; }
     private event Action Updater;
 
-    /// <summary>
-    /// Ground plane GameObject. Has a BoxCollider attached
-    /// </summary>
-    public GameObject ground { get; }
 
     private GameObject _container { get; }
 
-    public Stage( float speed , float width , float height , float laneSpacing , int laneCount , Conveyor conveyor , Player player )
+    public Stage( Vector3 offset, float speed , float width , float height , float laneSpacing , int laneCount , Conveyor conveyor , Player player )
     {
         _player = player;
         this.width = width;
         this.speed = speed;
+        this.offset = offset;
         this.conveyor = conveyor;
         this.laneSpacing = laneSpacing;
         float laneHeight = height / laneCount;
@@ -191,6 +190,8 @@ public class Stage
             Updater += lane.Update;
         }
 
+        _container.transform.position += offset;
+
         //Cube primitives have a mesh filter, mesh renderer and box collider already attached
         ground = GameObject.CreatePrimitive( PrimitiveType.Cube );
 
@@ -210,5 +211,5 @@ public class Stage
         collider.isTrigger = false;
     }
 
-    public Stage( StageDefinition stageDefinition , Player player , Conveyor conveyor ) : this( stageDefinition.speed , stageDefinition.width , stageDefinition.height , stageDefinition.laneSpacing , stageDefinition.laneCount , conveyor , player ) { }
+    public Stage( Vector3 offset, StageDefinition stageDefinition , Player player , Conveyor conveyor ) : this( offset, stageDefinition.speed , stageDefinition.width , stageDefinition.height , stageDefinition.laneSpacing , stageDefinition.laneCount , conveyor , player ) { }
 }
