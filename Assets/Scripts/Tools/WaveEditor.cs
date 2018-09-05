@@ -12,14 +12,25 @@ public class WaveEditor : Layout
     private WaveDefinition GetWaveDefinition(int index) => selectedWaveSet.waveDefinitions[ index ];
     private void AddWaveToTimeline(WaveDefinition selectedWaveDefinition, float timelinePosition) => _editor.timelineEditor.AddWaveToTimeline(selectedWaveDefinition, timelinePosition, true);
 
-    private void ShowWaveSets( float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
+    private void ShowWaveSets( float width = 4 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
     {
         HideWaveSets();
         int count = _editor.waveData.waveSets.Count;
         Add(waveSets = new Layout("WaveSetButtons", width, height * (count + 1), padding, spacing, count + 1, container));
         waveSets.SetLocalPosition(_editor.timelineEditor.indicatorPosition + (Vector3.back * (height * count * 0.5f)) + Vector3.up);
-        waveSets.Add(new List<RenameableButton>(RenameableButton.GetButtons(count, (int index) => new RenameableButton(GetWaveSet(index).name, width, height, container, 
+        waveSets.Add(new List<RenameableDeletableButton>(RenameableDeletableButton.GetButtons(count, (int index) => new RenameableDeletableButton(GetWaveSet(index).name, width, height, container, 
             fontSize: 20,
+            DeleteStay: (Button b) =>
+            {
+                if (Input.GetMouseButtonDown(0))
+                {
+                    if (b.selected)
+                        HideWaveDefinitions();
+
+                    _editor.waveData.Remove(GetWaveSet(index));
+                    ShowWaveSets();
+                }
+            },
             EndInput: (Field field) =>
             {
                 GetWaveSet(index).name = field.label.text;
@@ -72,14 +83,23 @@ public class WaveEditor : Layout
         waveSets = null;
     }
 
-    private void ShowWaveDefinitions( Vector3 position , float width = 3 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
+    private void ShowWaveDefinitions( Vector3 position , float width = 4 , float height = 1 , float padding = 0.25f , float spacing = 0.1f )
     {
         HideWaveDefinitions();
         int count = selectedWaveSet.waveDefinitions.Count;
         Add(_waveDefinitionLayout = new Layout("WaveDefinitionButtons", width, height * (count + 1), padding, spacing, count + 1, container));
-        _waveDefinitionLayout.SetPosition(position + (Vector3.left * width) + (Vector3.back * ((height * count * 0.5f) + (padding * 0.5f))));
-        _waveDefinitionLayout.Add(new List<RenameableButton>(RenameableButton.GetButtons(count, (int index) => new RenameableButton(GetWaveDefinition(index).name, width, height, container,
+        _waveDefinitionLayout.SetPosition(position + (Vector3.right * width) + (Vector3.back * ((count * 0.5f) + (0.25f * 0.5f))));
+
+        _waveDefinitionLayout.Add(new List<RenameableDeletableButton>(RenameableDeletableButton.GetButtons(count, (int index) => new RenameableDeletableButton(GetWaveDefinition(index).name, width, height, container,
             fontSize: 20,
+            DeleteStay: (Button b) =>
+            {
+                if (Input.GetMouseButtonDown(0))
+                {
+                    selectedWaveSet.Remove(GetWaveDefinition(index));
+                    ShowWaveDefinitions(position);
+                }
+            },
             EndInput: (Field field) =>
             {
                 GetWaveDefinition(index).name = field.label.text;

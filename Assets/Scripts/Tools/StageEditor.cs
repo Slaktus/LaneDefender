@@ -29,12 +29,23 @@ public class StageEditor : Layout
     {
         HideStageSets();
         int count = _editor.stageData.stageSets.Count;
-        Add(stageSets = new Layout( "StageSetButtons" , 3, (count + 2), 0.25f, 0.1f, count + 2, container ));
+        Add(stageSets = new Layout( "StageSetButtons" , 4, (count + 2), 0.25f, 0.1f, count + 2, container ));
         stageSets.SetViewportPosition(new Vector2(0, 1));
         stageSets.SetPosition(stageSets.position + Vector3.up + Vector3.back);
 
-        stageSets.Add(new List<RenameableButton>(RenameableButton.GetButtons(count, (int index) => new RenameableButton(GetStageSet( index ).name, 3, 1, container, 
+        stageSets.Add(new List<RenameableDeletableButton>(RenameableDeletableButton.GetButtons(count, (int index) => new RenameableDeletableButton(GetStageSet( index ).name, 4, 1, container, 
             fontSize: 20,
+            DeleteStay: (Button b) =>
+            {
+                if (Input.GetMouseButtonDown(0))
+                {
+                    if (b.selected)
+                        HideStageDefinitions();
+
+                    _editor.stageData.Remove(GetStageSet(index));
+                    ShowStageSets();
+                }
+            },
             EndInput: (Field field) =>
             {
                 GetStageSet(index).name = field.label.text;
@@ -51,7 +62,7 @@ public class StageEditor : Layout
                     button.Select();
                 }
             },
-            Exit: (Button button) => button.SetColor(_stages != null && _selectedStageSet == _editor.stageData.stageSets[ index ] ? button.color : Color.white),
+            Exit: (Button button) => button.SetColor(_stages != null && _selectedStageSet == GetStageSet( index ) ? button.color : Color.white),
             Close: (Button button) =>
             {
                 if (button.selected && Input.GetMouseButtonDown(0) && (_stages == null || !_stages.containsMouse))
@@ -63,7 +74,7 @@ public class StageEditor : Layout
                 }
             }))));
 
-        stageSets.Add(new Button("Add Stage Set", 3, 1, container, "AddStageSet",
+        stageSets.Add(new Button("Add Stage Set", 4, 1, container, "AddStageSet",
             fontSize: 20,
             Enter: (Button button) => button.SetColor(Color.green),
             Stay: (Button button) =>
@@ -79,7 +90,7 @@ public class StageEditor : Layout
             },
             Exit: (Button button) => button.SetColor(Color.white)));
 
-        stageSets.Add(new Button("Back to Campaign", 3, 1, container, "BackToCampaign", fontSize: 20,
+        stageSets.Add(new Button("Back to Campaign", 4, 1, container, "BackToCampaign", fontSize: 20,
             Enter: (Button button) => button.SetColor(Color.green),
             Stay: (Button button) =>
             {
@@ -113,10 +124,18 @@ public class StageEditor : Layout
     {
         HideStageDefinitions();
         int count = _selectedStageSet.stageDefinitions.Count;
-        Add(_stages = new Layout("StageDefinitionButtons", 3, 1 * (count + 1), 0.25f, 0.1f, count + 1, container));
-        _stages.SetPosition(position + (Vector3.right * 3) + (Vector3.back * ((count * 0.5f) + (0.25f * 0.5f))));
-        _stages.Add(new List<RenameableButton>(RenameableButton.GetButtons(count, (int index) => new RenameableButton(GetStageDefinition(index).name, 3, 1, container,
+        Add(_stages = new Layout("StageDefinitionButtons", 4, 1 * (count + 1), 0.25f, 0.1f, count + 1, container));
+        _stages.SetPosition(position + (Vector3.right * 4) + (Vector3.back * ((count * 0.5f) + (0.25f * 0.5f))));
+        _stages.Add(new List<RenameableDeletableButton>(RenameableDeletableButton.GetButtons(count, (int index) => new RenameableDeletableButton(GetStageDefinition(index).name, 4, 1, container,
             fontSize: 20,
+            DeleteStay: (Button b) =>
+            {
+                if (Input.GetMouseButtonDown(0))
+                {
+                    _selectedStageSet.Remove(GetStageDefinition(index));
+                    ShowStageDefinitions(position);
+                }
+            },
             EndInput: (Field field) =>
             {
                 GetStageDefinition(index).name = field.label.text;
@@ -144,7 +163,7 @@ public class StageEditor : Layout
             },
             Exit: (Button button) => button.SetColor(Color.white)))));
 
-        _stages.Add(new Button("Add Stage\nDefinition", 3, 1, container, "AddStageDefinition",
+        _stages.Add(new Button("Add Stage\nDefinition", 4, 1, container, "AddStageDefinition",
             fontSize: 20,
             Enter: (Button button) => button.SetColor(Color.green),
             Stay: (Button button) =>
@@ -170,7 +189,7 @@ public class StageEditor : Layout
     public void ShowStageEditor()
     {
         HideStageEditor();
-        Add(stageEditorLayout = new Layout( "StageEditor" , 3 , 4 , 0.25f , 0.1f , 5 , container ));
+        Add(stageEditorLayout = new Layout( "StageEditor" , 4 , 4 , 0.25f , 0.1f , 5 , container ));
         stageEditorLayout.SetPosition(stageSets.position + (Vector3.back * (stageSets.height + stageEditorLayout.height) * 0.5f));
         stageEditorLayout.Add(new List<Element>()
         {

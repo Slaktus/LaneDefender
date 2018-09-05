@@ -3,11 +3,87 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class RenameableButton : Panel
+public class RenameableDeletableButton : Panel
 {
-    public static List<RenameableButton> GetButtons(int count, Func<int, RenameableButton> GetButton)
+    public static List<RenameableDeletableButton> GetButtons(int count, Func<int, RenameableDeletableButton> GetButton)
     {
-        List<RenameableButton> buttons = new List<RenameableButton>(count);
+        List<RenameableDeletableButton> buttons = new List<RenameableDeletableButton>(count);
+
+        for (int i = 0; count > i; i++)
+            buttons.Add(GetButton(i));
+
+        return buttons;
+    }
+
+    public override void Update()
+    {
+        _deleteButton.Update();
+        _renamableButton.Update();
+        base.Update();
+    }
+
+    public override void LateUpdate()
+    {
+        _deleteButton.LateUpdate();
+        _renamableButton.LateUpdate();
+        base.LateUpdate();
+    }
+
+    public override void SetWidth(float width)
+    {
+        _renamableButton.SetWidth(width - 0.5f);
+        _deleteButton.SetPosition(_renamableButton.position + Vector3.right * ((width * 0.5f)));
+        base.SetWidth(width);
+    }
+
+    public override void SetHeight(float height)
+    {
+        _renamableButton.SetHeight(height);
+        _deleteButton.SetHeight(height);
+        base.SetHeight(height);
+    }
+
+    public void DisableField() => _renamableButton.DisableField();
+    public void EnableField() => _renamableButton.EnableField();
+
+    public void HideDeleteButton()
+    {
+        _renamableButton.SetLocalPosition(Vector3.zero);
+        _renamableButton.SetWidth(width);
+        _deleteButton.Disable();
+        _deleteButton.Hide();
+    }
+
+    public void ShowDeleteButton()
+    {
+        _renamableButton.SetPosition(_renamableButton.position + (Vector3.left * 0.25f));
+        _renamableButton.SetWidth(width - 0.5f);
+        _deleteButton.Enable();
+        _deleteButton.Show();
+    }
+
+    public Vector3 position => _renamableButton.position + (Vector3.left * (_deleteButton.enabled ? 0.125f : 0));
+
+    private RenamableButton _renamableButton;
+    private Button _deleteButton;
+    
+    public RenameableDeletableButton( string name, float width, float height, GameObject parent = null, Action<Button> DeleteEnter = null, Action<Button> DeleteStay = null, Action<Button> DeleteExit = null, Action<Button> DeleteClose = null, int fontSize = 35, Field.ContentMode contentMode = Field.ContentMode.TextAndNumbers, Field.ButtonMode buttonMode = Field.ButtonMode.Right, Field.EditMode editMode = Field.EditMode.SingleClick, Action<Field> StartInput = null, Action<Field> EndInput = null, Action<Button> Enter = null, Action<Button> Stay = null, Action<Button> Exit = null, Action<Button> Close = null, bool hideQuad = false): base(name,width,height,parent,hideQuad)
+    {
+        _renamableButton = new RenamableButton(name, width - 0.5f, height, container, fontSize, contentMode, buttonMode, editMode, StartInput, EndInput, Enter, Stay, Exit, Close, hideQuad);
+        _renamableButton.SetPosition(_renamableButton.position + (Vector3.left * 0.25f));
+
+        _deleteButton = new Button("<b>X</b>", 0.5f, height, container, "DeleteButton", DeleteEnter, DeleteStay, DeleteExit, DeleteClose, hideQuad, fontSize);
+        _deleteButton.SetPosition(_renamableButton.position + Vector3.right * ((width * 0.5f)));
+        _deleteButton.SetTextColor(Color.white);
+        _deleteButton.SetColor(Color.red);
+    }
+}
+
+public class RenamableButton : Panel
+{
+    public static List<RenamableButton> GetButtons(int count, Func<int, RenamableButton> GetButton)
+    {
+        List<RenamableButton> buttons = new List<RenamableButton>(count);
 
         for (int i = 0; count > i; i++)
             buttons.Add(GetButton(i));
@@ -59,7 +135,7 @@ public class RenameableButton : Panel
     private Field _field { get; }
     private Button _button { get; }
 
-    public RenameableButton(string name, float width, float height, GameObject parent = null, int fontSize = 35, Field.ContentMode contentMode = Field.ContentMode.TextAndNumbers, Field.ButtonMode buttonMode = Field.ButtonMode.Right, Field.EditMode editMode = Field.EditMode.SingleClick, Action<Field> StartInput = null, Action<Field> EndInput = null, Action<Button> Enter = null, Action<Button> Stay = null, Action<Button> Exit = null, Action<Button> Close = null, bool hideQuad = false) : base(name, width, height, parent, false)
+    public RenamableButton(string name, float width, float height, GameObject parent = null, int fontSize = 35, Field.ContentMode contentMode = Field.ContentMode.TextAndNumbers, Field.ButtonMode buttonMode = Field.ButtonMode.Right, Field.EditMode editMode = Field.EditMode.SingleClick, Action<Field> StartInput = null, Action<Field> EndInput = null, Action<Button> Enter = null, Action<Button> Stay = null, Action<Button> Exit = null, Action<Button> Close = null, bool hideQuad = false) : base(name, width, height, parent, false)
     {
         _field = new Field(name+"Field", name, width, height, fontSize, container, contentMode, buttonMode, editMode, StartInput, EndInput);
         _button = new Button(string.Empty, width, height, container, name+"Button", Enter, Stay, Exit, Close, hideQuad);
@@ -298,6 +374,7 @@ public class Button : Panel
     public void SetColor( Color color ) => quad.material.color = color;
     public void SetClose( Action<Button> Close ) => this.Close = Close;
     public void SetEnter( Action<Button> Enter ) => this.Enter = Enter;
+    public void SetTextColor(Color color) => label.SetColor(color);
 
     public Vector2 screenPosition => Camera.main.WorldToScreenPoint( new Vector3( container.transform.position.x - ( width * 0.5f ) , container.transform.position.z - ( height * 0.5f ) , Camera.main.transform.position.z ) );
     public Vector3 localPosition => container.transform.localPosition;
@@ -545,14 +622,12 @@ public class Panel : Element
     {
         this.width = width;
         quad.transform.localScale = new Vector3(width, quad.transform.localScale.y, quad.transform.localScale.z);
-
     }
 
     public override void SetHeight(float height)
     {
         this.height = height;
         quad.transform.localScale = new Vector3(quad.transform.localScale.x, height, quad.transform.localScale.z);
-
     }
 
     protected MeshRenderer quad { get; set; }

@@ -12,15 +12,26 @@ public class CampaignEditor : Layout
     {
         HideCampaignSets();
         int count = _editor.campaignData.campaignSets.Count;
-        Add(campaignSets = new Layout("CampaignSets", 3, count + 1, 0.25f, 0.1f, count + 1, container));
+        Add(campaignSets = new Layout("CampaignSets", 4, count + 1, 0.25f, 0.1f, count + 1, container));
 
         campaignSets.SetViewportPosition(new Vector2(0, 1));
         campaignSets.SetPosition(campaignSets.position + Vector3.up + Vector3.back);
 
-        campaignSets.Add(new List<RenameableButton>(
-            RenameableButton.GetButtons(count,
-            (int index) => new RenameableButton(GetCampaignSet(index).name, 3, 1, container, 
+        campaignSets.Add(new List<RenameableDeletableButton>(
+            RenameableDeletableButton.GetButtons(count,
+            (int index) => new RenameableDeletableButton(GetCampaignSet(index).name, 4, 1, container, 
                 fontSize: 20,
+                DeleteStay: ( Button button ) =>
+                {
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                        if (button.selected)
+                            HideCampaigns();
+
+                        _editor.campaignData.Remove(GetCampaignSet(index));
+                        ShowCampaignSets();
+                    }
+                },
                 EndInput: (Field field) => 
                 {
                     GetCampaignSet(index).name = field.label.text;
@@ -32,12 +43,11 @@ public class CampaignEditor : Layout
                     if (Input.GetMouseButtonDown(0))
                     {
                         selectedCampaignSet = GetCampaignSet(index);
-                        ShowCampaigns(index, button.position + new Vector3(button.width * 0.5f, 0, button.height * 0.5f));
+                        ShowCampaigns(index, button.position + new Vector3(campaignSets.width * 0.5f, 0, button.height * 0.5f));
                         button.SetColor(Color.yellow);
                         button.Select();
                     }
                 },
-                                                            //this condition can probably be simplified
                 Exit: (Button button) => button.SetColor(_campaigns != null && selectedCampaignSet == GetCampaignSet( index ) ? button.color : Color.white),
                 Close: (Button button) =>
                 {
@@ -82,13 +92,22 @@ public class CampaignEditor : Layout
     {
         HideCampaigns();
         int count = selectedCampaignSet.campaignDefinitions.Count;
-        Add(_campaigns = new Layout( "CampaignLayout" , 3 , count + 1 , 0.25f , 0.1f , count + 1 , container ));
+        Add(_campaigns = new Layout( "CampaignLayout" , 4 , count + 1 , 0.25f , 0.1f , count + 1 , container ));
         _campaigns.SetPosition( position + ( Vector3.right * _campaigns.width * 0.5f ) + ( Vector3.back * _campaigns.height * 0.5f ) );
 
-        _campaigns.Add(new List<RenameableButton>(
-            RenameableButton.GetButtons(count,
-            (int capturedIndex) => new RenameableButton(GetCampaign(capturedIndex).name, 3, 1, container,
+        _campaigns.Add(new List<RenameableDeletableButton>(
+            RenameableDeletableButton.GetButtons(count,
+            (int capturedIndex) => new RenameableDeletableButton(GetCampaign(capturedIndex).name, 4, 1, container,
                 fontSize: 20,
+                DeleteStay: (Button button) =>
+                {
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                        selectedCampaignSet.Remove(GetCampaign(index));
+                        ShowCampaigns(index,position);
+                        ShowCampaignSets();
+                    }
+                },
                 EndInput: (Field field) =>
                 {
                     GetCampaign(capturedIndex).name = field.label.text;
@@ -111,7 +130,7 @@ public class CampaignEditor : Layout
                 },
                 Exit: (Button button) => button.SetColor(Color.white)))) );
 
-        _campaigns.Add(new Button("New Campaign", 3, 1, container, "NewCampaign",
+        _campaigns.Add(new Button("New Campaign", 4, 1, container, "NewCampaign",
             fontSize: 20,
             Enter: (Button button) => button.SetColor(Color.green),
             Stay: (Button button) =>
@@ -175,7 +194,7 @@ public class CampaignEditor : Layout
                 } )
             };
 
-            Add(_campaignEditor = new Layout("CampaignEditor", 3, 4, 0.25f, 0.1f, campaignEditorButtons.Count / 2, container));
+            Add(_campaignEditor = new Layout("CampaignEditor", 4, 4, 0.25f, 0.1f, campaignEditorButtons.Count / 2, container));
             _campaignEditor.SetPosition( campaignSets.position + ( Vector3.back * ( ( campaignSets.height + _campaignEditor.height ) * 0.5f ) ) );
             _campaignEditor.Add(campaignEditorButtons, true);
             _campaignEditor.SetParent(container);

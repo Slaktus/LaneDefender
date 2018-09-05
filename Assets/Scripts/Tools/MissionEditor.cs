@@ -18,8 +18,20 @@ public class MissionEditor : Layout
         Add(missionSets = new Layout("MissionSets", 4, count + 1, 0.25f, 0.1f, count + 1, container));
         missionSets.SetPosition( position + ( Vector3.right * missionSets.width * 0.5f ) + ( Vector3.back * missionSets.height * 0.5f ) );
 
-        missionSets.Add(new List<RenameableButton>(RenameableButton.GetButtons(count, (int capturedIndex) => new RenameableButton(_editor.campaignData.missionSets[ capturedIndex ].name, 3, 1, container,
+        missionSets.Add(new List<RenameableDeletableButton>(RenameableDeletableButton.GetButtons(count, 
+            (int capturedIndex) => new RenameableDeletableButton(_editor.campaignData.missionSets[ capturedIndex ].name, 3, 1, container,
             fontSize: 20,
+            DeleteStay: (Button button) =>
+            {
+                if (Input.GetMouseButtonDown(0))
+                {
+                    if (button.selected)
+                        HideMissions();
+
+                    _editor.campaignData.Remove(GetMissionSet(capturedIndex));
+                    ShowMissionSets(index, position);
+                }
+            },
             EndInput: (Field field) =>
             {
                 GetMissionSet(capturedIndex).name = field.label.text;
@@ -32,7 +44,7 @@ public class MissionEditor : Layout
                 {
                     button.SetColor(Color.yellow);
                     selectedMissionSet = GetMissionSet(capturedIndex);
-                    ShowMissions(index, button.position + new Vector3(button.width * 0.5f, 0, button.height * 0.5f));
+                    ShowMissions(index, button.position + new Vector3(missionSets.width * 0.5f, 0, button.height * 0.5f));
                 }
             },
             Exit: (Button button) => button.SetColor(selectedMissionSet == GetMissionSet(capturedIndex) ? button.color : Color.white),
@@ -78,8 +90,17 @@ public class MissionEditor : Layout
         Add(missions = new Layout("MissionLayout", 4, count + 1, 0.25f, 0.1f, count + 1, container));
         missions.SetPosition( position + ( Vector3.right * missions.width * 0.5f ) + ( Vector3.back * missions.height * 0.5f ) );
 
-        missions.Add(new List<RenameableButton>(RenameableButton.GetButtons(count, (int capturedIndex) => new RenameableButton(GetMission(capturedIndex).name, 3, 1, container,
+        missions.Add(new List<RenameableDeletableButton>(RenameableDeletableButton.GetButtons(count, 
+            (int capturedIndex) => new RenameableDeletableButton(GetMission(capturedIndex).name, 3, 1, container,
             fontSize: 20,
+            DeleteStay: (Button button) =>
+            {
+                if (Input.GetMouseButtonDown(0))
+                {
+                    selectedMissionSet.Remove(GetMission(capturedIndex));
+                    ShowMissions(index, position);
+                }
+            },
             EndInput: (Field field) =>
             {
                 GetMission(capturedIndex).name = field.label.text;

@@ -12,7 +12,7 @@ public class CampaignMapEditor : Layout
     {
         if (_dummyContainer != null)
         {
-            _dummyContainer.transform.localScale = new Vector3(0.2f, Vector3.Distance(_dummyContainer.transform.position, mousePos), 0.2f);
+            _dummyContainer.transform.localScale = new Vector3(0.2f, Vector3.Distance(_dummyContainer.transform.position, new Vector3(mousePos.x, _dummyContainer.transform.position.y, mousePos.z)), 0.2f);
             Quaternion rotation = Quaternion.LookRotation(Vector3.down, (mousePos - _dummyContainer.transform.position).normalized);
             _dummyContainer.transform.rotation = rotation;
         }
@@ -22,6 +22,7 @@ public class CampaignMapEditor : Layout
 
     public void ShowCampaignMap()
     {
+
         HideCampaignMap();
         Vector3 offset = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, Camera.main.transform.position.y)) + (Vector3.left * selectedCampaign.width * 0.5f) + (Vector3.forward * selectedCampaign.height * 0.5f);
         campaignMap = new CampaignMap(selectedCampaign.width, selectedCampaign.height, selectedCampaign.columns, selectedCampaign.rows, offset);
@@ -30,8 +31,16 @@ public class CampaignMapEditor : Layout
         {
             int index = i;
             bool mission = selectedCampaign.Has(index);
-            RenameableButton button = new RenameableButton(mission ? GetMission(index).name : index.ToString(), mission ? campaignMap.tileMap.tileWidth - 1 : 1 , mission ? campaignMap.tileMap.tileHeight * 0.5f : 1, container,
+            RenameableDeletableButton button = new RenameableDeletableButton(mission ? GetMission(index).name : index.ToString(), mission ? campaignMap.tileMap.tileWidth - 1 : 1 , mission ? campaignMap.tileMap.tileHeight * 0.5f : 1, container,
                 fontSize: 20,
+                DeleteStay: (Button b) =>
+                {
+                    if (mission && Input.GetMouseButtonDown(0))
+                    {
+                        selectedCampaign.Remove(GetMission(index));
+                        ShowCampaignMap();
+                    }
+                },
                 EndInput: (Field field) => 
                 {
                     GetMission(index).name = field.label.text;
@@ -105,7 +114,10 @@ public class CampaignMapEditor : Layout
                 });
 
             if (!mission)
+            {
                 button.DisableField();
+                button.HideDeleteButton();
+            }
 
             button.SetPosition(campaignMap.tileMap.PositionOf(index));
             _campaignMapButtons.Add(button);
@@ -137,7 +149,7 @@ public class CampaignMapEditor : Layout
         HideConnections();
     }
 
-    private void ShowConnectorAndTerminal(int index, RenameableButton button)
+    private void ShowConnectorAndTerminal(int index, RenameableDeletableButton button)
     {
         Button connector = new Button("+", 0.5f, 0.5f, container, "Connector+",
             Enter: (Button butt) => butt.SetColor(butt.selected ? butt.color : Color.green),
@@ -207,7 +219,7 @@ public class CampaignMapEditor : Layout
         _connectorsAndTerminators.Clear();
     }
 
-    public void ShowFirstMissionButton(int index, RenameableButton button)
+    public void ShowFirstMissionButton(int index, RenameableDeletableButton button)
     {
         Button butt = new Button("1st", 1, 0.5f, container, "First",
             fontSize: 20,
@@ -254,7 +266,7 @@ public class CampaignMapEditor : Layout
         _firstMissionButtons.Clear();
     }
 
-    public void ShowFinalMissionButton(int index, RenameableButton button)
+    public void ShowFinalMissionButton(int index, RenameableDeletableButton button)
     {
         Button butt = new Button("Final", 1, 0.5f, container, "Final",
             fontSize: 20,
@@ -342,7 +354,7 @@ public class CampaignMapEditor : Layout
     private List<Button> _connectorsAndTerminators { get; }
     private List<Button> _finalMissionButtons { get; }
     private List<Button> _firstMissionButtons { get; }
-    private List<RenameableButton> _campaignMapButtons { get; }
+    private List<RenameableDeletableButton> _campaignMapButtons { get; }
     private GameObject _dummyConnector { get; set; }
     private GameObject _dummyContainer { get; set; }
     private List<GameObject> _connectors { get; }
@@ -355,6 +367,6 @@ public class CampaignMapEditor : Layout
         _firstMissionButtons = new List<Button>();
         _finalMissionButtons = new List<Button>();
         _connectorsAndTerminators = new List<Button>();
-        _campaignMapButtons = new List<RenameableButton>();
+        _campaignMapButtons = new List<RenameableDeletableButton>();
     }
 }
