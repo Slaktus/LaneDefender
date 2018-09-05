@@ -292,13 +292,12 @@ public class Button : Panel
 
     public void Enable() => enabled = true;
     public void Disable() => enabled = false;
-
     public void SetLabel( string text ) => label.SetText( text );
+    public void SetStay(Action<Button> Stay) => this.Stay = Stay;
+    public void SetExit(Action<Button> Exit) => this.Exit = Exit;
     public void SetColor( Color color ) => quad.material.color = color;
     public void SetClose( Action<Button> Close ) => this.Close = Close;
     public void SetEnter( Action<Button> Enter ) => this.Enter = Enter;
-    public void SetStay( Action<Button> Stay ) => this.Stay = Stay;
-    public void SetExit( Action<Button> Exit ) => this.Exit = Exit;
 
     public Vector2 screenPosition => Camera.main.WorldToScreenPoint( new Vector3( container.transform.position.x - ( width * 0.5f ) , container.transform.position.z - ( height * 0.5f ) , Camera.main.transform.position.z ) );
     public Vector3 localPosition => container.transform.localPosition;

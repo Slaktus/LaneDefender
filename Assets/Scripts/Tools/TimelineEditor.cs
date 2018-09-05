@@ -28,7 +28,7 @@ public class TimelineEditor : Layout
             {
                 if (containsMouse)
                 {
-                    selectedMission.waveTimes[ selectedMission.waveDefinitions.IndexOf(heldWave.waveDefinition) ] = Helpers.Normalize(mousePos.x, missionTimeline.rect.xMax, missionTimeline.rect.xMin);
+                    selectedMission.waveTimes[ heldWaveIndex ] = Helpers.Normalize(mousePos.x, missionTimeline.rect.xMax, missionTimeline.rect.xMin);
                     ShowMissionTimeline();
                 }
 
@@ -38,69 +38,11 @@ public class TimelineEditor : Layout
         }
     }
 
-    public void AddWaveToTimeline(WaveDefinition waveDefinition)
+    public void AddWaveToTimeline(WaveDefinition waveDefinition, float timelinePosition, bool addToMission = false )
     {
-        selectedMission.Add(waveDefinition, timelinePosition);
+        if ( addToMission )
+            selectedMission.Add(waveDefinition, timelinePosition);
 
-        Button button = new Button("Wave", 2, 1, container, "Wave",
-            Enter: (Button b) => b.SetColor(b.selected ? b.color : Color.green),
-            Stay: (Button b) =>
-            {
-                if (Input.GetMouseButtonDown(1))
-                {
-                    selectedMission.Remove(waveDefinition);
-                    _buttons.Remove(b);
-                    b.Destroy();
-                }
-                else if (!b.selected && Input.GetMouseButtonDown(0))
-                {
-                    for (int i = 0; _buttons.Count > i; i++)
-                    {
-                        _buttons[ i ].Deselect();
-                        _buttons[ i ].SetColor(Color.white);
-                    }
-
-                    SetSelectedWaveDefinition(waveDefinition);
-                    HideWaveEventButtons();
-                    ShowWaveEventButtons();
-                    b.SetColor(Color.yellow);
-                    b.Select();
-                }
-            },
-            Exit: (Button b) =>
-            {
-                if (_editor.stage.conveyor == null || !_editor.stage.conveyor.showing)
-                {
-                    if (heldWaveEvent == null && heldWave == null && Input.GetMouseButton(0))
-                    {
-                        heldWave = new HeldWave(b.rect.position, waveDefinition);
-                        heldWave.SetText("Wave");
-                    }
-
-                    b.SetColor(b.selected ? b.color : Color.white);
-                }
-            });
-
-        SetSelectedWaveDefinition(waveDefinition);
-        HideWaveEventButtons();
-        ShowWaveEventButtons();
-
-        for (int i = 0; _buttons.Count > i; i++)
-        {
-            _buttons[ i ].Deselect();
-            _buttons[ i ].SetColor(Color.white);
-        }
-
-        _buttons.Add(button);
-        Add(button);
-
-        button.SetPosition(new Vector3(missionTimeline.rect.xMin + (timelinePosition * missionTimeline.rect.xMax), 0, missionTimeline.rect.yMin + 0.5f) + Vector3.up);
-        button.SetColor(Color.yellow);
-        button.Select();
-    }
-
-    public void AddWaveToTimeline(WaveDefinition waveDefinition, float timelinePosition)
-    {
         Button button = new Button("Wave", 1, 1, container, "Wave",
             fontSize: 20,
             Enter: (Button b) =>
@@ -116,6 +58,7 @@ public class TimelineEditor : Layout
                     {
                         selectedMission.Remove(waveDefinition);
                         _buttons.Remove(b);
+                        Remove(b);
                         b.Destroy();
                     }
                     else if (!b.selected && Input.GetMouseButtonDown(0))
@@ -140,7 +83,9 @@ public class TimelineEditor : Layout
                 {
                     if ( _editor.waveEditor.heldWaveEvent == null && heldWave == null && Input.GetMouseButton(0))
                     {
+                        heldWaveIndex = selectedMission.waveTimes.IndexOf(timelinePosition);
                         heldWave = new HeldWave(b.rect.position, waveDefinition);
+                        heldWave.SetPosition(mousePos + (Vector3.up * 2));
                         heldWave.SetText("Wave");
                     }
 
@@ -194,7 +139,7 @@ public class TimelineEditor : Layout
 
             if (selectedMission != null)
                 for (int i = 0; selectedMission.waveDefinitions.Count > i; i++)
-                    AddWaveToTimeline(selectedMission.waveDefinitions[ i ], selectedMission.waveTimes[ i ]);
+                    AddWaveToTimeline(selectedMission.waveDefinitions[ i ], selectedMission.waveTimes[ i ], false);
         }
     }
 
@@ -220,8 +165,9 @@ public class TimelineEditor : Layout
     public Vector3 indicatorPosition => new Vector3(_indicator.transform.position.x, 0, missionTimeline.rect.center.y);
 
     public float timelinePosition { get; private set; }
-    public Button missionTimeline { get; set; }
-    public HeldWave heldWave { get; set; }
+    public Button missionTimeline { get; private set; }
+    public HeldWave heldWave { get; private set; }
+    public int heldWaveIndex { get; private set; }
 
     private MissionDefinition selectedMission => _editor.missionEditor.selectedMission;
     private HeldEvent heldWaveEvent => _editor.waveEditor.heldWaveEvent;

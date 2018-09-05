@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class StageEditor : Layout
 {
+    private StageSet GetStageSet(int index) => _editor.stageData.stageSets[ index ];
+    private StageDefinition GetStageDefinition(int index) => _selectedStageSet.GetStage(index);
     private void SetStageDefinition(StageDefinition stageDefinition) => _editor.missionEditor.SetStageDefinition(stageDefinition);
     private void ShowMissionTimeline() => _editor.timelineEditor.ShowMissionTimeline();
     private void ShowMissionEditor() => _editor.missionEditor.ShowMissionEditor();
@@ -31,14 +33,19 @@ public class StageEditor : Layout
         stageSets.SetViewportPosition(new Vector2(0, 1));
         stageSets.SetPosition(stageSets.position + Vector3.up + Vector3.back);
 
-        stageSets.Add(new List<Button>(Button.GetButtons(count, (int index) => new Button("Stage Set", 3, 1, container, "StageSet",
+        stageSets.Add(new List<RenameableButton>(RenameableButton.GetButtons(count, (int index) => new RenameableButton(GetStageSet( index ).name, 3, 1, container, 
             fontSize: 20,
-            Enter: (Button button) => button.SetColor(_stages != null && _selectedStageSet == _editor.stageData.stageSets[ index ] ? button.color : Color.green),
+            EndInput: (Field field) =>
+            {
+                GetStageSet(index).name = field.label.text;
+                field.SetColor(Color.white);
+            },
+            Enter: (Button button) => button.SetColor(_stages != null && _selectedStageSet == GetStageSet( index ) ? button.color : Color.green),
             Stay: (Button button) =>
             {
                 if (Input.GetMouseButtonDown(0))
                 {
-                    _selectedStageSet = _editor.stageData.stageSets[ index ];
+                    _selectedStageSet = GetStageSet(index);
                     ShowStageDefinitions(button.position);
                     button.SetColor(Color.yellow);
                     button.Select();
@@ -54,29 +61,29 @@ public class StageEditor : Layout
                     _selectedStageSet = null;
                     button.SetColor(Color.white);
                 }
-            })))
-        {
-            new Button( "Add Stage Set" , 3 , 1 , container , "AddStageSet" ,
-            fontSize: 20 ,
-            Enter: ( Button button ) => button.SetColor( Color.green ) ,
-            Stay: ( Button button ) =>
+            }))));
+
+        stageSets.Add(new Button("Add Stage Set", 3, 1, container, "AddStageSet",
+            fontSize: 20,
+            Enter: (Button button) => button.SetColor(Color.green),
+            Stay: (Button button) =>
             {
-                if ( Input.GetMouseButtonDown( 0 ) )
+                if (Input.GetMouseButtonDown(0))
                 {
-                    ScriptableObjects.Add( ScriptableObject.CreateInstance<StageSet>() , _editor.stageData );
+                    ScriptableObjects.Add(ScriptableObject.CreateInstance<StageSet>(), _editor.stageData);
 
                     ShowStageSets();
                     ShowStageEditor();
                     _editor.missionEditor.ShowMissionEditor();
                 }
-            } ,
-            Exit: ( Button button ) => button.SetColor( Color.white ) ) ,
+            },
+            Exit: (Button button) => button.SetColor(Color.white)));
 
-            new Button( "Back to Campaign" , 3 , 1 , container , "BackToCampaign" , fontSize: 20 ,
-            Enter: ( Button button ) => button.SetColor( Color.green ) ,
-            Stay: ( Button button ) =>
+        stageSets.Add(new Button("Back to Campaign", 3, 1, container, "BackToCampaign", fontSize: 20,
+            Enter: (Button button) => button.SetColor(Color.green),
+            Stay: (Button button) =>
             {
-                if ( Input.GetMouseButtonDown( 0 ) )
+                if (Input.GetMouseButtonDown(0))
                 {
                     _editor.waveEditor.Hide();
                     _editor.stageEditor.Hide();
@@ -89,9 +96,8 @@ public class StageEditor : Layout
                     _editor.campaignEditor.ShowCampaignEditor();
                     _editor.campaignMapEditor.ShowCampaignMap();
                 }
-            } ,
-            Exit: ( Button button ) => button.SetColor( Color.white ) )
-        }, true );
+            },
+            Exit: (Button button) => button.SetColor(Color.white)), true);
     }
 
     private void HideStageSets()
@@ -109,14 +115,19 @@ public class StageEditor : Layout
         int count = _selectedStageSet.stageDefinitions.Count;
         Add(_stages = new Layout("StageDefinitionButtons", 3, 1 * (count + 1), 0.25f, 0.1f, count + 1, container));
         _stages.SetPosition(position + (Vector3.right * 3) + (Vector3.back * ((count * 0.5f) + (0.25f * 0.5f))));
-        _stages.Add(new List<Button>(Button.GetButtons(count, (int index) => new Button("Stage Definition", 3, 1, container, "StageDefinition",
+        _stages.Add(new List<RenameableButton>(RenameableButton.GetButtons(count, (int index) => new RenameableButton(GetStageDefinition(index).name, 3, 1, container,
             fontSize: 20,
+            EndInput: (Field field) =>
+            {
+                GetStageDefinition(index).name = field.label.text;
+                field.SetColor(Color.white);
+            },
             Enter: (Button button) => button.SetColor(Color.green),
             Stay: (Button button) =>
             {
                 if (_selectedStageSet != null && Input.GetMouseButtonDown(0))
                 {
-                    selectedStageDefinition = _selectedStageSet.GetStage( index );
+                    selectedStageDefinition = GetStageDefinition( index );
 
                     HideStageSets();
                     HideStageDefinitions();
@@ -131,21 +142,20 @@ public class StageEditor : Layout
                     ShowMissionEditor();
                 }
             },
-            Exit: (Button button) => button.SetColor(Color.white))))
-        {
-            new Button( "Add Stage\nDefinition" , 3 , 1 , container , "AddStageDefinition" ,
-            fontSize: 20 ,
-            Enter: ( Button button ) => button.SetColor( Color.green ) ,
-            Stay: ( Button button ) =>
+            Exit: (Button button) => button.SetColor(Color.white)))));
+
+        _stages.Add(new Button("Add Stage\nDefinition", 3, 1, container, "AddStageDefinition",
+            fontSize: 20,
+            Enter: (Button button) => button.SetColor(Color.green),
+            Stay: (Button button) =>
             {
-                if ( _selectedStageSet != null && Input.GetMouseButtonDown( 0 ) )
+                if (_selectedStageSet != null && Input.GetMouseButtonDown(0))
                 {
-                    ScriptableObjects.Add( StageDefinition.Default() , _selectedStageSet );
-                    ShowStageDefinitions( position );
+                    ScriptableObjects.Add(StageDefinition.Default(), _selectedStageSet);
+                    ShowStageDefinitions(position);
                 }
-            } ,
-            Exit: ( Button button ) => button.SetColor( Color.white ) )
-        }, true);
+            },
+            Exit: (Button button) => button.SetColor(Color.white)), true);
     }
 
     public void HideStageDefinitions()
