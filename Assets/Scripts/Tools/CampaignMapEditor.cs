@@ -22,7 +22,6 @@ public class CampaignMapEditor : Layout
 
     public void ShowCampaignMap()
     {
-
         HideCampaignMap();
         Vector3 offset = Camera.main.ViewportToWorldPoint(new Vector3(0.5f, 0.5f, Camera.main.transform.position.y)) + (Vector3.left * selectedCampaign.width * 0.5f) + (Vector3.forward * selectedCampaign.height * 0.5f);
         campaignMap = new CampaignMap(selectedCampaign.width, selectedCampaign.height, selectedCampaign.columns, selectedCampaign.rows, offset);
@@ -37,7 +36,7 @@ public class CampaignMapEditor : Layout
                 {
                     if (mission && Input.GetMouseButtonDown(0))
                     {
-                        selectedCampaign.Remove(GetMission(index));
+                        selectedCampaign.RemoveMissionDefinitionAt(index);
                         ShowCampaignMap();
                     }
                 },

@@ -33,6 +33,13 @@ public class CampaignDefinition : DefinitionBase
             connections.Add(toAdd as Connection);
     }
 
+    public void RemoveMissionDefinitionAt(int index)
+    {
+
+        missionDefinitions.RemoveAt(missionIndices.IndexOf(index));
+        missionIndices.Remove(index);
+    }
+
     public override void Remove( ScriptableObject toRemove )
     {
         if ( toRemove is MissionDefinition)

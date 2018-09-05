@@ -155,7 +155,7 @@ public class MissionEditor : Layout
             } )
         };
 
-        Add(_missionEditorLayout = new Layout( "StageEditor" , 3 , 1 , 0.25f , 0.1f , missionEditorButtons.Count / 2 , container ));
+        Add(_missionEditorLayout = new Layout( "StageEditor" , 4 , 1 , 0.25f , 0.1f , missionEditorButtons.Count / 2 , container ));
         _missionEditorLayout.Add( missionEditorButtons , true );
         _missionEditorLayout.SetPosition( ( _editor.stageEditor.stageEditorLayout != null ? _editor.stageEditor.stageEditorLayout.position : _editor.stageEditor.stageSets.position ) + ( Vector3.back * ( _missionEditorLayout.height + ( _editor.stageEditor.stageEditorLayout != null ? _editor.stageEditor.stageEditorLayout.height : _editor.stageEditor.stageSets.height ) ) * 0.5f ) );
     }
