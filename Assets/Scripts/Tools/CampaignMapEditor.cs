@@ -37,6 +37,7 @@ public class CampaignMapEditor : Layout
                     if (mission && Input.GetMouseButtonDown(0))
                     {
                         selectedCampaign.RemoveMissionDefinitionAt(index);
+                        CullConnections();
                         ShowCampaignMap();
                     }
                 },
@@ -310,6 +311,24 @@ public class CampaignMapEditor : Layout
         _finalMissionButtons.Clear();
     }
 
+    private void CullConnections()
+    {
+        List<Connection> toCull = new List<Connection>(_connections.Count);
+
+        for ( int i = 0; _connections.Count > i; i++)
+        {
+            Connection connection = selectedCampaign.connections[ i ];
+
+            if (!selectedCampaign.Has(connection.fromIndex) || !selectedCampaign.Has(connection.toIndex))
+                toCull.Add(connection);
+        }
+
+        for ( int i = 0; toCull.Count > i; i++)
+            selectedCampaign.connections.Remove(toCull[ i ]);
+
+        ShowConnections();
+    }
+
     private void ShowConnections()
     {
         HideConnections();
@@ -318,29 +337,43 @@ public class CampaignMapEditor : Layout
         {
             Connection connection = selectedCampaign.connections[ i ];
 
-            GameObject container = new GameObject("Connector");
-            GameObject quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            quad.transform.SetParent(container.transform);
-            quad.transform.localPosition += Vector3.up * 0.5f;
+            Button button = new Button(string.Empty, 1, 1, container, "Connection",
+                Enter: (Button butt) => butt.SetColor(Color.yellow),
+                Stay: (Button butt) => 
+                {
+                    if (Input.GetMouseButton(0))
+                        butt.SetColor(Color.red);
+
+                    if (Input.GetMouseButtonUp(0))
+                    {
+                        selectedCampaign.connections.Remove(connection);
+                        ShowConnections();
+                    }
+                },
+                Exit: (Button butt) => butt.SetColor(Color.white));
 
             Vector3 fromPosition = campaignMap.tileMap.PositionOf(connection.fromIndex) + (Vector3.right * ((campaignMap.tileMap.tileWidth * 0.5f)));
             Vector3 toPosition = campaignMap.tileMap.PositionOf(connection.toIndex) + (Vector3.left * ((campaignMap.tileMap.tileWidth * 0.5f)));
+            Vector3 direction = toPosition - fromPosition;
+            float distance = direction.magnitude;
 
-            container.transform.position = fromPosition + Vector3.up;
-            container.transform.localScale = new Vector3(0.2f, Vector3.Distance(fromPosition, toPosition), 0.2f);
-            Quaternion rotation = Quaternion.LookRotation(Vector3.down, (toPosition - fromPosition).normalized);
-            container.transform.rotation = rotation;
-
-            _connectors.Add(container);
+            button.SetPosition(fromPosition + (direction.normalized * distance * 0.5f));
+            button.SetRotation(Quaternion.LookRotation(direction,Vector3.up));
+            button.SetWidthAndHeight(new Vector2(0.2f, distance));
+            _connections.Add(button);
+            Add(button);
         }
     }
 
     private void HideConnections()
     {
-        for (int i = 0; _connectors.Count > i; i++)
-            GameObject.Destroy(_connectors[ i ]);
+        for (int i = 0; _connections.Count > i; i++)
+        {
+            _connections[ i ].Destroy();
+            Remove(_connections[ i ]);
+        }
 
-        _connectors.Clear();
+        _connections.Clear();
     }
 
     public CampaignMap campaignMap { get; private set; }
@@ -356,13 +389,13 @@ public class CampaignMapEditor : Layout
     private List<RenameableDeletableButton> _campaignMapButtons { get; }
     private GameObject _dummyConnector { get; set; }
     private GameObject _dummyContainer { get; set; }
-    private List<GameObject> _connectors { get; }
+    private List<Button> _connections { get; }
     private Editor _editor { get; }
 
     public CampaignMapEditor(Editor editor, GameObject parent) : base(typeof(CampaignMapEditor).Name, parent)
     {
         _editor = editor;
-        _connectors = new List<GameObject>();
+        _connections = new List<Button>();
         _firstMissionButtons = new List<Button>();
         _finalMissionButtons = new List<Button>();
         _connectorsAndTerminators = new List<Button>();

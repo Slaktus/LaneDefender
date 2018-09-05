@@ -630,6 +630,9 @@ public class Panel : Element
         quad.transform.localScale = new Vector3(quad.transform.localScale.x, height, quad.transform.localScale.z);
     }
 
+    public void SetQuadLocalRotation(Quaternion rotation) => quad.transform.localRotation = rotation;
+    public void SetQuadLocalPosition(Vector3 localPosition) => quad.transform.localPosition = localPosition;
+
     protected MeshRenderer quad { get; set; }
 
     public Panel( string name , float width , float height , GameObject parent = null, bool hideQuad = false ) : base( name , width , height )
@@ -663,12 +666,14 @@ public abstract class Element
     public void SetLocalPosition( Vector3 localPosition ) => container.transform.localPosition = localPosition;
     public void SetParent( GameObject parent ) => container.transform.SetParent( parent.transform );
     public void SetPosition( Vector3 position ) => container.transform.position = position;
+    public void SetRotation(Quaternion rotation) => container.transform.rotation = rotation;
+    public void SetScale(Vector3 scale) => container.transform.localScale = scale;
 
     public abstract void Destroy();
     public abstract void SetWidth( float width);
     public abstract void SetHeight(float height);
 
-    public Rect rect => new Rect( container.transform.position.x - ( width * 0.5f ) , container.transform.position.z - ( height * 0.5f ) , width , height );
+    public virtual Rect rect => new Rect( container.transform.position.x - ( width * 0.5f ) , container.transform.position.z - ( height * 0.5f ) , width , height );
     public virtual bool Contains( Vector3 position ) => Contains( new Vector2( position.x , position.z ) );
     public virtual bool Contains( Vector2 position ) => rect.Contains( position );
     public virtual bool containsMouse => Contains( mousePos );
