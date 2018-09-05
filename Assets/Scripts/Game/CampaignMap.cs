@@ -3,9 +3,9 @@ using UnityEngine;
 
 public class CampaignMap
 {
+    public void Add(Mission mission) => missions.Add(mission);
+    public void Add(int index, MissionDefinition missionDefinition) => missions.Add(new Mission(index, missionDefinition));
     public bool Has( int index ) => missions.Count > index && missions[ index ] != null;
-    public void Add( Mission mission ) => missions.Add( mission );
-    public void Add( int index , MissionDefinition missionDefinition ) => missions.Add( new Mission( index , missionDefinition ) );
     public void Replace( int index , Mission mission ) => missions[ index ] = mission;
     public void Remove( Mission mission ) => missions.Add( mission );
 

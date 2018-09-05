@@ -25,6 +25,7 @@ public class EnemyDefinition : EntityDefinition
 
     public void SetDamage(int index, int damage) => levels[ index ].SetDamage(damage);
     public void SetHealth(int index, int health) => levels[ index ].SetHealth(health);
+    public void SetColor(int index, Color color) => levels[ index ].SetColor(color);
     public void SetValue(int index, int value) => levels[ index ].SetValue(value);
     public void SetSpeed(int index, int speed) => levels[ index ].SetSpeed(speed);
     public void SetWidth(float width) => this.width = width;

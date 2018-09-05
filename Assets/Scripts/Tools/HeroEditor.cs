@@ -33,10 +33,12 @@ public class HeroEditor : Layout
                     if (button.selected && Input.GetMouseButtonDown(0) && (_heroLevels == null || !_heroLevels.containsMouse))
                     {
                         HideHeroLevels();
-                        button.Deselect();
 
                         if (_selectedLevel != index)
+                        {
+                            button.Deselect();
                             button.SetColor(Color.white);
+                        }
                     }
                 })
             )), true);

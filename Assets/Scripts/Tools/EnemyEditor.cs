@@ -33,10 +33,12 @@ public class EnemyEditor : Layout
                     if (button.selected && Input.GetMouseButtonDown(0) && (_enemyLevels == null || !_enemyLevels.containsMouse))
                     {
                         HideEnemyLevels();
-                        button.Deselect();
 
                         if (_selectedLevel != index)
+                        {
+                            button.Deselect();
                             button.SetColor(Color.white);
+                        }
                     }
                 })
             )), true);
@@ -101,7 +103,7 @@ public class EnemyEditor : Layout
     {
         //just a bit of positioning here and we be rearin' to gaw
         HideEnemyEditor();
-        Add(_enemyEditor = new Layout("EnemyEditor", 3, 6 , 0.25f, 0.1f, 6, container));
+        Add(_enemyEditor = new Layout("EnemyEditor", 3, 6, 0.25f, 0.1f, 6, container));
         _enemyEditor.SetPosition(_enemies.position + (Vector3.back * (_enemies.height + _enemyEditor.height) * 0.5f));
         _enemyEditor.Add(new List<Element>()
         {
@@ -170,7 +172,7 @@ public class EnemyEditor : Layout
 
         int count = _selectedEnemy.levels[ _selectedLevel ].effects.Count;
         Add(_enemyEffects = new Layout("EnemyEffects", 3, count + 1, 0.25f, 0.1f, count + 1, container));
-        _enemyEffects.SetPosition(_enemyEditor.position + (Vector3.back * ( ((_enemyEffects.height + _enemyEditor.height) * 0.5f))));
+        _enemyEffects.SetPosition(_enemyEditor.position + (Vector3.back * (((_enemyEffects.height + _enemyEditor.height) * 0.5f))));
         _enemyEffects.Add(new List<Button>(Button.GetButtons(count,
             (int index) => new Button(_selectedEnemy.levels[ _selectedLevel ].effects[ index ].ToString(), 3, 1, container, "Effect", fontSize: 20,
                 Enter: (Button button) => button.SetColor(Color.green),
@@ -193,6 +195,9 @@ public class EnemyEditor : Layout
                 } ,
                 Exit: ( Button button ) => button.SetColor( Color.white ) ),
         }, true);
+
+
+        ShowColorPicker();
     }
 
     public void HideEnemyEditor()
@@ -210,16 +215,16 @@ public class EnemyEditor : Layout
         _enemyEffects = null;
     }
 
-    public void ShowEffects( Vector3 position)
+    public void ShowEffects(Vector3 position)
     {
         HideEffects();
-        int count = ( int ) Definitions.Effects.Count;
+        int count = (int) Definitions.Effects.Count;
         Add(_effects = new Layout("Effects", 3, count, 0.25f, 0.1f, count, container));
         _effects.SetPosition(position + (Vector3.right * _effects.width * 0.5f) + (Vector3.back * _effects.height * 0.5f));
 
         _effects.Add(new List<Button>(
             Button.GetButtons(count,
-            (int index) => new Button((( Definitions.Effects) index ).ToString(), 3, 1, container, "Effect", fontSize: 20,
+            (int index) => new Button(((Definitions.Effects) index).ToString(), 3, 1, container, "Effect", fontSize: 20,
                 Enter: (Button button) => button.SetColor(button.selected ? button.color : Color.green),
                 Stay: (Button button) =>
                 {
@@ -247,25 +252,130 @@ public class EnemyEditor : Layout
         _effects = null;
     }
 
+    private void ShowColorPicker()
+    {
+        HideColorPicker();
+        _colorPicker = new Layout("ColorPicker", 3, 1, 0.25f, 0.1f, 1, container);
+
+        Button colorButton = new Button("Color", 3, 1, container, "ColorButton",
+            fontSize: 20,
+            Stay: (Button butt) =>
+            {
+                if (Input.GetMouseButtonDown(0))
+                {
+                    ShowColors(butt.position);
+                }
+            },
+            Close: (Button butt) =>
+            {
+                if (Input.GetMouseButtonDown(0) && ( _colors == null || !_colors.containsMouse ))
+                {
+                    HideColors();
+                }
+            });
+
+        colorButton.SetColor(_selectedEnemy.levels[ _selectedLevel ].color);
+        _colorPicker.SetPosition(_enemyEffects.position + (Vector3.back * (((_colorPicker.height + _enemyEffects.height) * 0.5f))));
+        _colorPicker.Add(colorButton, true);
+        Add(_colorPicker);
+    }
+
+    private void HideColorPicker()
+    {
+        if (_colorPicker != null)
+            Remove(_colorPicker);
+
+        _colorPicker?.Destroy();
+        _colorPicker = null;
+    }
+
+    public void ShowColors(Vector3 position)
+    {
+        Add(_colors = new Layout("Colors", 4, 2, 0.25f, 0.1f, 2, container));
+        List<Button> buttons = new List<Button>(6);
+
+        for (int i = 0; 6 > i; i++)
+        {
+            Color color = Color.clear;
+
+            switch (i)
+            {
+                case 0:
+                    color = Color.blue;
+                    break;
+
+                case 1:
+                    color = Color.red;
+                    break;
+
+                case 2:
+                    color = Color.green;
+                    break;
+
+                case 3:
+                    color = Color.cyan;
+                    break;
+
+                case 4:
+                    color = Color.magenta;
+                    break;
+
+                case 5:
+                    color = Color.yellow;
+                    break;
+            }
+
+            Button button = new Button(string.Empty, 4, 1, container, "Color",
+                Stay: (Button butt) =>
+                {
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                        _selectedEnemy.SetColor(_selectedLevel, color);
+                        ShowColorPicker();
+                        HideColors();
+                    }
+                });
+
+            button.SetColor(color);
+            _colors.Add(button);
+        }
+
+        _colors.SetPosition(position + (Vector3.right * 3.5f) + (Vector3.back * (0.5f + (0.25f * 0.5f))));
+        _colors.Refresh();
+    }
+
+    public void HideColors()
+    {
+        if (_colors != null)
+            Remove(_colors);
+
+        _colors?.Destroy();
+        _colors = null;
+    }
+
     public override void Hide()
     {
+        HideColors();
         HideEnemies();
         HideEffects();
         HideEnemyLevels();
         HideEnemyEditor();
+        HideColorPicker();
         base.Hide();
     }
 
     private Editor _editor { get; }
+    private Layout _colors { get; set; }
     private Layout _enemies { get; set; }
     private Layout _effects { get; set; }
+    private Layout _colorPicker { get; set; }
     private Layout _enemyLevels { get; set; }
     private Layout _enemyEditor { get; set; }
     private Layout _enemyEffects { get; set; }
     private EnemyDefinition _selectedEnemy { get; set; }
     private int _selectedLevel { get; set; }
 
-    public EnemyEditor(Editor editor, GameObject parent) : base(typeof(HeroEditor).Name, parent)
+    public EnemyEditor(Editor editor, GameObject parent) : base(typeof(EnemyEditor).Name, parent)
     {
         _editor = editor;
         _selectedLevel = -1;
