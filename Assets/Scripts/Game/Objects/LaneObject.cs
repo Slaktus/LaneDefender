@@ -9,7 +9,7 @@ public abstract class LaneObject : BaseObject
 
         while ( !interrupt && entryPoint - ( scale.x * 0.5f ) > position.x - lane.start.x )
         {
-            float x = position.x + ( speed * Time.deltaTime * 3 );
+            float x = position.x + ( 5 * Time.deltaTime);
             position = new Vector3( Mathf.Clamp( x , start + ( scale.x * 0.5f ) , start + entryPoint - ( scale.x * 0.5f ) ) , position.y , position.z );
             yield return interrupt = overlap;
         }

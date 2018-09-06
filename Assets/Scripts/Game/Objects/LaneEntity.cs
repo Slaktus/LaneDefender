@@ -25,7 +25,7 @@ public class LaneEntity : LaneObject
                 move = !enter.MoveNext();
 
             float x = position.x + ( ( speed * Time.deltaTime ) * ( move ? 1 : 0 ) );
-            bool destroy = x > lane.end.x - ( body.transform.localScale.x * 0.5f ) || 0 >= health;
+            bool destroy = x > lane.end.x - ( body.transform.localScale.x * 0.5f ) || ( 0 >= health && changeLane == null);
             position = new Vector3( Mathf.Clamp( x , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
 
             if ( destroy )
