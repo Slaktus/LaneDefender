@@ -16,6 +16,7 @@ public class WaveEventDefinition : ScriptableObject
     public float entryPoint;
     public float delay;
     public int subType;
+    public int level;
     public int type;
     public int lane;
 }
