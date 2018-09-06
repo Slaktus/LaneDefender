@@ -10,7 +10,10 @@ public class ConveyorItem : BaseObject
 
     public override void Update() => position = new Vector3(position.x, position.y, Mathf.Clamp(position.z - (speed * Time.deltaTime), limit, _conveyor.top.z - (height * 0.5f)));
     public void PowerUp() => label.SetText(type.ToString() + "\n" + ++power);
+    public void SetItemDefinition(ItemDefinition definition) => this.definition = definition;
+    public void SetItemSettings(ItemSettings settings) => this.settings = settings;
     public void SetHeld(bool held) => this.held = held;
+    public void Refresh() => label.SetText(type.ToString() + "\n" + level);
 
     public string text => label.text;
     public int index => _conveyor.IndexOf( this );
@@ -22,10 +25,10 @@ public class ConveyorItem : BaseObject
     public bool settled => !held && Mathf.Approximately( position.z , limit );
     public bool canUpgrade => settled && _maxLevel > level;
 
-    public ItemSettings settings { get; }
     public int power { get; private set; }
     public bool held { get; private set; }
-    public ItemDefinition definition { get; }
+    public ItemSettings settings { get; set; }
+    public ItemDefinition definition { get; set; }
     public Definitions.Items type => definition.type;
     public int damage => definition.Damage(level);
     public int level => settings.level;

@@ -26,9 +26,11 @@ public static class Definitions
 
     public enum Enemies
     {
-        Default = 0,
-        Test = 1,
-        Count = 2
+        Mini = 0,
+        Sedan = 1,
+        Van = 2,
+        Bus = 3,
+        Count = 4
     }
 
     public enum Items

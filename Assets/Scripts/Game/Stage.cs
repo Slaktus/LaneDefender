@@ -27,8 +27,8 @@ public class Stage
                     if ( handled)
                     {
                         SpawnEnemyEvent spawnEnemyEvent = (waveEvent as SpawnEnemyEvent);
-                        EnemyLevel enemyLevel = spawnEnemyEvent.enemyDefinition.levels[ 0 ];
-                        lane.Add(new Enemy(spawnEnemyEvent.enemyDefinition, 0, new EnemySettings(Color.white, enemyLevel.health, enemyLevel.speed), lane, waveEvent.entryPoint, _container));
+                        EnemyLevel enemyLevel = spawnEnemyEvent.enemyDefinition.levels[ spawnEnemyEvent.level ];
+                        lane.Add(new Enemy(spawnEnemyEvent.enemyDefinition, spawnEnemyEvent.level, new EnemySettings(enemyLevel.color, enemyLevel.health, enemyLevel.speed), lane, waveEvent.entryPoint, _container));
                     }
                 }
 

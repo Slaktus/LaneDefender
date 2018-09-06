@@ -20,7 +20,7 @@ public class Session
         Lane hoveredLane = null;
         ConveyorItem hoveredItem = null;
 
-        //Proceed if we hit the ground plane
+        //Proceed if raycast hits something
         if ( hits.Length > 0 )
         {
             //Get the mouse position on the ground plane
@@ -65,18 +65,35 @@ public class Session
                     heldItem = null;
                 }
             }
-
-            //Proceed if an item is held
-            if ( heldItem != null )
+            else if ( heldItem != null) //Proceed if an item is held
             {
                 //Position the held item at the world-space mouse position
                 heldItem.SetPosition( mousePosition );
+                Debug.Log(hoveredItem);
 
-                //Proceed if the left mouse button is released or the right mouse button is pressed
-                if ( !Input.GetMouseButton( 0 ) || Input.GetMouseButtonDown( 1 ) )
+                //Proceed if the left mouse button is released
+                if (!Input.GetMouseButton(0))
                 {
+                    hoveredItem = conveyor.GetHoveredItem(mousePosition);
+
+                    if (hoveredItem != null && heldItem.conveyorItem != hoveredItem)
+                    {
+                        ItemDefinition heldDefinition = heldItem.conveyorItem.definition;
+                        ItemSettings heldSettings = heldItem.conveyorItem.settings;
+                        ItemDefinition hoveredDefinition = hoveredItem.definition;
+                        ItemSettings hoveredSettings = hoveredItem.settings;
+
+                        heldItem.conveyorItem.SetItemDefinition(hoveredDefinition);
+                        heldItem.conveyorItem.SetItemSettings(hoveredSettings);
+                        hoveredItem.SetItemDefinition(heldDefinition);
+                        hoveredItem.SetItemSettings(heldSettings);
+                        heldItem.conveyorItem.Refresh();
+                        hoveredItem.Refresh();
+                    }
+
                     //Reset the held conveyor item's color and clean up the held item
                     heldItem.conveyorItem.color = Color.white;
+                    heldItem.conveyorItem.SetHeld(false);
                     heldItem.Destroy();
                     heldItem = null;
                 }

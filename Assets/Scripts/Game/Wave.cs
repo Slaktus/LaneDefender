@@ -52,9 +52,10 @@ public abstract class WaveEvent
     public float delay { get; }
     public int subType { get; }
     public Type type { get; }
+    public int level { get; }
     public int lane { get; }
 
-    public WaveEvent( float delay , int lane , Type type , int subType , float entryPoint = 0 )
+    public WaveEvent( int level , float delay , int lane , Type type , int subType , float entryPoint = 0 )
     {
         this.entryPoint = entryPoint;
         this.subType = subType;
@@ -63,7 +64,7 @@ public abstract class WaveEvent
         this.type = type;
     }
 
-    public WaveEvent( WaveEventDefinition waveEventDefinition ) : this( waveEventDefinition.delay , waveEventDefinition.lane , ( Type ) waveEventDefinition.type , waveEventDefinition.subType, waveEventDefinition.entryPoint ) { }
+    public WaveEvent( WaveEventDefinition waveEventDefinition ) : this( waveEventDefinition.level, waveEventDefinition.delay , waveEventDefinition.lane , ( Type ) waveEventDefinition.type , waveEventDefinition.subType, waveEventDefinition.entryPoint ) { }
 
     public enum Type
     {

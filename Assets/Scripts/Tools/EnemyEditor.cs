@@ -140,8 +140,8 @@ public class EnemyEditor : Layout
             new Label("Speed:", Color.black, 1.25f, 0.5f, container, fontSize: 20, anchor: TextAnchor.MiddleCenter),
             new Field("Speed", _selectedEnemy.Speed(_selectedLevel).ToString(), 2, 0.5f, 20, container, Field.ContentMode.Numbers, EndInput: (Field field) =>
             {
-                int value;
-                int.TryParse(field.label.text, out value);
+                float value;
+                float.TryParse(field.label.text, out value);
                 _selectedEnemy.SetSpeed(_selectedLevel, value);
                 field.label.SetText(value.ToString());
                 //need to implement refresh

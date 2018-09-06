@@ -20,9 +20,8 @@ public class MissionDefinition : DefinitionBase
     {
         int i = 0;
 
-        if (waveTimes.Count > 0)
-            while (time > waveTimes[ i ])
-                i++;
+        while ( waveTimes.Count > i && time > waveTimes[ i ])
+            i++;
 
         waveDefinitions.Insert(i, toAdd as WaveDefinition);
         waveTimes.Insert(i, time);

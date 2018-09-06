@@ -56,9 +56,27 @@ public class Editor : Layout
                 {
                     _heldItem.SetPosition(mousePosition);
 
-                    if (!Input.GetMouseButton(0) || Input.GetMouseButtonDown(1))
+                    if (!Input.GetMouseButton(0) )
                     {
+                        hoveredItem = stage.conveyor.GetHoveredItem(mousePosition);
+
+                        if (hoveredItem != null && _heldItem.conveyorItem != hoveredItem)
+                        {
+                            ItemDefinition heldDefinition = _heldItem.conveyorItem.definition;
+                            ItemSettings heldSettings = _heldItem.conveyorItem.settings;
+                            ItemDefinition hoveredDefinition = hoveredItem.definition;
+                            ItemSettings hoveredSettings = hoveredItem.settings;
+
+                            _heldItem.conveyorItem.SetItemDefinition(hoveredDefinition);
+                            _heldItem.conveyorItem.SetItemSettings(hoveredSettings);
+                            hoveredItem.SetItemDefinition(heldDefinition);
+                            hoveredItem.SetItemSettings(heldSettings);
+                            _heldItem.conveyorItem.Refresh();
+                            hoveredItem.Refresh();
+                        }
+
                         _heldItem.conveyorItem.color = Color.white;
+                        _heldItem.conveyorItem.SetHeld(false);
                         _heldItem.Destroy();
                         _heldItem = null;
                     }
@@ -236,10 +254,16 @@ public class Editor : Layout
         if (objectData == null)
         {
             objectData = Assets.Create<ObjectData>(Assets.objectDataPath);
-            ScriptableObjects.Add(ScriptableObject.CreateInstance<EnemySet>(), objectData);
-            ScriptableObjects.Add(ScriptableObject.CreateInstance<ItemSet>(), objectData);
-            ScriptableObjects.Add(ScriptableObject.CreateInstance<HeroSet>(), objectData);
         }
+
+        if (objectData.enemySets.Count == 0 )
+            ScriptableObjects.Add(ScriptableObject.CreateInstance<EnemySet>(), objectData);
+
+        if (objectData.itemSets.Count == 0)
+            ScriptableObjects.Add(ScriptableObject.CreateInstance<ItemSet>(), objectData);
+
+        if (objectData.heroSets.Count == 0)
+            ScriptableObjects.Add(ScriptableObject.CreateInstance<HeroSet>(), objectData);
 
         for (int i = objectData.enemySets[ (int) Assets.ObjectDataSets.Default ].enemyDefinitions.Count; (int) Definitions.Enemies.Count > i; i++)
             ScriptableObjects.Add(ScriptableObject.CreateInstance<EnemyDefinition>().Initialize(((Definitions.Enemies) i).ToString(), 2, 1, (Definitions.Enemies) i), objectData.enemySets[ (int) Assets.ObjectDataSets.Default ]);

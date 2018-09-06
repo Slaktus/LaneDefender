@@ -176,7 +176,7 @@ public class Entry : MonoBehaviour
                 switch ((WaveEvent.Type) missionDefinition.waveDefinitions[ i ].waveEvents[ j ].type)
                 {
                     case WaveEvent.Type.SpawnEnemy:
-                        wave.Add(new SpawnEnemyEvent(Definitions.Enemy(Definitions.Enemies.Default), missionDefinition.waveDefinitions[ i ].waveEvents[ j ]));
+                        wave.Add(new SpawnEnemyEvent(Definitions.Enemy(Definitions.Enemies.Mini), missionDefinition.waveDefinitions[ i ].waveEvents[ j ]));
                         break;
                 }
         }
