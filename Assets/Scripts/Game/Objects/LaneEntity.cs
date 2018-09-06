@@ -44,7 +44,7 @@ public class LaneEntity : LaneObject
         base.Destroy();
     }
 
-    private void Damage( int damage = 1 )
+    public void Damage( int damage = 1 )
     {
         _healthBar.Decrease( damage );
 
@@ -114,8 +114,14 @@ public class LaneEntity : LaneObject
                 }
                 else
                 {
+                    if (changeLane != null)
+                    {
+                        Debug.LogError("hrm");
+                        Debug.DrawLine(back.position, back.position + Vector3.up, Color.red, 1);
+                    }
+
                     bool up = position.z > laneEntity.position.z;
-                    position = new Vector3( position.x , position.y , up ? laneEntity.top + ( scale.z * 0.6f ) : laneEntity.bottom - ( scale.z * 0.6f ) );
+                    position = new Vector3(position.x, position.y, up ? laneEntity.top + scale.z + (laneEntity.scale.z * 0.125f) : laneEntity.bottom - scale.z - (laneEntity.scale.z * 0.125f));
                     changeLane = ChangeLane( up ? -1 : 1 );
                     Damage();
                 }
@@ -132,7 +138,7 @@ public class LaneEntity : LaneObject
                 else if ( back.melee == null )
                 {
                     bool up = position.z > laneEntity.position.z;
-                    position = new Vector3( position.x , position.y , up ? laneEntity.top + ( scale.z * 0.6f ) : laneEntity.bottom - ( scale.z * 0.6f ) );
+                    position = new Vector3(position.x, position.y, up ? laneEntity.top + scale.z + (laneEntity.scale.z * 0.125f) : laneEntity.bottom - scale.z - (laneEntity.scale.z * 0.125f));
                     changeLane = ChangeLane( up ? -1 : 1 );
                     Damage();
                 }
@@ -144,15 +150,17 @@ public class LaneEntity : LaneObject
     {
         float current = position.x;
         float target = current - 3;
-        float targetTime = Time.time + 1;
+        float startTime = Time.time;
+        float targetTime = Time.time + 0.5f;
 
         while ( targetTime > Time.time )
-            yield return position = new Vector3( Mathf.Clamp( Mathf.Lerp( current , target , 1f - ( targetTime - Time.time ) ) , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
+            yield return position = new Vector3( Mathf.Clamp( Mathf.Lerp( current , target , Helpers.Normalize(Time.time, targetTime, startTime)) , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
 
-        targetTime = Time.time + 1;
+        startTime = Time.time;
+        targetTime = Time.time + 0.5f;
 
         while ( targetTime > Time.time )
-            yield return position = new Vector3( Mathf.Clamp( Mathf.Lerp( target , current + 1 , 1f - ( targetTime - Time.time ) ) , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
+            yield return position = new Vector3( Mathf.Clamp( Mathf.Lerp( target , current + 1 , Helpers.Normalize(Time.time, targetTime, startTime)) , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
 
         if ( overlapping == enemy )
         {
@@ -160,10 +168,11 @@ public class LaneEntity : LaneObject
             enemy.pushAhead = enemy.PushForward();
         }
 
-        targetTime = Time.time + 1;
+        startTime = Time.time;
+        targetTime = Time.time + 0.5f;
 
         while ( targetTime > Time.time )
-            yield return position = new Vector3( Mathf.Clamp( Mathf.Lerp( current + 1 , current , 1f - ( targetTime - Time.time ) ) , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
+            yield return position = new Vector3( Mathf.Clamp( Mathf.Lerp( current + 1 , current , Helpers.Normalize(Time.time, targetTime, startTime)) , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
 
         melee = null;
     }
@@ -172,15 +181,17 @@ public class LaneEntity : LaneObject
     {
         float current = position.x;
         float target = current + 1;
-        float targetTime = Time.time + 1;
+        float startTime = Time.time;
+        float targetTime = Time.time + 0.5f;
 
         while ( targetTime > Time.time )
-            yield return position = new Vector3( Mathf.Clamp( Mathf.Lerp( current , target , 1f - ( targetTime - Time.time ) ) , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
+            yield return position = new Vector3( Mathf.Clamp( Mathf.Lerp( current , target , Helpers.Normalize(Time.time, targetTime, startTime)), start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
 
-        targetTime = Time.time + 1;
+        startTime = Time.time;
+        targetTime = Time.time + 0.5f;
 
         while ( targetTime > Time.time )
-            yield return position = new Vector3( Mathf.Clamp( Mathf.Lerp( target , current , 1f - ( targetTime - Time.time ) ) , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
+            yield return position = new Vector3( Mathf.Clamp( Mathf.Lerp( target , current , Helpers.Normalize(Time.time, targetTime, startTime)), start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
 
         pushAhead = null;
     }
@@ -189,17 +200,19 @@ public class LaneEntity : LaneObject
     {
         float current = position.x;
         float target = current - 3;
-        float targetTime = Time.time + 1;
+        float startTime = Time.time;
+        float targetTime = Time.time + 0.5f;
 
         while ( targetTime > Time.time )
-            yield return position = new Vector3( Mathf.Clamp( Mathf.Lerp( current , target , 1f - ( targetTime - Time.time ) ) , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
+            yield return position = new Vector3( Mathf.Clamp( Mathf.Lerp( current , target , Helpers.Normalize(Time.time,targetTime,startTime)) , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
 
         if ( this is Hero )
         {
-            targetTime = Time.time + 1;
+            startTime = Time.time;
+            targetTime = Time.time + 0.5f;
 
             while ( targetTime > Time.time )
-                yield return position = new Vector3( Mathf.Clamp( Mathf.Lerp( target , current , 1f - ( targetTime - Time.time ) ) , start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
+                yield return position = new Vector3( Mathf.Clamp( Mathf.Lerp( target , current , Helpers.Normalize(Time.time, targetTime, startTime)), start + ( scale.x * 0.5f ) , end - ( scale.x * 0.5f ) ) , position.y , position.z );
         }
 
         pushBack = null;

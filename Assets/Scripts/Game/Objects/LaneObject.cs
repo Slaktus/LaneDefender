@@ -31,21 +31,28 @@ public abstract class LaneObject : BaseObject
             lane.Add( this );
         }
 
-        return ChangeLane( position.z , outOfBounds ? ( lane.start.z - lane.height - lane.stage.laneSpacing ) * Mathf.Sign( change ) : lane.start.z , outOfBounds );
+        return ChangeLane( position.z , outOfBounds ? ( lane.start.z - lane.height - stage.laneSpacing ) * Mathf.Sign( change ) : lane.start.z , outOfBounds );
     }
 
     private IEnumerator ChangeLane( float current , float target , bool outOfBounds )
     {
-        float targetTime = Time.time + 1;
+        float startTime = Time.time;
+        float targetTime = Time.time + 0.25f;
 
         while ( targetTime > Time.time )
-            yield return position = new Vector3( position.x , position.y , Mathf.Lerp( current , target , 1f - ( targetTime - Time.time ) ) );
+            yield return position = new Vector3( position.x , position.y , Mathf.Lerp( current , target , Helpers.Normalize(Time.time, targetTime, startTime)));
 
         position = new Vector3( position.x , position.y , target );
 
         if ( outOfBounds )
         {
-            IEnumerator changeLane = ChangeLane( target , current , false );
+            if ( this is LaneEntity)
+            {
+                LaneEntity laneEntity = this as LaneEntity;
+                laneEntity.Damage();
+            }
+
+            IEnumerator changeLane = ChangeLane( target , lane.start.z , false );
 
             while ( changeLane.MoveNext() )
                 yield return changeLane.Current;
