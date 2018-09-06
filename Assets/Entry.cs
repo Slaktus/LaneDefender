@@ -155,15 +155,15 @@ public class Entry : MonoBehaviour
         StageDefinition stageDefinition = missionDefinition.stageDefinition;
 
         session.SetConveyor(new Conveyor(
-            speed: 5,
+            speed: 7,
             width: 5,
             height: 15 + (1 * (stageDefinition.laneCount - 1)),
-            itemInterval: 3,
+            itemInterval: 1,
             itemLimit: 8,
             itemWidthPadding: 2,
             itemSpacing: 0.1f));
 
-        session.SetStage(new Stage( Vector3.right * 3 , stageDefinition, session.player, session.conveyor));
+        session.SetStage(new Stage( stageDefinition, session.player, session.conveyor));
 
         Level level = new Level(missionDefinition.duration);
 

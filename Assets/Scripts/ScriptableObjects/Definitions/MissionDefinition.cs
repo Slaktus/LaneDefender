@@ -18,8 +18,14 @@ public class MissionDefinition : DefinitionBase
 
     public void Add( ScriptableObject toAdd , float time )
     {
-        Add( toAdd );
-        waveTimes.Add( time );
+        int i = 0;
+
+        if (waveTimes.Count > 0)
+            while (time > waveTimes[ i ])
+                i++;
+
+        waveDefinitions.Insert(i, toAdd as WaveDefinition);
+        waveTimes.Insert(i, time);
     }
 
     public override void Remove( ScriptableObject toRemove )

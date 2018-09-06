@@ -118,14 +118,13 @@ public class Editor : Layout
     }
 
     public void ShowStage(StageDefinition stageDefinition) => stage = new Stage(
-        Vector3.right * 3,
         stageDefinition, 
         new Player(),
         new Conveyor(
-            speed: 5,
+            speed: 6,
             width: 5,
             height: stageDefinition.height + (stageDefinition.laneSpacing * (stageDefinition.laneCount - 1)),
-            itemInterval: 3,
+            itemInterval: 2,
             itemLimit: 8,
             itemWidthPadding: 2,
             itemSpacing: 0.1f,

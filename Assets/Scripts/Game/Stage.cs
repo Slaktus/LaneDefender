@@ -24,8 +24,12 @@ public class Stage
                         if ( lane.objects[ i ] is LaneEntity && lane.objects[ i ].rect.width > lane.objects[ i ].back - lane.start.x )
                             handled = false;
 
-                    if ( handled )
-                        lane.Add( new Enemy( ( waveEvent as SpawnEnemyEvent ).enemyDefinition , 0 , new EnemySettings( Color.white , 3 , 8 ) , lane , waveEvent.entryPoint , _container ) );
+                    if ( handled)
+                    {
+                        SpawnEnemyEvent spawnEnemyEvent = (waveEvent as SpawnEnemyEvent);
+                        EnemyLevel enemyLevel = spawnEnemyEvent.enemyDefinition.levels[ 0 ];
+                        lane.Add(new Enemy(spawnEnemyEvent.enemyDefinition, 0, new EnemySettings(Color.white, enemyLevel.health, enemyLevel.speed), lane, waveEvent.entryPoint, _container));
+                    }
                 }
 
                 return handled;
@@ -152,7 +156,6 @@ public class Stage
     public float start => _lanes[ 0 ].start.x;
     public float laneSpacing { get; private set; }
     public Conveyor conveyor { get; private set; }
-    public Vector3 offset { get; private set; }
     public float speed { get; private set; }
     public float width { get; private set; }
     public GameObject ground { get; }
@@ -164,12 +167,11 @@ public class Stage
 
     private GameObject _container { get; }
 
-    public Stage( Vector3 offset, float speed , float width , float height , float laneSpacing , int laneCount , Conveyor conveyor , Player player )
+    public Stage( float speed , float width , float height , float laneSpacing , int laneCount , Conveyor conveyor , Player player )
     {
         _player = player;
         this.width = width;
         this.speed = speed;
-        this.offset = offset;
         this.conveyor = conveyor;
         this.laneSpacing = laneSpacing;
         float laneHeight = height / laneCount;
@@ -190,7 +192,6 @@ public class Stage
             Updater += lane.Update;
         }
 
-        _container.transform.position += offset;
 
         //Cube primitives have a mesh filter, mesh renderer and box collider already attached
         ground = GameObject.CreatePrimitive( PrimitiveType.Cube );
@@ -211,5 +212,5 @@ public class Stage
         collider.isTrigger = false;
     }
 
-    public Stage( Vector3 offset, StageDefinition stageDefinition , Player player , Conveyor conveyor ) : this( offset, stageDefinition.speed , stageDefinition.width , stageDefinition.height , stageDefinition.laneSpacing , stageDefinition.laneCount , conveyor , player ) { }
+    public Stage( StageDefinition stageDefinition , Player player , Conveyor conveyor ) : this( stageDefinition.speed , stageDefinition.width , stageDefinition.height , stageDefinition.laneSpacing , stageDefinition.laneCount , conveyor , player ) { }
 }
