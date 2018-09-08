@@ -114,12 +114,6 @@ public class LaneEntity : LaneObject
                 }
                 else
                 {
-                    if (changeLane != null)
-                    {
-                        Debug.LogError("hrm");
-                        Debug.DrawLine(back.position, back.position + Vector3.up, Color.red, 1);
-                    }
-
                     bool up = position.z > laneEntity.position.z;
                     position = new Vector3(position.x, position.y, up ? laneEntity.top + scale.z + (laneEntity.scale.z * 0.125f) : laneEntity.bottom - scale.z - (laneEntity.scale.z * 0.125f));
                     changeLane = ChangeLane( up ? -1 : 1 );

@@ -25,7 +25,7 @@ public class StageEditor : Layout
         }
     }
 
-    private void ShowStageSets()
+    public void ShowStageSets()
     {
         HideStageSets();
         int count = _editor.stageData.stageSets.Count;
@@ -111,7 +111,7 @@ public class StageEditor : Layout
             Exit: (Button button) => button.SetColor(Color.white)), true);
     }
 
-    private void HideStageSets()
+    public void HideStageSets()
     {
         if (stageSets != null)
             Remove(stageSets);
@@ -120,7 +120,7 @@ public class StageEditor : Layout
         stageSets = null;
     }
 
-    private void ShowStageDefinitions(Vector3 position)
+    public void ShowStageDefinitions(Vector3 position)
     {
         HideStageDefinitions();
         int count = _selectedStageSet.stageDefinitions.Count;

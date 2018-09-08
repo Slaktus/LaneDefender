@@ -303,6 +303,11 @@ public class Editor : Layout
                         }
 
                         button.SetLabel("Stop");
+
+                        stageEditor.HideStageSets();
+                        stageEditor.HideStageEditor();
+                        stageEditor.HideStageDefinitions();
+                        missionEditor.HideMissionEditor();
                         waveEditor.HideWaveEventButtons();
                     }
                     else
@@ -315,6 +320,10 @@ public class Editor : Layout
                         _heldItem = null;
                         _level = null;
                         _itemTime = 0;
+
+                        stageEditor.ShowStageSets();
+                        stageEditor.ShowStageEditor();
+                        missionEditor.ShowMissionEditor();
 
                         if (waveEditor.selectedWaveDefinition != null)
                             waveEditor.ShowWaveEventButtons();
