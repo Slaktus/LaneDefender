@@ -9,14 +9,14 @@ public class EnemyEditor : Layout
     {
         HideEnemies();
         int count = _editor.objectData.enemySets[ (int) Assets.ObjectDataSets.Default ].enemyDefinitions.Count;
-        Add(_enemies = new Layout("Enemies", 3, count, 0.25f, 0.1f, count, container));
+        Add(_enemies = new Layout("Enemies", 4, count, 0.25f, 0.1f, count, container));
 
         _enemies.SetViewportPosition(new Vector2(0.25f, 1));
         _enemies.SetPosition(_enemies.position + Vector3.up + Vector3.back);
 
         _enemies.Add(new List<Button>(
             Button.GetButtons(count,
-            (int index) => new Button(_editor.objectData.enemySets[ (int) Assets.ObjectDataSets.Default ].enemyDefinitions[ index ].name, 3, 1, container, "Enemy", fontSize: 20,
+            (int index) => new Button(_editor.objectData.enemySets[ (int) Assets.ObjectDataSets.Default ].enemyDefinitions[ index ].name, 4, 1, container, "Enemy", fontSize: 20,
                 Enter: (Button button) => button.SetColor(button.selected ? button.color : Color.green),
                 Stay: (Button button) =>
                 {
@@ -57,12 +57,12 @@ public class EnemyEditor : Layout
     {
         HideEnemyLevels();
         int count = definition.levels.Count;
-        Add(_enemyLevels = new Layout("HeroLevels", 3, count + 1 , 0.25f, 0.1f, count + 1, container));
+        Add(_enemyLevels = new Layout("HeroLevels", 4, count + 1 , 0.25f, 0.1f, count + 1, container));
         _enemyLevels.SetPosition(position + (Vector3.right * _enemyLevels.width * 0.5f) + (Vector3.back * _enemyLevels.height * 0.5f));
 
         _enemyLevels.Add(new List<Button>(
             Button.GetButtons(count,
-            (int index) => new Button("Level " + index , 3, 1, container, "Item", fontSize: 20,
+            (int index) => new Button("Level " + index , 4, 1, container, "Item", fontSize: 20,
                 Enter: (Button button) => button.SetColor(button.selected ? button.color : Color.green),
                 Stay: (Button button) =>
                 {
@@ -76,7 +76,7 @@ public class EnemyEditor : Layout
                 },
                 Exit: (Button button) => button.SetColor(button.selected ? button.color : Color.white))))
         {
-            new Button( "Add Enemy Level" , 3 , 1 , container , "AddEnemyLevel" , fontSize: 20,
+            new Button( "Add Enemy Level" , 4 , 1 , container , "AddEnemyLevel" , fontSize: 20,
                 Enter: ( Button button ) => button.SetColor( Color.green ) ,
                 Stay: ( Button button ) =>
                 {
@@ -103,7 +103,7 @@ public class EnemyEditor : Layout
     {
         //just a bit of positioning here and we be rearin' to gaw
         HideEnemyEditor();
-        Add(_enemyEditor = new Layout("EnemyEditor", 3, 6, 0.25f, 0.1f, 6, container));
+        Add(_enemyEditor = new Layout("EnemyEditor", 4, 6, 0.25f, 0.1f, 6, container));
         _enemyEditor.SetPosition(_enemies.position + (Vector3.back * (_enemies.height + _enemyEditor.height) * 0.5f));
         _enemyEditor.Add(new List<Element>()
         {
@@ -171,7 +171,7 @@ public class EnemyEditor : Layout
         }, true);
 
         int count = _selectedEnemy.levels[ _selectedLevel ].effects.Count;
-        Add(_enemyEffects = new Layout("EnemyEffects", 3, count + 1, 0.25f, 0.1f, count + 1, container));
+        Add(_enemyEffects = new Layout("EnemyEffects", 4, count + 1, 0.25f, 0.1f, count + 1, container));
         _enemyEffects.SetPosition(_enemyEditor.position + (Vector3.back * (((_enemyEffects.height + _enemyEditor.height) * 0.5f))));
         _enemyEffects.Add(new List<Button>(Button.GetButtons(count,
             (int index) => new Button(_selectedEnemy.levels[ _selectedLevel ].effects[ index ].ToString(), 3, 1, container, "Effect", fontSize: 20,
@@ -219,12 +219,12 @@ public class EnemyEditor : Layout
     {
         HideEffects();
         int count = (int) Definitions.Effects.Count;
-        Add(_effects = new Layout("Effects", 3, count, 0.25f, 0.1f, count, container));
+        Add(_effects = new Layout("Effects", 4, count, 0.25f, 0.1f, count, container));
         _effects.SetPosition(position + (Vector3.right * _effects.width * 0.5f) + (Vector3.back * _effects.height * 0.5f));
 
         _effects.Add(new List<Button>(
             Button.GetButtons(count,
-            (int index) => new Button(((Definitions.Effects) index).ToString(), 3, 1, container, "Effect", fontSize: 20,
+            (int index) => new Button(((Definitions.Effects) index).ToString(), 4, 1, container, "Effect", fontSize: 20,
                 Enter: (Button button) => button.SetColor(button.selected ? button.color : Color.green),
                 Stay: (Button button) =>
                 {
@@ -255,9 +255,9 @@ public class EnemyEditor : Layout
     private void ShowColorPicker()
     {
         HideColorPicker();
-        _colorPicker = new Layout("ColorPicker", 3, 1, 0.25f, 0.1f, 1, container);
+        _colorPicker = new Layout("ColorPicker", 4, 1, 0.25f, 0.1f, 1, container);
 
-        Button colorButton = new Button("Color", 3, 1, container, "ColorButton",
+        Button colorButton = new Button("Color", 4, 1, container, "ColorButton",
             fontSize: 20,
             Stay: (Button butt) =>
             {
@@ -374,6 +374,7 @@ public class EnemyEditor : Layout
     private Layout _enemyEffects { get; set; }
     private EnemyDefinition _selectedEnemy { get; set; }
     private int _selectedLevel { get; set; }
+
 
     public EnemyEditor(Editor editor, GameObject parent) : base(typeof(EnemyEditor).Name, parent)
     {

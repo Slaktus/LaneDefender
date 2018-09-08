@@ -15,7 +15,7 @@ public class CampaignEditor : Layout
         Add(campaignSets = new Layout("CampaignSets", 4, count + 1, 0.25f, 0.1f, count + 1, container));
 
         campaignSets.SetViewportPosition(new Vector2(0, 1));
-        campaignSets.SetPosition(campaignSets.position + Vector3.up + Vector3.back);
+        campaignSets.SetPosition(campaignSets.position + Vector3.up + (Vector3.back * 0.5f));
 
         campaignSets.Add(new List<RenameableDeletableButton>(
             RenameableDeletableButton.GetButtons(count,

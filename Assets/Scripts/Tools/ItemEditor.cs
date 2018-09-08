@@ -9,14 +9,14 @@ public class ItemEditor : Layout
     {
         HideItems();
         int count = _editor.objectData.itemSets[ (int) Assets.ObjectDataSets.Default ].itemDefinitions.Count;
-        Add(_items = new Layout("Items", 3, count, 0.25f, 0.1f, count, container));
+        Add(_items = new Layout("Items", 4, count, 0.25f, 0.1f, count, container));
 
         _items.SetViewportPosition(new Vector2(0.75f, 1));
         _items.SetPosition(_items.position + Vector3.up + Vector3.back);
 
         _items.Add(new List<Button>(
             Button.GetButtons(count,
-            (int index) => new Button(_editor.objectData.itemSets[ (int) Assets.ObjectDataSets.Default ].itemDefinitions[ index ].name, 3, 1, container, "Item", fontSize: 20,
+            (int index) => new Button(_editor.objectData.itemSets[ (int) Assets.ObjectDataSets.Default ].itemDefinitions[ index ].name, 4, 1, container, "Item", fontSize: 20,
                 Enter: (Button button) => button.SetColor(button.selected ? button.color : Color.green),
                 Stay: (Button button) =>
                 {
@@ -57,7 +57,7 @@ public class ItemEditor : Layout
     {
         HideItemLevels();
         int count = definition.levels.Count;
-        Add(_itemLevels = new Layout("ItemLevels", 3, count + 1 , 0.25f, 0.1f, count + 1, container));
+        Add(_itemLevels = new Layout("ItemLevels", 4, count + 1 , 0.25f, 0.1f, count + 1, container));
         _itemLevels.SetPosition(position + (Vector3.right * _itemLevels.width * 0.5f) + (Vector3.back * _itemLevels.height * 0.5f));
 
         _itemLevels.Add(new List<Button>(
@@ -76,7 +76,7 @@ public class ItemEditor : Layout
                 },
                 Exit: (Button button) => button.SetColor(button.selected ? button.color : Color.white))))
         {
-            new Button( "Add Item Level" , 3 , 1 , container , "AddItemLevel" , fontSize: 20,
+            new Button( "Add Item Level" , 4 , 1 , container , "AddItemLevel" , fontSize: 20,
                 Enter: ( Button button ) => button.SetColor( Color.green ) ,
                 Stay: ( Button button ) =>
                 {
@@ -102,7 +102,7 @@ public class ItemEditor : Layout
     public void ShowItemEditor()
     {
         HideItemEditor();
-        Add(_itemEditor = new Layout("ItemEditor", 3, 2 , 0.25f, 0.1f, 2, container));
+        Add(_itemEditor = new Layout("ItemEditor", 4, 2 , 0.25f, 0.1f, 2, container));
         _itemEditor.SetPosition(_items.position + (Vector3.back * _items.height * 0.5f) + Vector3.back);
 
         _itemEditor.Add(new List<Element>()
@@ -130,7 +130,7 @@ public class ItemEditor : Layout
         }, true );
         
         int count = _selectedItem.levels[ _selectedLevel ].effects.Count;
-        Add(_itemEffects = new Layout("ItemEffects", 3, count + 1, 0.25f, 0.1f, count + 1, container));
+        Add(_itemEffects = new Layout("ItemEffects", 4, count + 1, 0.25f, 0.1f, count + 1, container));
         _itemEffects.SetPosition(_itemEditor.position + (Vector3.back * ( ((_itemEffects.height + _itemEditor.height) * 0.5f))));
 
         _itemEffects.Add(new List<Button>(Button.GetButtons(count,
@@ -174,7 +174,7 @@ public class ItemEditor : Layout
     {
         HideEffects();
         int count = ( int ) Definitions.Effects.Count;
-        Add(_effects = new Layout("Effects", 3, count, 0.25f, 0.1f, count, container));
+        Add(_effects = new Layout("Effects", 4, count, 0.25f, 0.1f, count, container));
         _effects.SetPosition(position + (Vector3.right * _effects.width * 0.5f) + (Vector3.back * _effects.height * 0.5f));
 
         _effects.Add(new List<Button>(

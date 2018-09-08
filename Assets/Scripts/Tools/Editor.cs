@@ -140,11 +140,11 @@ public class Editor : Layout
         new Player(),
         new Conveyor(
             speed: 6,
-            width: 5,
+            width: 4,
             height: stageDefinition.height + (stageDefinition.laneSpacing * (stageDefinition.laneCount - 1)),
             itemInterval: 2,
             itemLimit: 8,
-            itemWidthPadding: 2,
+            itemWidthPadding: 1,
             itemSpacing: 0.1f,
             hide: true));
 

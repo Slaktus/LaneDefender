@@ -71,10 +71,14 @@ public class Inventory
             Definitions.Items.Damage,
             Definitions.Items.LaneUp,
             Definitions.Items.LaneDown,
+            Definitions.Items.Leap,
+            Definitions.Items.Split,
         };
 
         itemSettings = new List<ItemSettings>(items.Count)
         {
+            new ItemSettings(0),
+            new ItemSettings(0),
             new ItemSettings(0),
             new ItemSettings(0),
             new ItemSettings(0)

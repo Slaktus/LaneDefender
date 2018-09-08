@@ -156,11 +156,11 @@ public class Entry : MonoBehaviour
 
         session.SetConveyor(new Conveyor(
             speed: 7,
-            width: 5,
+            width: 4,
             height: 15 + (1 * (stageDefinition.laneCount - 1)),
             itemInterval: 1,
             itemLimit: 8,
-            itemWidthPadding: 2,
+            itemWidthPadding: 1,
             itemSpacing: 0.1f));
 
         session.SetStage(new Stage( stageDefinition, session.player, session.conveyor));
