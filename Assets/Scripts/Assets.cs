@@ -14,7 +14,10 @@ public static class Assets
     public static ObjectData Get(ObjectDataSets data) => _objectData.Count > 0 ? _objectData[ (int) data ] : null;
     public static StageData Get( StageDataSets data ) => _stageData.Count > 0 ? _stageData[ ( int ) data ] : null;
     public static WaveData Get( WaveDataSets data ) => _waveData.Count > 0 ? _waveData[ ( int ) data ] : null;
-        
+
+    private static void Add<T>(T[] assets, List<T> target) where T : DefinitionBase => target.AddRange(assets);
+
+    #if UNITY_EDITOR
     private static void Add<T>( string[] paths, List<T> target ) where T : DefinitionBase
     {
         T[] assets = new T[ paths.Length ];
@@ -25,9 +28,6 @@ public static class Assets
         Add(assets, target);
     }
 
-    private static void Add<T>(T[] assets, List<T> target) where T : DefinitionBase => target.AddRange(assets);
-
-    #if UNITY_EDITOR
     public static T Create<T>(string path) where T : DefinitionBase => ScriptableObjects.Create<T>(path + typeof(T) + ".asset");
     #endif
 
@@ -50,9 +50,13 @@ public static class Assets
         
         string assetBundles = System.IO.Path.Combine( Application.streamingAssetsPath , "AssetBundles" );
         string platform = string.Empty;
+        Debug.Log("Start");
 
         #if UNITY_STANDALONE_WIN
+            Debug.Log("Windows");
             platform = System.IO.Path.Combine( assetBundles , "PC" );
+        #elif UNITY_WEBGL
+            platform = System.IO.Path.Combine( assetBundles , "WebGL" );
         #elif UNITY_SWITCH
             platform = System.IO.Path.Combine( assetBundles , "Switch" );
         #endif
@@ -60,6 +64,7 @@ public static class Assets
         //STAGE DATA
         AssetBundleCreateRequest stageData = AssetBundle.LoadFromFileAsync( System.IO.Path.Combine( platform , "stages" ) );
 
+        Debug.Log("StageData");
         yield return stageData;
 
         string[] stageDataNames = stageData.assetBundle.GetAllAssetNames();
@@ -70,6 +75,7 @@ public static class Assets
         //WAVE DATA
         AssetBundleCreateRequest waveData = AssetBundle.LoadFromFileAsync( System.IO.Path.Combine( platform , "waves" ) );
 
+        Debug.Log("WaveData");
         yield return waveData;
 
         string[] waveDataNames = waveData.assetBundle.GetAllAssetNames();
@@ -80,6 +86,7 @@ public static class Assets
         //CAMPAIGN DATA
         AssetBundleCreateRequest campaignData = AssetBundle.LoadFromFileAsync( System.IO.Path.Combine( platform , "campaigns" ) );
 
+        Debug.Log("CampaignData");
         yield return campaignData;
 
         string[] campaignDataNames = campaignData.assetBundle.GetAllAssetNames();
@@ -90,7 +97,8 @@ public static class Assets
         //OBJECT DATA
         AssetBundleCreateRequest objectData = AssetBundle.LoadFromFileAsync(System.IO.Path.Combine(platform, "objects"));
 
-        yield return campaignData;
+        Debug.Log("ObjectData");
+        yield return objectData;
 
         string[] objectDataNames = objectData.assetBundle.GetAllAssetNames();
 

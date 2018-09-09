@@ -12,6 +12,7 @@ public class CreateAssetBundles
 
         string assetBundles = Path.Combine( UnityEngine.Application.streamingAssetsPath , "AssetBundles" );
         string pcAssets = Path.Combine( assetBundles , "PC" );
+        string webGLAssets = Path.Combine(assetBundles, "WebGL");
         string switchAssets = Path.Combine( assetBundles , "Switch" );
 
         if ( !Directory.Exists( pcAssets ) )
@@ -20,10 +21,14 @@ public class CreateAssetBundles
         if ( !Directory.Exists( switchAssets ) )
             Directory.CreateDirectory( switchAssets );
 
+        if (!Directory.Exists(webGLAssets))
+            Directory.CreateDirectory(webGLAssets);
+
         AssetBundleBuild[] builds = new AssetBundleBuild[ sourceDirectories.Length ];
         LoadAssets( source , sourceDirectories , extensions , builds );
 
         BuildPipeline.BuildAssetBundles( pcAssets , builds , BuildAssetBundleOptions.None , BuildTarget.StandaloneWindows );
+        BuildPipeline.BuildAssetBundles(webGLAssets, builds, BuildAssetBundleOptions.None, BuildTarget.WebGL);
         //BuildPipeline.BuildAssetBundles( switchAssets , builds , BuildAssetBundleOptions.None , BuildTarget.Switch );
         AssetDatabase.Refresh();
     }

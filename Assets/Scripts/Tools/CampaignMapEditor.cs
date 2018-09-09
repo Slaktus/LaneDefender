@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿#if UNITY_EDITOR
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -402,3 +403,4 @@ public class CampaignMapEditor : Layout
         _campaignMapButtons = new List<RenameableDeletableButton>();
     }
 }
+#endif //UNITY_EDITOR

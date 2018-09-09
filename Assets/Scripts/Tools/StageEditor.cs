@@ -97,6 +97,9 @@ public class StageEditor : Layout
             {
                 if (Input.GetMouseButtonDown(0))
                 {
+                    _selectedStageSet = null;
+                    selectedStageDefinition = null;
+
                     _editor.waveEditor.Hide();
                     _editor.stageEditor.Hide();
                     _editor.missionEditor.Hide();
