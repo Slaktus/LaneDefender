@@ -15,8 +15,6 @@ public static class Assets
     public static StageData Get( StageDataSets data ) => _stageData.Count > 0 ? _stageData[ ( int ) data ] : null;
     public static WaveData Get( WaveDataSets data ) => _waveData.Count > 0 ? _waveData[ ( int ) data ] : null;
 
-    private static void Add<T>(T[] assets, List<T> target) where T : DefinitionBase => target.AddRange(assets);
-
     #if UNITY_EDITOR
     private static void Add<T>( string[] paths, List<T> target ) where T : DefinitionBase
     {
@@ -25,7 +23,7 @@ public static class Assets
         for (int i = 0; paths.Length > i; i++)
             assets[ i ] = AssetDatabase.LoadAssetAtPath<T>(paths[ i ]);
 
-        Add(assets, target);
+        target.AddRange(assets);
     }
 
     public static T Create<T>(string path) where T : DefinitionBase => ScriptableObjects.Create<T>(path + typeof(T) + ".asset");

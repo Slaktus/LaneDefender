@@ -292,7 +292,6 @@ public class EnemyEditor : Layout
     public void ShowColors(Vector3 position)
     {
         Add(_colors = new Layout("Colors", 4, 2, 0.25f, 0.1f, 2, container));
-        List<Button> buttons = new List<Button>(6);
 
         for (int i = 0; 6 > i; i++)
         {

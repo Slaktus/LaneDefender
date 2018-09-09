@@ -11,6 +11,12 @@ public static class ScriptableObjects
         return asset;
     }
 
+    public static T Create<T>(string path, T asset ) where T : ScriptableObject
+    {
+        AssetDatabase.CreateAsset(asset, path);
+        return asset;
+    }
+
     public static void Save() => AssetDatabase.SaveAssets();
 
     public static void Add<T,Y>( T toAdd , Y addTo ) where T : ScriptableObject where Y : ScriptableObject

@@ -1,5 +1,6 @@
 ﻿#if UNITY_EDITOR
 using UnityEngine;
+using UnityEditor;
 
 public class Editor : Layout
 {
@@ -345,7 +346,15 @@ public class Editor : Layout
             Stay: (Button button) =>
             {
                 if (Input.GetMouseButtonDown(0))
+                {
+                    //ScriptableObjects.Create(Assets.campaignDataPath, campaignData = CampaignData.DeepCopy(campaignData));
+                    //ScriptableObjects.Create(Assets.stageDataPath, stageData = StageData.DeepCopy(stageData));
+                    EditorUtility.SetDirty(campaignData);
+                    EditorUtility.SetDirty(objectData);
+                    EditorUtility.SetDirty(stageData);
+                    EditorUtility.SetDirty(waveData);
                     ScriptableObjects.Save();
+                }
             },
             Exit: (Button button) => button.SetColor(Color.white)));
 

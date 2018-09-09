@@ -84,8 +84,10 @@ public class StageEditor : Layout
                 {
                     ScriptableObjects.Add(ScriptableObject.CreateInstance<StageSet>(), _editor.stageData);
 
+                    if (selectedStageDefinition != null)
+                        ShowStageEditor();
+
                     ShowStageSets();
-                    ShowStageEditor();
                     _editor.missionEditor.ShowMissionEditor();
                 }
             },

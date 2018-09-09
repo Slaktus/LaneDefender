@@ -50,31 +50,22 @@ public class Session
             //Reset lane colors
             stage.SetLaneColor( Color.black );
 
-            //Proceed if a lane is hovered and an item is held
-            if ( heldItem != null && hoveredLane != null )
-            {
-                hoveredLane.color = Color.yellow;
-
-                //Proceed if the left mouse button is not held
-                //This will only happen if the left mouse button is released
-                if ( !Input.GetMouseButton( 0 ) )
-                {
-                    hoveredLane.Add( new LaneItem( heldItem , hoveredLane ) );
-                    heldItem.conveyorItem.Destroy();
-                    heldItem.Destroy();
-                    heldItem = null;
-                }
-            }
-            else if ( heldItem != null) //Proceed if an item is held
+            if ( heldItem != null) //Proceed if an item is held
             {
                 //Position the held item at the world-space mouse position
                 heldItem.SetPosition( mousePosition );
-                Debug.Log(hoveredItem);
+
+                //Proceed if a lane is hovered
+                if (hoveredLane != null)
+                    hoveredLane.color = Color.yellow;
 
                 //Proceed if the left mouse button is released
                 if (!Input.GetMouseButton(0))
                 {
                     hoveredItem = conveyor.GetHoveredItem(mousePosition);
+
+                    if ( hoveredLane != null )
+                        hoveredLane.Add(new LaneItem(heldItem, hoveredLane));
 
                     if (hoveredItem != null && heldItem.conveyorItem != hoveredItem)
                     {
