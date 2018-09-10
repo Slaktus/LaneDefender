@@ -166,7 +166,28 @@ public class WaveEditor : Layout
 
             if ( waveEventButtons.Count > laneIndex )
             {
-                Button button = new Button(index.ToString(), 1, 1, container, "WaveEvent" + index.ToString(),
+                float width = 1;
+                float height = 1;
+                Color color = Color.white;
+                string name = index.ToString();
+
+                switch ((WaveEvent.Type) waveEvent.type)
+                {
+                    case WaveEvent.Type.SpawnEnemy:
+                        EnemyDefinition enemyDefinition = Definitions.Enemy((Definitions.Enemies) waveEvent.subType);
+                        EnemyLevel enemyLevel = enemyDefinition.levels[ waveEvent.level ];
+                        width = enemyDefinition.width;
+                        height = lane.height - enemyDefinition.laneHeightPadding;
+                        name = enemyDefinition.name;
+                        color = enemyLevel.color;
+                        break;
+
+                    case WaveEvent.Type.SpawnItem:
+
+                        break;
+                }
+
+                Button button = new Button(name, width, height, container, "WaveEvent" + index.ToString(),
                     fontSize: 20,
                     Enter: (Button butt) => butt.SetColor(Color.green),
                     Stay: (Button butt) =>
@@ -195,7 +216,7 @@ public class WaveEditor : Layout
                             heldWaveEvent.SetText(index.ToString());
                         }
 
-                        butt.SetColor(Color.white);
+                        butt.SetColor(color);
                     },
                     Close: (Button butt) =>
                     {
@@ -209,6 +230,7 @@ public class WaveEditor : Layout
                         }
                     });
 
+                button.SetColor(color);
                 waveEventButtons[ laneIndex ].Add( button );
                 waveEventLayouts[ laneIndex ].Add( button );
                 button.SetLocalPosition( new Vector3( waveEvent.entryPoint * lane.width , 1 , 0 ) );
@@ -239,6 +261,7 @@ public class WaveEditor : Layout
                     {
                         if (Input.GetMouseButtonDown(0))
                         {
+                            ShowWaveEventButtons();
                             ShowEnemyLevels(butt, index, b.position + new Vector3(b.width * 0.5f, 0, b.height * 0.5f));
                             b.SetColor(Color.yellow);
                             b.Select();
@@ -257,6 +280,7 @@ public class WaveEditor : Layout
                     {
                         if (Input.GetMouseButtonDown(0))
                         {
+                            ShowWaveEventButtons();
                             ShowItemLevels(butt, index, b.position + new Vector3(b.width * 0.5f, 0, b.height * 0.5f));
                             b.SetColor(Color.yellow);
                             b.Select();
@@ -278,6 +302,7 @@ public class WaveEditor : Layout
                     {
                         if (Input.GetMouseButtonDown(0))
                         {
+                            ShowWaveEventButtons();
                             ShowEnemyTypes(butt, index, b.position + new Vector3(b.width * 0.5f, 0, b.height * 0.5f));
                             b.SetColor(Color.yellow);
                             b.Select();
@@ -296,6 +321,7 @@ public class WaveEditor : Layout
                     {
                         if (Input.GetMouseButtonDown(0))
                         {
+                            ShowWaveEventButtons();
                             ShowItemTypes(butt, index, b.position + new Vector3(b.width * 0.5f, 0, b.height * 0.5f));
                             b.SetColor(Color.yellow);
                             b.Select();
@@ -318,6 +344,7 @@ public class WaveEditor : Layout
                 {
                     if (Input.GetMouseButtonDown(0))
                     {
+                        ShowWaveEventButtons();
                         ShowWaveTypes(button,index, b.position + new Vector3(b.width * 0.5f, 0, b.height * 0.5f));
                         b.SetColor(Color.yellow);
                         b.Select();
@@ -368,6 +395,7 @@ public class WaveEditor : Layout
                     if (Input.GetMouseButtonDown(0))
                     {
                         _selectedWaveEvent.type = capturedIndex;
+                        ShowWaveEventButtons();
                         ShowWaveEventEditor(butt, index);
                         HideWaveTypes();
                     }
@@ -405,6 +433,7 @@ public class WaveEditor : Layout
                     if (Input.GetMouseButtonDown(0))
                     {
                         _selectedWaveEvent.level = capturedIndex;
+                        ShowWaveEventButtons();
                         ShowWaveEventEditor(butt, index);
                         HideEnemyLevels();
                     }
@@ -441,8 +470,10 @@ public class WaveEditor : Layout
                 {
                     if (Input.GetMouseButtonDown(0))
                     {
+                        HideWaveEventEditor();
+
                         _selectedWaveEvent.subType = capturedIndex;
-                        ShowWaveEventEditor(butt, index);
+                        ShowWaveEventButtons();
                         HideEnemyTypes();
                     }
                 },
@@ -478,8 +509,10 @@ public class WaveEditor : Layout
                 {
                     if (Input.GetMouseButtonDown(0))
                     {
+                        HideWaveEventEditor();
+
                         _selectedWaveEvent.subType = capturedIndex;
-                        ShowWaveEventEditor(butt, index);
+                        ShowWaveEventButtons();
                         HideItemTypes();
                     }
                 },
@@ -515,8 +548,10 @@ public class WaveEditor : Layout
                 {
                     if (Input.GetMouseButtonDown(0))
                     {
+                        HideWaveEventEditor();
+
                         _selectedWaveEvent.level = capturedIndex;
-                        ShowWaveEventEditor(butt, index);
+                        ShowWaveEventButtons();
                         HideItemLevels();
                     }
                 },

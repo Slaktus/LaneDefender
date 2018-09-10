@@ -189,6 +189,9 @@ public class Editor : Layout
 
     private void ShowObjectEditors()
     {
+        testButton.Hide();
+        testButton.Disable();
+
         HideCampaignEditor();
 
         objectsButton.Select();
