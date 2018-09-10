@@ -62,6 +62,8 @@ public class CampaignMapEditor : Layout
                                 {
                                     _editor.stageEditor.SetSelectedStageDefinition(selectedMission.stageDefinition);
                                     _editor.ShowStage(selectedMission.stageDefinition);
+                                    _editor.testButton.Enable();
+                                    _editor.testButton.Show();
                                 }
 
                                 _editor.stageEditor.Show();

@@ -302,8 +302,10 @@ public class Editor : Layout
                         }
 
                         button.SetLabel("Stop");
+                        button.SetPosition(saveButton.position);
 
                         saveButton.Hide();
+                        saveButton.Disable();
                         objectsButton.Hide();
                         campaignButton.Hide();
                         stageEditor.HideStageSets();
@@ -324,11 +326,13 @@ public class Editor : Layout
                         _itemTime = 0;
 
                         saveButton.Show();
+                        saveButton.Enable();
                         objectsButton.Show();
                         campaignButton.Show();
                         stageEditor.ShowStageSets();
                         stageEditor.ShowStageEditor();
                         missionEditor.ShowMissionEditor();
+                        testButton.SetPosition(saveButton.position + Vector3.left * (saveButton.width));
 
                         if (waveEditor.selectedWaveDefinition != null)
                             waveEditor.ShowWaveEventButtons();
@@ -337,8 +341,6 @@ public class Editor : Layout
             },
             Exit: (Button button) => button.SetColor(Color.white)));
 
-        testButton.SetViewportPosition(new Vector2(1, 1));
-        testButton.SetPosition(testButton.position + (Vector3.left * testButton.width) + Vector3.up);
 
         Add(saveButton = new Button("Save", 1.5f, 0.5f, container, "Save",
             fontSize: 20,
@@ -347,8 +349,6 @@ public class Editor : Layout
             {
                 if (Input.GetMouseButtonDown(0))
                 {
-                    //ScriptableObjects.Create(Assets.campaignDataPath, campaignData = CampaignData.DeepCopy(campaignData));
-                    //ScriptableObjects.Create(Assets.stageDataPath, stageData = StageData.DeepCopy(stageData));
                     EditorUtility.SetDirty(campaignData);
                     EditorUtility.SetDirty(objectData);
                     EditorUtility.SetDirty(stageData);
@@ -358,7 +358,11 @@ public class Editor : Layout
             },
             Exit: (Button button) => button.SetColor(Color.white)));
 
-        saveButton.SetPosition(testButton.position + Vector3.left * (saveButton.width));
+        saveButton.SetViewportPosition(new Vector2(1, 1));
+        saveButton.SetPosition(saveButton.position + (Vector3.left * saveButton.width) + Vector3.up);
+        testButton.SetPosition(saveButton.position + Vector3.left * (saveButton.width));
+        testButton.Disable();
+        testButton.Hide();
 
         Add(campaignButton = new Button("Campaigns", 2, 0.5f, container, "CampaignsButton",
             fontSize: 20,

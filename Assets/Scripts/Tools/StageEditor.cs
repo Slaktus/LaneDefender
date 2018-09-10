@@ -19,7 +19,11 @@ public class StageEditor : Layout
         if (selectedStageDefinition != null )
         {
             if ( _editor.stage == null)
+            {
                 _editor.ShowStage(selectedStageDefinition);
+                _editor.testButton.Enable();
+                _editor.testButton.Show();
+            }
 
             ShowStageEditor();
         }
@@ -102,6 +106,8 @@ public class StageEditor : Layout
                     _selectedStageSet = null;
                     selectedStageDefinition = null;
 
+                    _editor.testButton.Disable();
+                    _editor.testButton.Hide();
                     _editor.waveEditor.Hide();
                     _editor.stageEditor.Hide();
                     _editor.missionEditor.Hide();
@@ -159,6 +165,8 @@ public class StageEditor : Layout
                     HideStage();
 
                     SetStageDefinition(selectedStageDefinition);
+                    _editor.testButton.Enable();
+                    _editor.testButton.Show();
                     ShowStage();
 
                     ShowStageSets();
