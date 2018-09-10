@@ -212,8 +212,8 @@ public class WaveEditor : Layout
                     {
                         if (_editor.timelineEditor.heldWave == null && heldWaveEvent == null && Input.GetMouseButton(0))
                         {
-                            heldWaveEvent = new HeldEvent(butt.rect.position, waveEvent, laneIndex);
-                            heldWaveEvent.SetText(index.ToString());
+                            heldWaveEvent = new HeldEvent(butt.rect.position, width, height, color, waveEvent, laneIndex);
+                            heldWaveEvent.SetText(name);
                         }
 
                         butt.SetColor(color);

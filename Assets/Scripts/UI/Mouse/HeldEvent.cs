@@ -14,11 +14,12 @@ public class HeldEvent : BaseObject
     public WaveEventDefinition waveEventDefinition { get; private set; }
     public int laneIndex { get; }
 
-    public HeldEvent(Vector3 position, WaveEventDefinition waveEventDefinition, int laneIndex) : base("Held" + waveEventDefinition.type.ToString(), GameObject.CreatePrimitive(PrimitiveType.Quad))
+    public HeldEvent(Vector3 position, float width , float height , Color color, WaveEventDefinition waveEventDefinition, int laneIndex) : base("Held" + waveEventDefinition.type.ToString(), GameObject.CreatePrimitive(PrimitiveType.Quad))
     {
         container.transform.localRotation = Quaternion.Euler( 90 , 0 , 0 );
+        body.transform.localScale = new Vector3(width, height, 1);
         body.transform.localRotation = Quaternion.identity;
-        meshRenderer.material.color = Color.white;
+        meshRenderer.material.color = color;
 
         label.SetLocalRotation( Quaternion.identity );
 
