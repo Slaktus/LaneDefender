@@ -35,8 +35,8 @@ public class StageEditor : Layout
         int count = _editor.stageData.stageSets.Count;
         Add(stageSets = new Layout( "StageSetButtons" , 4, (count + 2), 0.25f, 0.1f, count + 2, container ));
 
-        stageSets.SetViewportPosition(new Vector2(0, 1));
-        stageSets.SetPosition(stageSets.position + Vector3.up + (Vector3.back * 0.5f));
+        stageSets.SetViewportPosition(new Vector2(1, 1));
+        stageSets.SetPosition(stageSets.position + (Vector3.left * stageSets.width) + Vector3.up + (Vector3.back * 0.5f));
 
         stageSets.Add(new List<RenameableDeletableButton>(RenameableDeletableButton.GetButtons(count, (int index) => new RenameableDeletableButton(GetStageSet( index ).name, 4, 1, container, 
             fontSize: 20,
@@ -137,7 +137,7 @@ public class StageEditor : Layout
         HideStageDefinitions();
         int count = _selectedStageSet.stageDefinitions.Count;
         Add(_stages = new Layout("StageDefinitionButtons", 4, 1 * (count + 1), 0.25f, 0.1f, count + 1, container));
-        _stages.SetPosition(position + (Vector3.right * 4) + (Vector3.back * ((count * 0.5f) + (0.25f * 0.5f))));
+        _stages.SetPosition(position + (Vector3.left * (stageSets.width - 0.5f)) + (Vector3.back * ((count * 0.5f) + (0.25f * 0.5f))));
         _stages.Add(new List<RenameableDeletableButton>(RenameableDeletableButton.GetButtons(count, (int index) => new RenameableDeletableButton(GetStageDefinition(index).name, 4, 1, container,
             fontSize: 20,
             DeleteStay: (Button b) =>

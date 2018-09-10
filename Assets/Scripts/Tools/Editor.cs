@@ -157,6 +157,12 @@ public class Editor : Layout
 
     private void ShowCampaignEditor()
     {
+        if (campaignEditor.selectedCampaign == null && campaignData.campaignSets.Count > 0 && campaignData.campaignSets[ 0 ].campaignDefinitions.Count > 0)
+            campaignEditor.SetSelectedCampaign(campaignData.campaignSets[ 0 ].campaignDefinitions[ 0 ]);
+
+        if ( campaignEditor.selectedCampaign != null )
+            campaignMapEditor.ShowCampaignMap();
+
         HideObjectsEditor();
 
         campaignButton.Select();
@@ -332,7 +338,7 @@ public class Editor : Layout
                         stageEditor.ShowStageSets();
                         stageEditor.ShowStageEditor();
                         missionEditor.ShowMissionEditor();
-                        testButton.SetPosition(saveButton.position + Vector3.left * (saveButton.width));
+                        testButton.SetPosition(saveButton.position + Vector3.right * (saveButton.width));
 
                         if (waveEditor.selectedWaveDefinition != null)
                             waveEditor.ShowWaveEventButtons();
@@ -358,12 +364,12 @@ public class Editor : Layout
             },
             Exit: (Button button) => button.SetColor(Color.white)));
 
-        saveButton.SetViewportPosition(new Vector2(1, 1));
-        saveButton.SetPosition(saveButton.position + (Vector3.left * saveButton.width) + Vector3.up);
-        testButton.SetPosition(saveButton.position + Vector3.left * (saveButton.width));
+        saveButton.SetViewportPosition(new Vector2(0, 1));
+        saveButton.SetPosition(saveButton.position + Vector3.up);
+        testButton.SetPosition(saveButton.position + Vector3.right * (saveButton.width));
         testButton.Disable();
         testButton.Hide();
-
+        
         Add(campaignButton = new Button("Campaigns", 2, 0.5f, container, "CampaignsButton",
             fontSize: 20,
             Enter: (Button button) => button.SetColor( button.selected ? button.color : Color.green),
@@ -374,8 +380,8 @@ public class Editor : Layout
             },
             Exit: (Button button) => button.SetColor(button.selected ? button.color : Color.white)));
 
-        campaignButton.SetViewportPosition(new Vector2(0, 1));
-        campaignButton.SetPosition(campaignButton.position + Vector3.up);
+        campaignButton.SetViewportPosition(new Vector2(1, 1));
+        campaignButton.SetPosition(campaignButton.position + (Vector3.left * campaignButton.width) + Vector3.up);
 
         Add(objectsButton = new Button("Objects", 2, 0.5f, container, "ObjectsButton",
             fontSize: 20,
@@ -387,7 +393,8 @@ public class Editor : Layout
             },
             Exit: (Button button) => button.SetColor(button.selected ? button.color : Color.white)));
 
-        objectsButton.SetPosition(campaignButton.position + Vector3.right * (objectsButton.width));
+        objectsButton.SetPosition(campaignButton.position + Vector3.left * (objectsButton.width));
+        
         Add(campaignMapEditor = new CampaignMapEditor(this, container));
         Add(campaignEditor = new CampaignEditor(this, Vector3.zero, container));
         Add(timelineEditor = new TimelineEditor(this, container));

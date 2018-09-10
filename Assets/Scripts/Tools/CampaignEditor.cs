@@ -7,6 +7,7 @@ public class CampaignEditor : Layout
     private void ShowCampaignMap() => _editor.campaignMapEditor.ShowCampaignMap();
     private CampaignSet GetCampaignSet(int index) => _editor.campaignData.GetCampaignSet(index);
     private CampaignDefinition GetCampaign(int index) => selectedCampaignSet.campaignDefinitions[ index ];
+    public void SetSelectedCampaign(CampaignDefinition selectedCampaign) => this.selectedCampaign = selectedCampaign;
 
     public void ShowCampaignSets()
     {
@@ -14,8 +15,8 @@ public class CampaignEditor : Layout
         int count = _editor.campaignData.campaignSets.Count;
         Add(campaignSets = new Layout("CampaignSets", 4, count + 1, 0.25f, 0.1f, count + 1, container));
 
-        campaignSets.SetViewportPosition(new Vector2(0, 1));
-        campaignSets.SetPosition(campaignSets.position + Vector3.up + (Vector3.back * 0.5f));
+        campaignSets.SetViewportPosition(new Vector2(1, 1));
+        campaignSets.SetPosition(campaignSets.position + Vector3.up + (Vector3.left * campaignSets.width) + (Vector3.back * 0.5f));
 
         campaignSets.Add(new List<RenameableDeletableButton>(
             RenameableDeletableButton.GetButtons(count,
@@ -43,7 +44,7 @@ public class CampaignEditor : Layout
                     if (Input.GetMouseButtonDown(0))
                     {
                         selectedCampaignSet = GetCampaignSet(index);
-                        ShowCampaigns(index, button.position + new Vector3(campaignSets.width * 0.5f, 0, button.height * 0.5f));
+                        ShowCampaigns(index, button.position );
                         button.SetColor(Color.yellow);
                         button.Select();
                     }
@@ -93,7 +94,7 @@ public class CampaignEditor : Layout
         HideCampaigns();
         int count = selectedCampaignSet.campaignDefinitions.Count;
         Add(_campaigns = new Layout( "CampaignLayout" , 4 , count + 1 , 0.25f , 0.1f , count + 1 , container ));
-        _campaigns.SetPosition( position + ( Vector3.right * _campaigns.width * 0.5f ) + ( Vector3.back * _campaigns.height * 0.5f ) );
+        _campaigns.SetPosition(position + (Vector3.left * (campaignSets.width - 0.5f)) + (Vector3.back * ((_campaigns.height * 0.5f) - 0.5f)));
 
         _campaigns.Add(new List<RenameableDeletableButton>(
             RenameableDeletableButton.GetButtons(count,
