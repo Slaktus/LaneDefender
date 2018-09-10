@@ -157,19 +157,41 @@ public class Editor : Layout
 
     private void ShowCampaignEditor()
     {
-        if (campaignEditor.selectedCampaign == null && campaignData.campaignSets.Count > 0 && campaignData.campaignSets[ 0 ].campaignDefinitions.Count > 0)
-            campaignEditor.SetSelectedCampaign(campaignData.campaignSets[ 0 ].campaignDefinitions[ 0 ]);
+        if ( missionEditor.selectedMission != null)
+        {
+            if (missionEditor.selectedMission.stageDefinition != null)
+            {
+                stageEditor.SetSelectedStageDefinition(missionEditor.selectedMission.stageDefinition);
+                ShowStage(stageEditor.selectedStageDefinition);
+                testButton.Enable();
+                testButton.Show();
+            }
 
-        if ( campaignEditor.selectedCampaign != null )
-            campaignMapEditor.ShowCampaignMap();
+            stageEditor.Show();
+            missionEditor.ShowMissionEditor();
+            timelineEditor.ShowMissionTimeline();
+
+            campaignEditor.Hide();
+            timelineEditor.Hide();
+            missionEditor.Hide();
+
+        }
+        else
+        {
+            if (campaignEditor.selectedCampaign == null && campaignData.campaignSets.Count > 0 && campaignData.campaignSets[ 0 ].campaignDefinitions.Count > 0)
+                campaignEditor.SetSelectedCampaign(campaignData.campaignSets[ 0 ].campaignDefinitions[ 0 ]);
+
+            if (campaignEditor.selectedCampaign != null)
+                campaignMapEditor.ShowCampaignMap();
+
+            campaignEditor.ShowCampaignSets();
+            campaignEditor.ShowCampaignEditor();
+        }
 
         HideObjectsEditor();
 
         campaignButton.Select();
         campaignButton.SetColor(Color.yellow);
-
-        campaignEditor.ShowCampaignSets();
-        campaignEditor.ShowCampaignEditor();
     }
 
     private void HideCampaignEditor()

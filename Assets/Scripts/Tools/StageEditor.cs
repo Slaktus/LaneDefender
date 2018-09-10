@@ -105,6 +105,8 @@ public class StageEditor : Layout
                 {
                     _selectedStageSet = null;
                     selectedStageDefinition = null;
+                    _editor.missionEditor.SetSelectedMission(null);
+                    _editor.missionEditor.SetSelectedMissionSet(null);
 
                     _editor.testButton.Disable();
                     _editor.testButton.Hide();

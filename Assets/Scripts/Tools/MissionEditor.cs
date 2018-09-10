@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class MissionEditor : Layout
 {
+    public void SetSelectedMissionSet(MissionSet selectedMissionSet) => this.selectedMissionSet = selectedMissionSet;
     public void SetSelectedMission(MissionDefinition selectedMission) => this.selectedMission = selectedMission;
     public void SetStageDefinition(StageDefinition stageDefinition) => selectedMission.stageDefinition = stageDefinition;
 
