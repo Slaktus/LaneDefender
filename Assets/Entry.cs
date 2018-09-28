@@ -8,12 +8,13 @@ public class Entry : MonoBehaviour
 
 	void Awake()
     {
-        string player = PlayerPrefs.GetString("Player");
-
+        string playerJSON = PlayerPrefs.GetString("Player");
+        Player player = string.IsNullOrEmpty(playerJSON) ? new Player() : new Player(JsonUtility.FromJson<Player>(playerJSON));
         instance = this;
+
         #if UNITY_EDITOR
-        //Assets.Initialize(this, () => ShowTitleScreen(string.IsNullOrEmpty(player) ? new Player() : new Player(JsonUtility.FromJson<Player>(player))));
-        Assets.Initialize(this, () => editor = new Editor(gameObject));
+        //Assets.Initialize(this, () => ShowTitleScreen(player);
+        Assets.Initialize(this, () => editor = new Editor(player, gameObject));
         #else
         Assets.Initialize(this, () => ShowTitleScreen(string.IsNullOrEmpty(player) ? new Player() : new Player(JsonUtility.FromJson<Player>(player))));
         #endif

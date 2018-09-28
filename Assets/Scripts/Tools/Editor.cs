@@ -6,96 +6,14 @@ public class Editor : Layout
 {
     public override void Update()
     {
+        session.Update(stage?.enemies > 0 || 1 >= level?.progress );
         HandleLaneHover();
-
-        _level?.Update();
-        stage?.Update();
-        stage?.conveyor?.Update();
-
-        if (stage != null && stage.conveyor != null && stage.conveyor.showing)
-        {
-            Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit[] hits = Physics.RaycastAll(mouseRay.origin, mouseRay.direction, float.PositiveInfinity);
-
-            Lane hoveredLane = null;
-            ConveyorItem hoveredItem = null;
-
-            if (hits.Length > 0)
-            {
-                Vector3 mousePosition = hits[ 0 ].point;
-                hoveredLane = stage.GetHoveredLane(mousePosition);
-
-                if (stage.conveyor.Contains(mousePosition))
-                {
-                    hoveredItem = stage.conveyor.GetHoveredItem(mousePosition);
-
-                    if (hoveredItem != null && _heldItem == null)
-                    {
-                        if (_heldItem == null && Input.GetMouseButtonDown(0))
-                            _heldItem = new HeldItem(hoveredItem);
-                        else
-                            hoveredItem.color = Color.yellow;
-                    }
-                }
-
-                stage.SetLaneColor(Color.black);
-
-                if (_heldItem != null && hoveredLane != null)
-                {
-                    hoveredLane.color = Color.yellow;
-
-                    if (!Input.GetMouseButton(0))
-                    {
-                        hoveredLane.Add(new LaneItem(_heldItem, hoveredLane));
-                        _heldItem.conveyorItem.Destroy();
-                        _heldItem.Destroy();
-                        _heldItem = null;
-                    }
-                }
-
-                if (_heldItem != null)
-                {
-                    _heldItem.SetPosition(mousePosition);
-
-                    if (!Input.GetMouseButton(0) )
-                    {
-                        hoveredItem = stage.conveyor.GetHoveredItem(mousePosition);
-
-                        if (hoveredItem != null && _heldItem.conveyorItem != hoveredItem)
-                        {
-                            ItemDefinition heldDefinition = _heldItem.conveyorItem.definition;
-                            ItemSettings heldSettings = _heldItem.conveyorItem.settings;
-                            ItemDefinition hoveredDefinition = hoveredItem.definition;
-                            ItemSettings hoveredSettings = hoveredItem.settings;
-
-                            _heldItem.conveyorItem.SetItemDefinition(hoveredDefinition);
-                            _heldItem.conveyorItem.SetItemSettings(hoveredSettings);
-                            hoveredItem.SetItemDefinition(heldDefinition);
-                            hoveredItem.SetItemSettings(heldSettings);
-                            _heldItem.conveyorItem.Refresh();
-                            hoveredItem.Refresh();
-                        }
-
-                        _heldItem.conveyorItem.color = Color.white;
-                        _heldItem.conveyorItem.SetHeld(false);
-                        _heldItem.Destroy();
-                        _heldItem = null;
-                    }
-                }
-            }
-
-            stage.conveyor.SetItemColor(Color.white, _heldItem != null ? _heldItem.conveyorItem : hoveredItem);
-
-            if (Time.time > _itemTime && (1 > _level.progress || stage.enemies > 0))
-                _itemTime = stage.conveyor.AddItemToConveyor(new Inventory());
-        }
-
         base.Update();
     }
 
     private void HandleLaneHover()
     {
-        if (timelineEditor.heldWave == null && stage != null && (stage.conveyor == null || !stage.conveyor.showing) && waveEditor.selectedWaveDefinition != null && waveEditor.waveSets == null && waveEditor.waveEventEditor == null)
+        if (timelineEditor.heldWave == null && stage != null && (conveyor == null || !conveyor.showing) && waveEditor.selectedWaveDefinition != null && waveEditor.waveSets == null && waveEditor.waveEventEditor == null)
         {
             Lane hoveredLane = stage.GetHoveredLane(mousePos);
             stage.SetLaneColor(Color.black);
@@ -103,8 +21,9 @@ public class Editor : Layout
             if (hoveredLane != null)
             {
                 hoveredLane.color = Color.yellow;
+                int laneIndex = stage.IndexOf(hoveredLane);
 
-                if (Input.GetMouseButtonDown(0) && !waveEditor.waveEventLayouts[ stage.IndexOf(hoveredLane) ].containsMouse)
+                if (Input.GetMouseButtonDown(0) && laneIndex >= 0 && waveEditor.waveEventLayouts.Count > laneIndex && !waveEditor.waveEventLayouts[ laneIndex ].containsMouse)
                 {
                     int index = stage.IndexOf(hoveredLane);
                     WaveEventDefinition waveEventDefinition = ScriptableObject.CreateInstance<WaveEventDefinition>();
@@ -136,7 +55,7 @@ public class Editor : Layout
         }
     }
 
-    public void ShowStage(StageDefinition stageDefinition) => stage = new Stage(
+    public void ShowStage(StageDefinition stageDefinition) => session.SetStage( new Stage(
         stageDefinition, 
         new Player(),
         new Conveyor(
@@ -147,12 +66,12 @@ public class Editor : Layout
             itemLimit: 8,
             itemWidthPadding: 1,
             itemSpacing: 0.1f,
-            hide: true));
+            hide: true)));
 
     public void HideStage()
     {
         stage?.Destroy();
-        stage = null;
+        session.SetStage(null);
     }
 
     private void ShowCampaignEditor()
@@ -242,8 +161,6 @@ public class Editor : Layout
             ShowObjectEditors();
     }
 
-    public Stage stage { get; private set; }
-
     public CampaignData campaignData { get; }
     public ObjectData objectData { get; }
     public StageData stageData { get; }
@@ -263,12 +180,19 @@ public class Editor : Layout
     public Button testButton { get; }
     public Button saveButton { get; }
 
+    public Stage stage => session.stage;
+    public Level level => session.level;
+    public Conveyor conveyor => session.stage?.conveyor;
+
+    private Session session { get; }
     private HeldItem _heldItem { get; set; }
     private float _itemTime { get; set; }
-    private Level _level { get; set; }
 
-    public Editor(GameObject parent) : base("Editor", parent)
+    public Editor(Player player, GameObject parent) : base("Editor", parent)
     {
+        session = new Session(new Player());
+        session.Hide();
+
         waveData = Assets.Get(Assets.WaveDataSets.Default);
         stageData = Assets.Get(Assets.StageDataSets.Default);
         objectData = Assets.Get(Assets.ObjectDataSets.Default);
@@ -313,15 +237,15 @@ public class Editor : Layout
             {
                 if (stage != null && missionEditor.selectedMission != null && Input.GetMouseButtonDown(0))
                 {
-                    if (_level == null)
+                    if (level == null)
                     {
                         stage.conveyor.Show();
-                        _level = new Level(missionEditor.selectedMission.duration, showProgress: false);
+                        session.SetLevel(new Level(missionEditor.selectedMission.duration, showProgress: false));
 
                         for (int i = 0; missionEditor.selectedMission.waveDefinitions.Count > i; i++)
                         {
                             Wave wave = new Wave(missionEditor.selectedMission.waveTimes[ i ] * missionEditor.selectedMission.duration, stage);
-                            _level.Add(wave);
+                            level.Add(wave);
 
                             for (int j = 0; missionEditor.selectedMission.waveDefinitions[ i ].waveEvents.Count > j; j++)
                                 switch ((WaveEvent.Type) missionEditor.selectedMission.waveDefinitions[ i ].waveEvents[ j ].type)
@@ -344,16 +268,18 @@ public class Editor : Layout
                         stageEditor.HideStageDefinitions();
                         missionEditor.HideMissionEditor();
                         waveEditor.HideWaveEventButtons();
+                        session.Start();
                     }
                     else
                     {
+                        session.Stop();
                         stage.ClearLanes();
-                        stage.conveyor.Hide();
-                        stage.conveyor.Clear();
+                        conveyor.Hide();
+                        conveyor.Clear();
                         button.SetLabel("Test");
-                        _level.DestroyProgress();
+                        level.DestroyProgress();
+                        session.SetLevel(null);
                         _heldItem = null;
-                        _level = null;
                         _itemTime = 0;
 
                         saveButton.Show();

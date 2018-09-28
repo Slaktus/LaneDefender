@@ -47,12 +47,12 @@ public class TimelineEditor : Layout
             fontSize: 20,
             Enter: (Button b) =>
             {
-                if (_editor.stage.conveyor == null || !_editor.stage.conveyor.showing)
+                if (_editor.conveyor == null || !_editor.conveyor.showing)
                     b.SetColor(b.selected ? b.color : Color.green);
             },
             Stay: (Button b) =>
             {
-                if (_editor.stage.conveyor == null || !_editor.stage.conveyor.showing)
+                if (_editor.conveyor == null || !_editor.conveyor.showing)
                 {
                     if (Input.GetMouseButtonDown(1))
                     {
@@ -79,7 +79,7 @@ public class TimelineEditor : Layout
             },
             Exit: (Button b) =>
             {
-                if (_editor.stage.conveyor == null || !_editor.stage.conveyor.showing)
+                if (_editor.conveyor == null || !_editor.conveyor.showing)
                 {
                     if ( _editor.waveEditor.heldWaveEvent == null && heldWave == null && Input.GetMouseButton(0))
                     {
@@ -120,13 +120,13 @@ public class TimelineEditor : Layout
                     for (int i = 0; _buttons.Count > i && !overlappingWave; i++)
                         overlappingWave = _buttons[ i ].containsMouse;
 
-                    if (overlappingWave || heldWave != null || _editor.waveEditor.waveSets != null || (_editor.stage.conveyor != null && _editor.stage.conveyor.showing))
+                    if (overlappingWave || heldWave != null || _editor.waveEditor.waveSets != null || (_editor.conveyor != null && _editor.conveyor.showing))
                         HideIndicator();
                     else if (_editor.waveEditor.waveSets == null )
                     {
                         ShowIndicator();
 
-                        if (Input.GetMouseButtonDown(0) && (_editor.stage.conveyor != null && !_editor.stage.conveyor.showing))
+                        if (Input.GetMouseButtonDown(0) && (_editor.conveyor != null && !_editor.conveyor.showing))
                         {
                             timelinePosition = Helpers.Normalize(_indicator.transform.position.x, button.rect.xMax, button.rect.xMin);
                             _editor.waveEditor.Show();

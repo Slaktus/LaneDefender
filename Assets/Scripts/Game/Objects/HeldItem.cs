@@ -5,6 +5,7 @@ public class HeldItem : BaseObject
     public override void Destroy()
     {
         conveyorItem.SetHeld( false );
+        conveyorItem.Destroy();
         GameObject.Destroy( container );
     }
 

@@ -34,7 +34,9 @@ public class Player
 public class Inventory
 {
     public HeroSettings Settings( Definitions.Heroes hero ) => heroSettings[ heroes.IndexOf( hero ) ];
+
     public ItemSettings Settings(Definitions.Items item) => itemSettings[ items.IndexOf(item) ];
+
     public void AddCoins( int value ) => coins += value;
 
     public void AddHero( Definitions.Heroes hero )
@@ -88,6 +90,8 @@ public class Inventory
     public Inventory( Inventory inventory )
     {
         coins = inventory.coins;
+        itemSettings = new List<ItemSettings>(inventory.itemSettings);
+        heroSettings = new List<HeroSettings>(inventory.heroSettings);
         heroes = new List<Definitions.Heroes>( inventory.heroes );
         items = new List<Definitions.Items>( inventory.items );
     }
